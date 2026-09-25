@@ -1,3 +1,4 @@
+import { defaultGarment, type Garment } from "./garment.ts";
 export type Product = {
   id: string;
   name: string;
@@ -100,6 +101,7 @@ export type Design = {
   backImage: string;
   sizes: Record<string, number>;
   technique: string;
+  garment: Garment;
 };
 export type CartItem = {
   id: string;
@@ -120,4 +122,5 @@ export const newDesign = (p: Product): Design => ({
   backImage: "",
   sizes: { P: 5, M: 10, G: 10, GG: 5 },
   technique: "Silk",
+  garment: { ...defaultGarment },
 });

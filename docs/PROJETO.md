@@ -135,3 +135,14 @@ A aplicação publicada continua uma demonstração: checkout não cobra nem cri
 - [x] TypeScript, seis testes de validação de carrinho/projeto e build de produção aprovados.
 
 Publicação solicitada: commit e push no GitHub. Nenhum deploy manual na Vercel; a integração Git pode disparar automaticamente.
+
+### Golas, mangas e tecido
+- [x] Personalização de gola e mangas desligada por padrão; ativação independente e seleção de cores.
+- [x] Mangas inteiras ou faixa nas pontas, sem alteração do corte do modelo.
+- [x] Algodão, piquet e dry fit com relevo e acabamento visual próprios, ilustrativos.
+- [x] Mesma aparência em edição 2D, visualização 3D e carrinho.
+- [x] Configuração preservada em rascunho, projeto JSON e carrinho; migração automática dos projetos antigos.
+- [x] Oito testes aprovados, incluindo persistência das opções e rejeição de tecido inválido.
+- [ ] Modelagens distintas (regata, manga longa, gola polo) exigem ativos 3D próprios.
+
+As texturas não representam amostras comerciais calibradas. A exportação PNG continua sendo a arte da área de impressão; as especificações de gola/mangas/tecido acompanham o JSON do projeto. Preços seguem demonstrativos e não variam com essas opções.

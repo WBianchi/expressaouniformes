@@ -3582,3 +3582,47 @@ footer {
   height: 320px;
   transform-origin: center;
 }
+.garment-options {
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  min-width: 0;
+}
+.garment-options legend {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 4px;
+}
+.garment-toggle,
+.garment-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.garment-color {
+  justify-content: space-between;
+}
+.garment-color input {
+  width: 40px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.garment-toggle input {
+  accent-color: #2460ce;
+  width: 16px;
+  height: 16px;
+}
+.garment-options .field-label {
+  font-size: 12px;
+}
+@media (max-width: 800px) {
+  .studio-tools .garment-options {
+    flex: 1 0 100%;
+  }
+}

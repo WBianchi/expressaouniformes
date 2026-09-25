@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { defaultGarment } from "./garment.ts";
 import { products } from "./catalog.ts";
 const count = z.number().int().min(0).max(9999);
 export const designSchema = z.object({
@@ -16,6 +17,16 @@ export const designSchema = z.object({
     .max(12_000_000)
     .refine((s) => s === "" || s.startsWith("data:image/png;base64,")),
   sizes: z.object({ P: count, M: count, G: count, GG: count }),
+  garment: z
+    .object({
+      collarEnabled: z.boolean(),
+      collarColor: z.string().regex(/^#[a-fA-F0-9]{6}$/),
+      sleevesEnabled: z.boolean(),
+      sleeveColor: z.string().regex(/^#[a-fA-F0-9]{6}$/),
+      sleeveDetail: z.enum(["full", "cuff"]),
+      fabric: z.enum(["cotton", "pique", "dryfit"]),
+    })
+    .default(defaultGarment),
   technique: z.enum(["Silk", "Bordado", "Sublimação"]),
 });
 export const cartItemSchema = z

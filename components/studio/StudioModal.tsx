@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { IText } from "fabric";
+import { GarmentOptions } from "./GarmentOptions";
 import { AiArt } from "./AiArt";
 import { useStudio } from "./useStudio";
 import {
@@ -188,6 +189,10 @@ export default function StudioModal({
                 </span>
               </button>
               <AiArt disabled={!ready} onUse={upload} />
+              <GarmentOptions
+                value={design.garment}
+                onChange={(garment) => setDesign((d) => ({ ...d, garment }))}
+              />
               <hr />
               <label className="field-label">
                 Técnica de personalização
@@ -289,6 +294,7 @@ export default function StudioModal({
                     <ShirtPreview
                       zoom={1000 * fitScale * currentZoom}
                       color={design.color}
+                      garment={design.garment}
                       front={mode === "3d" ? design.frontImage : undefined}
                       back={mode === "3d" ? design.backImage : undefined}
                       side={side}

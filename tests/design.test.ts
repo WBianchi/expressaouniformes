@@ -80,3 +80,31 @@ test("rejeita previews remotos e produto desconhecido", () => {
     false,
   );
 });
+test("projetos antigos recebem acabamentos desligados sem perder a arte", () => {
+  const { garment, ...old } = newDesign(products[0]);
+  const restored = designSchema.parse(old);
+  assert.equal(restored.garment.collarEnabled, false);
+  assert.equal(restored.garment.sleevesEnabled, false);
+  assert.equal(restored.front, old.front);
+});
+test("acabamentos e tecido sobrevivem à persistência e rejeitam opções inválidas", () => {
+  const design = newDesign(products[0]);
+  design.garment = {
+    ...design.garment,
+    collarEnabled: true,
+    sleevesEnabled: true,
+    fabric: "pique",
+    sleeveDetail: "cuff",
+  };
+  assert.deepEqual(
+    designSchema.parse(JSON.parse(JSON.stringify(design))).garment,
+    design.garment,
+  );
+  assert.equal(
+    designSchema.safeParse({
+      ...design,
+      garment: { ...design.garment, fabric: "invalid" },
+    }).success,
+    false,
+  );
+});

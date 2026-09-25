@@ -8,7 +8,16 @@ import {
   useTexture,
   useProgress,
 } from "@react-three/drei";
-import { Mesh, MeshStandardMaterial, SRGBColorSpace } from "three";
+import {
+  Mesh,
+  MeshStandardMaterial,
+  SRGBColorSpace,
+  Color,
+  DataTexture,
+  RGBAFormat,
+  RepeatWrapping,
+} from "three";
+import { defaultGarment, fabrics, type Garment } from "@/lib/garment";
 function CameraZoom({ zoom }: { zoom: number }) {
   const { camera, invalidate } = useThree();
   useEffect(() => {
@@ -43,20 +52,80 @@ function Shirt({
   front,
   back,
   side,
+  garment = defaultGarment,
 }: {
   color: string;
   front?: string;
   back?: string;
   side: string;
+  garment?: Garment;
 }) {
   const { nodes, materials } = useGLTF("/shirt.glb");
   const geometry = (nodes.T_Shirt_male as Mesh).geometry;
+  const texture = useMemo(() => {
+    const size = 64,
+      data = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        const wave =
+          garment.fabric === "pique"
+            ? Math.sin((x * Math.PI) / 8) * Math.sin((y * Math.PI) / 8)
+            : garment.fabric === "dryfit"
+              ? Math.cos((x * Math.PI) / 4) * Math.cos((y * Math.PI) / 4)
+              : Math.sin(((x + y) * Math.PI) / 3);
+        const index = (y * size + x) * 4;
+        data[index] =
+          data[index + 1] =
+          data[index + 2] =
+            128 + Math.round(wave * 90);
+        data[index + 3] = 255;
+      }
+    const t = new DataTexture(data, size, size, RGBAFormat);
+    t.wrapS = t.wrapT = RepeatWrapping;
+    t.repeat.set(22, 22);
+    t.needsUpdate = true;
+    return t;
+  }, [garment.fabric]);
   const material = useMemo(() => {
     const m = (materials.lambert1 as MeshStandardMaterial).clone();
-    m.color.set(color);
-    m.roughness = 1;
+    m.color.set("#ffffff");
+    m.onBeforeCompile = (shader) => {
+      shader.uniforms.bodyTint = { value: new Color(color) };
+      shader.uniforms.collarTint = { value: new Color(garment.collarColor) };
+      shader.uniforms.sleeveTint = { value: new Color(garment.sleeveColor) };
+      shader.vertexShader =
+        "varying vec3 garmentPosition;\n" +
+        shader.vertexShader.replace(
+          "#include <begin_vertex>",
+          "#include <begin_vertex>\ngarmentPosition = position;",
+        );
+      shader.fragmentShader =
+        "varying vec3 garmentPosition;\nuniform vec3 bodyTint;\nuniform vec3 collarTint;\nuniform vec3 sleeveTint;\n" +
+        shader.fragmentShader.replace(
+          "#include <color_fragment>",
+          `
+        #include <color_fragment>
+        float gx = abs(garmentPosition.x);
+        float collarEdge = 0.255 - 0.06 * sqrt(max(0.0, 1.0 - gx * gx / 0.011));
+        float collarMask = ${garment.collarEnabled ? "1.0" : "0.0"} * (1.0 - smoothstep(0.102, 0.105, gx)) * smoothstep(collarEdge, collarEdge + 0.001, garmentPosition.y);
+        float sleeveMask = ${garment.sleevesEnabled ? "1.0" : "0.0"} * smoothstep(${garment.sleeveDetail === "cuff" ? "0.247, 0.249" : "0.179, 0.181"}, gx);
+        diffuseColor.rgb *= mix(mix(bodyTint, sleeveTint, sleeveMask), collarTint, collarMask);
+      `,
+        );
+    };
+    m.customProgramCacheKey = () =>
+      JSON.stringify([
+        garment.collarEnabled,
+        garment.sleevesEnabled,
+        garment.sleeveDetail,
+      ]);
+    m.roughness = fabrics[garment.fabric].roughness;
+    m.bumpMap = texture;
+    m.bumpScale = fabrics[garment.fabric].bump;
     return m;
-  }, [materials, color]);
+  }, [materials, garment, color, texture]);
+
+  useEffect(() => () => texture.dispose(), [texture]);
   useEffect(() => () => material.dispose(), [material]);
   return (
     <group rotation={[0, side === "back" ? Math.PI : 0, 0]}>
@@ -91,7 +160,9 @@ export default function ShirtPreview({
   interactive = false,
   zoom = 380,
   allowWheelZoom = true,
+  garment,
 }: {
+  garment?: Garment;
   zoom?: number;
   allowWheelZoom?: boolean;
   color?: string;
@@ -123,7 +194,13 @@ export default function ShirtPreview({
           <directionalLight position={[-3, 1, -2]} intensity={1.5} />
           <Suspense fallback={null}>
             <group position={[0, 0.045, 0]}>
-              <Shirt color={color} front={front} back={back} side={side} />
+              <Shirt
+                color={color}
+                front={front}
+                back={back}
+                side={side}
+                garment={garment}
+              />
             </group>
           </Suspense>
           {interactive && (

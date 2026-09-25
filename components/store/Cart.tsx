@@ -1,4 +1,5 @@
 "use client";
+import { fabrics, defaultGarment } from "@/lib/garment";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
@@ -57,6 +58,7 @@ export default function Cart() {
                     <Shirt
                       zoom={220}
                       color={item.design.color}
+                      garment={item.design.garment}
                       front={item.design.frontImage}
                       back={item.design.backImage}
                     />
@@ -66,6 +68,15 @@ export default function Cart() {
                     <h3>{p.name}</h3>
                     <p>
                       {item.design.technique} · {item.quantity} unidades
+                      {" · "}
+                      {
+                        fabrics[(item.design.garment || defaultGarment).fabric]
+                          .name
+                      }
+                      {item.design.garment?.collarEnabled &&
+                        " · Gola personalizada"}
+                      {item.design.garment?.sleevesEnabled &&
+                        " · Mangas personalizadas"}
                     </p>
                     <div className="size-summary">
                       {Object.entries(item.design.sizes)

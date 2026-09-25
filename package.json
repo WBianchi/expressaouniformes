@@ -1,0 +1,37 @@
+{
+  "name": "expressao-uniformes",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types tests/design.test.ts",
+    "format": "prettier --write app components lib tests docs package.json tsconfig.json README.md"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
+    "@vercel/blob": "^2.3.1",
+    "fabric": "^7.2.0",
+    "lucide-react": "^0.577.0",
+    "next": "^16.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sonner": "^2.0.7",
+    "three": "^0.183.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.183.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}

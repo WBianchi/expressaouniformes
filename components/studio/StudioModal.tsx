@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { IText } from "fabric";
-import { GarmentOptions } from "./GarmentOptions";
+import { StylePanel, sectionNames, type StudioSection } from "./StylePanel";
+import { fabrics, defaultGarment } from "@/lib/garment";
 import { AiArt } from "./AiArt";
 import { useStudio } from "./useStudio";
 import {
@@ -25,8 +26,13 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
+  Shirt,
+  ChevronRight,
+  Palette,
+  Scissors,
+  Grid2X2,
 } from "lucide-react";
-import { type Product, type Design, colors, money } from "@/lib/catalog";
+import { type Product, type Design, money } from "@/lib/catalog";
 import ShirtPreview from "./ShirtPreview";
 export default function StudioModal({
   product,
@@ -68,6 +74,10 @@ export default function StudioModal({
     total,
     textObject,
   } = useStudio(product, initial);
+  const [section, setSection] = useState<StudioSection>("base");
+  useEffect(() => {
+    if (selected) setSection("art");
+  }, [selected]);
   const stageRef = useRef<HTMLDivElement>(null);
   const [fitScale, setFitScale] = useState(0.5);
   const [viewZoom, setViewZoom] = useState({ "2d": 1, "3d": 1 });
@@ -108,7 +118,7 @@ export default function StudioModal({
       <Dialog.Portal>
         <Dialog.Overlay className="studio-overlay" />
         <Dialog.Content
-          className="studio-modal"
+          className="studio-modal studio-configurator"
           aria-describedby="studio-description"
         >
           <header className="studio-header">
@@ -123,6 +133,9 @@ export default function StudioModal({
                 </Dialog.Description>
               </div>
             </div>
+            <div className="studio-header-label">
+              <span /> CONFIGURADOR DE UNIFORMES
+            </div>
             <div className="studio-header-actions">
               <button className="button secondary small" onClick={save}>
                 <Save size={16} /> Salvar rascunho
@@ -134,86 +147,49 @@ export default function StudioModal({
           </header>
           <div className="studio-body">
             <aside className="studio-tools">
-              <span className="eyebrow">SUA PEÇA</span>
-              <h3>Comece pela cor</h3>
-              <div className="swatches">
-                {colors.map((c) => (
+              <span className="eyebrow">PERSONALIZE SUA PEÇA</span>
+              <h3>Do seu jeito.</h3>
+              <nav
+                className="part-navigation"
+                aria-label="Partes e opções da peça"
+              >
+                {(
+                  [
+                    { id: "base", icon: Palette },
+                    { id: "collar", icon: Shirt },
+                    { id: "sleeves", icon: Scissors },
+                    { id: "fabric", icon: Grid2X2 },
+                    { id: "art", icon: Type },
+                    { id: "order", icon: ShoppingBag },
+                  ] as const
+                ).map(({ id, icon: Icon }) => (
                   <button
-                    key={c.hex}
-                    title={c.name}
-                    aria-label={c.name}
-                    aria-pressed={design.color === c.hex}
-                    style={{ background: c.hex }}
-                    onClick={() => setDesign((d) => ({ ...d, color: c.hex }))}
+                    key={id}
+                    aria-pressed={section === id}
+                    onClick={() => setSection(id)}
                   >
-                    {design.color === c.hex && (
-                      <Check
-                        size={17}
-                        color={c.hex === "#e5e1d8" ? "#123" : "#fff"}
-                      />
-                    )}
+                    <Icon size={17} />
+                    <span>{sectionNames[id]}</span>
+                    <ChevronRight size={14} />
                   </button>
                 ))}
-              </div>
-              <p className="muted small-text">
-                {colors.find((c) => c.hex === design.color)?.name}
-              </p>
-              <hr />
-              <span className="eyebrow">DÊ SEU TOQUE</span>
-              <button
-                className="tool-tile"
-                onClick={() => file.current?.click()}
-                disabled={!ready}
-              >
-                <Upload size={21} />
+              </nav>
+              <div className="studio-selection-summary">
+                <span className="eyebrow">SUA COMBINAÇÃO</span>
+                <strong>{product.name}</strong>
                 <span>
-                  <strong>Adicionar logo</strong>
-                  <small>PNG, JPG ou WebP · até 4 MB</small>
+                  {fabrics[(design.garment || defaultGarment).fabric].name} ·{" "}
+                  {design.technique}
                 </span>
-              </button>
-              <input
-                type="file"
-                ref={file}
-                hidden
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(e) => {
-                  void upload(e.target.files?.[0]);
-                  e.target.value = "";
-                }}
-              />
-              <button className="tool-tile" onClick={addText} disabled={!ready}>
-                <Type size={22} />
-                <span>
-                  <strong>Adicionar texto</strong>
-                  <small>Nome, frase ou assinatura</small>
-                </span>
-              </button>
-              <AiArt disabled={!ready} onUse={upload} />
-              <GarmentOptions
-                value={design.garment}
-                onChange={(garment) => setDesign((d) => ({ ...d, garment }))}
-              />
-              <hr />
-              <label className="field-label">
-                Técnica de personalização
-                <select
-                  value={design.technique}
-                  onChange={(e) =>
-                    setDesign((d) => ({ ...d, technique: e.target.value }))
-                  }
-                >
-                  <option>Silk</option>
-                  <option>Bordado</option>
-                  <option>Sublimação</option>
-                </select>
-              </label>
-              <div className="studio-tip">
-                <ShieldNote />A prévia ajuda a visualizar sua ideia. A fábrica
-                confere a viabilidade e o arquivo antes da produção.
+                <span>{total} peças na grade</span>
               </div>
               <button className="text-button" onClick={restore}>
-                Abrir rascunho deste navegador
+                Abrir rascunho salvo
               </button>
+              <p className="studio-tip">
+                Prévia ilustrativa. A fábrica confere sua arte antes da
+                produção.
+              </p>
             </aside>
             <section className="studio-workspace">
               <div className="workspace-top">
@@ -341,239 +317,303 @@ export default function StudioModal({
                 </div>
                 <span>Modelo demonstrativo de camiseta</span>
               </div>
+              <footer className="studio-footer">
+                <div>
+                  <strong>{money(product.price * total)}</strong>
+                  <span>
+                    {total} peças × {money(product.price)} · estimativa
+                    demonstrativa
+                  </span>
+                </div>
+                <button
+                  className="button primary"
+                  disabled={total < 30 || !ready}
+                  onClick={() => {
+                    sync(false);
+                    onAdd(state.current);
+                  }}
+                >
+                  <ShoppingBag size={17} /> Adicionar ao carrinho
+                </button>
+              </footer>
             </section>
             <aside className="studio-properties">
-              <div className="row-between">
-                <h3>
-                  <Layers size={17} /> Camadas
-                </h3>
-                <span className="count">{objects.length}</span>
-              </div>
-              <div className="layers">
-                {objects.length === 0 ? (
-                  <p className="muted small-text">
-                    Adicione sua marca ou um texto a este lado.
-                  </p>
-                ) : (
-                  objects.map((o, i) => (
-                    <button
-                      className={selected === o ? "active" : ""}
-                      key={i}
-                      onClick={() => {
-                        fabric.current?.setActiveObject(o);
-                        fabric.current?.requestRenderAll();
-                        setSelected(o);
-                      }}
-                    >
-                      <span>
-                        {o instanceof IText ? (
-                          <Type size={15} />
-                        ) : (
-                          <Upload size={15} />
-                        )}
-                      </span>
-                      <span>
-                        {o instanceof IText ? o.text : "Logo / imagem"}
-                      </span>
-                    </button>
-                  ))
-                )}
-              </div>
-              {selected && (
-                <div className="properties">
-                  <span className="eyebrow">PROPRIEDADES</span>
-                  {textObject && (
-                    <>
-                      <label className="field-label">
-                        Texto
-                        <input
-                          value={textObject.text}
-                          onChange={(e) => property("text", e.target.value)}
-                        />
-                      </label>
-                      <label className="field-label">
-                        Fonte
-                        <select
-                          value={textObject.fontFamily}
-                          onChange={(e) =>
-                            property("fontFamily", e.target.value)
-                          }
-                        >
-                          <option>Arial</option>
-                          <option>Georgia</option>
-                          <option>Verdana</option>
-                          <option>Courier New</option>
-                        </select>
-                      </label>
-                      <label className="field-label inline-label">
-                        Cor
-                        <input
-                          type="color"
-                          value={String(textObject.fill)}
-                          onChange={(e) => property("fill", e.target.value)}
-                        />
-                      </label>
-                    </>
-                  )}
-                  <div className="position-fields">
-                    <label className="field-label">
-                      Posição X
-                      <input
-                        type="number"
-                        value={Math.round(selected.left)}
-                        onChange={(e) =>
-                          property("left", Number(e.target.value) || 0)
-                        }
-                      />
-                    </label>
-                    <label className="field-label">
-                      Posição Y
-                      <input
-                        type="number"
-                        value={Math.round(selected.top)}
-                        onChange={(e) =>
-                          property("top", Number(e.target.value) || 0)
-                        }
-                      />
-                    </label>
-                  </div>
-                  <label className="field-label">
-                    Largura: {Math.round(selected.getScaledWidth())} px
-                    <input
-                      type="range"
-                      min="10"
-                      max="270"
-                      value={Math.min(
-                        270,
-                        Math.round(selected.getScaledWidth()),
-                      )}
-                      onChange={(e) =>
-                        mutate(() => {
-                          selected.scaleToWidth(Number(e.target.value));
-                          selected.setCoords();
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="field-label">
-                    Rotação: {Math.round(selected.angle)}°
-                    <input
-                      type="range"
-                      min="-180"
-                      max="180"
-                      value={selected.angle}
-                      onChange={(e) =>
-                        property("angle", Number(e.target.value))
-                      }
-                    />
-                  </label>
-                  <div className="button-row">
-                    <button
-                      className="icon-button"
-                      title="Centralizar"
-                      aria-label="Centralizar elemento"
-                      onClick={() => mutate((c) => c.centerObjectH(selected))}
-                    >
-                      <AlignCenter size={18} />
-                    </button>
-                    <button
-                      className="icon-button"
-                      aria-label="Trazer para frente"
-                      onClick={() =>
-                        mutate((c) => c.bringObjectForward(selected))
-                      }
-                    >
-                      <ArrowUp size={18} />
-                    </button>
-                    <button
-                      className="icon-button"
-                      aria-label="Enviar para trás"
-                      onClick={() =>
-                        mutate((c) => c.sendObjectBackwards(selected))
-                      }
-                    >
-                      <ArrowDown size={18} />
-                    </button>
-                    <button
-                      className="icon-button danger"
-                      aria-label="Excluir elemento"
-                      onClick={() => mutate((c) => c.remove(selected))}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
+              <span className="eyebrow">AJUSTES DA SELEÇÃO</span>
+              <h3 className="selection-title">{sectionNames[section]}</h3>
+              {["base", "collar", "sleeves", "fabric"].includes(section) && (
+                <StylePanel
+                  section={section}
+                  design={design}
+                  onChange={(patch) => setDesign((d) => ({ ...d, ...patch }))}
+                />
               )}
-              <hr />
-              <h3>Vista toda a equipe</h3>
-              <p className="muted small-text">
-                Distribua as peças por tamanho.
-              </p>
-              <div className="size-grid">
-                {Object.entries(design.sizes).map(([size, n]) => (
-                  <label key={size}>
-                    {size}
-                    <input
-                      aria-label={"Quantidade " + size}
-                      type="number"
-                      min="0"
-                      max="9999"
-                      value={n}
-                      onChange={(e) =>
-                        setDesign((d) => ({
-                          ...d,
-                          sizes: {
-                            ...d.sizes,
-                            [size]: Math.max(
-                              0,
-                              Math.min(
-                                9999,
-                                Math.floor(Number(e.target.value)) || 0,
-                              ),
-                            ),
-                          },
-                        }))
-                      }
-                    />
-                  </label>
-                ))}
+              <div hidden={section !== "art"}>
+                <span className="eyebrow">DÊ SEU TOQUE</span>
+                <button
+                  className="tool-tile"
+                  onClick={() => file.current?.click()}
+                  disabled={!ready}
+                >
+                  <Upload size={21} />
+                  <span>
+                    <strong>Adicionar logo</strong>
+                    <small>PNG, JPG ou WebP · até 4 MB</small>
+                  </span>
+                </button>
+                <input
+                  type="file"
+                  ref={file}
+                  hidden
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => {
+                    void upload(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  className="tool-tile"
+                  onClick={addText}
+                  disabled={!ready}
+                >
+                  <Type size={22} />
+                  <span>
+                    <strong>Adicionar texto</strong>
+                    <small>Nome, frase ou assinatura</small>
+                  </span>
+                </button>
+                <AiArt disabled={!ready} onUse={upload} />
+
+                <div className="row-between">
+                  <h3>
+                    <Layers size={17} /> Camadas
+                  </h3>
+                  <span className="count">{objects.length}</span>
+                </div>
+                <div className="layers">
+                  {objects.length === 0 ? (
+                    <p className="muted small-text">
+                      Adicione sua marca ou um texto a este lado.
+                    </p>
+                  ) : (
+                    objects.map((o, i) => (
+                      <button
+                        className={selected === o ? "active" : ""}
+                        key={i}
+                        onClick={() => {
+                          fabric.current?.setActiveObject(o);
+                          fabric.current?.requestRenderAll();
+                          setSelected(o);
+                        }}
+                      >
+                        <span>
+                          {o instanceof IText ? (
+                            <Type size={15} />
+                          ) : (
+                            <Upload size={15} />
+                          )}
+                        </span>
+                        <span>
+                          {o instanceof IText ? o.text : "Logo / imagem"}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+                {selected && (
+                  <div className="properties">
+                    <span className="eyebrow">PROPRIEDADES</span>
+                    {textObject && (
+                      <>
+                        <label className="field-label">
+                          Texto
+                          <input
+                            value={textObject.text}
+                            onChange={(e) => property("text", e.target.value)}
+                          />
+                        </label>
+                        <label className="field-label">
+                          Fonte
+                          <select
+                            value={textObject.fontFamily}
+                            onChange={(e) =>
+                              property("fontFamily", e.target.value)
+                            }
+                          >
+                            <option>Arial</option>
+                            <option>Georgia</option>
+                            <option>Verdana</option>
+                            <option>Courier New</option>
+                          </select>
+                        </label>
+                        <label className="field-label inline-label">
+                          Cor
+                          <input
+                            type="color"
+                            value={String(textObject.fill)}
+                            onChange={(e) => property("fill", e.target.value)}
+                          />
+                        </label>
+                      </>
+                    )}
+                    <div className="position-fields">
+                      <label className="field-label">
+                        Posição X
+                        <input
+                          type="number"
+                          value={Math.round(selected.left)}
+                          onChange={(e) =>
+                            property("left", Number(e.target.value) || 0)
+                          }
+                        />
+                      </label>
+                      <label className="field-label">
+                        Posição Y
+                        <input
+                          type="number"
+                          value={Math.round(selected.top)}
+                          onChange={(e) =>
+                            property("top", Number(e.target.value) || 0)
+                          }
+                        />
+                      </label>
+                    </div>
+                    <label className="field-label">
+                      Largura: {Math.round(selected.getScaledWidth())} px
+                      <input
+                        type="range"
+                        min="10"
+                        max="270"
+                        value={Math.min(
+                          270,
+                          Math.round(selected.getScaledWidth()),
+                        )}
+                        onChange={(e) =>
+                          mutate(() => {
+                            selected.scaleToWidth(Number(e.target.value));
+                            selected.setCoords();
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="field-label">
+                      Rotação: {Math.round(selected.angle)}°
+                      <input
+                        type="range"
+                        min="-180"
+                        max="180"
+                        value={selected.angle}
+                        onChange={(e) =>
+                          property("angle", Number(e.target.value))
+                        }
+                      />
+                    </label>
+                    <div className="button-row">
+                      <button
+                        className="icon-button"
+                        title="Centralizar"
+                        aria-label="Centralizar elemento"
+                        onClick={() => mutate((c) => c.centerObjectH(selected))}
+                      >
+                        <AlignCenter size={18} />
+                      </button>
+                      <button
+                        className="icon-button"
+                        aria-label="Trazer para frente"
+                        onClick={() =>
+                          mutate((c) => c.bringObjectForward(selected))
+                        }
+                      >
+                        <ArrowUp size={18} />
+                      </button>
+                      <button
+                        className="icon-button"
+                        aria-label="Enviar para trás"
+                        onClick={() =>
+                          mutate((c) => c.sendObjectBackwards(selected))
+                        }
+                      >
+                        <ArrowDown size={18} />
+                      </button>
+                      <button
+                        className="icon-button danger"
+                        aria-label="Excluir elemento"
+                        onClick={() => mutate((c) => c.remove(selected))}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <hr />
               </div>
-              <p className={total < 30 ? "error-text" : "muted small-text"}>
-                {total} peças · mínimo de 30 por cor/modelo
-              </p>
-              <hr />
-              <button className="export-button" onClick={() => download(false)}>
-                <Download size={16} /> Baixar arte deste lado
-              </button>
-              <button className="export-button" onClick={() => download(true)}>
-                <Download size={16} /> Exportar projeto editável
-              </button>
+              <div hidden={section !== "order"}>
+                <label className="field-label">
+                  Técnica de personalização
+                  <select
+                    value={design.technique}
+                    onChange={(e) =>
+                      setDesign((d) => ({ ...d, technique: e.target.value }))
+                    }
+                  >
+                    <option>Silk</option>
+                    <option>Bordado</option>
+                    <option>Sublimação</option>
+                  </select>
+                </label>
+                <h3>Vista toda a equipe</h3>
+                <p className="muted small-text">
+                  Distribua as peças por tamanho.
+                </p>
+                <div className="size-grid">
+                  {Object.entries(design.sizes).map(([size, n]) => (
+                    <label key={size}>
+                      {size}
+                      <input
+                        aria-label={"Quantidade " + size}
+                        type="number"
+                        min="0"
+                        max="9999"
+                        value={n}
+                        onChange={(e) =>
+                          setDesign((d) => ({
+                            ...d,
+                            sizes: {
+                              ...d.sizes,
+                              [size]: Math.max(
+                                0,
+                                Math.min(
+                                  9999,
+                                  Math.floor(Number(e.target.value)) || 0,
+                                ),
+                              ),
+                            },
+                          }))
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+                <p className={total < 30 ? "error-text" : "muted small-text"}>
+                  {total} peças · mínimo de 30 por cor/modelo
+                </p>
+                <hr />
+                <button
+                  className="export-button"
+                  onClick={() => download(false)}
+                >
+                  <Download size={16} /> Baixar arte deste lado
+                </button>
+                <button
+                  className="export-button"
+                  onClick={() => download(true)}
+                >
+                  <Download size={16} /> Exportar projeto editável
+                </button>
+              </div>
             </aside>
           </div>
-          <footer className="studio-footer">
-            <div>
-              <strong>{money(product.price * total)}</strong>
-              <span>
-                {total} peças × {money(product.price)} · estimativa
-                demonstrativa
-              </span>
-            </div>
-            <button
-              className="button primary"
-              disabled={total < 30 || !ready}
-              onClick={() => {
-                sync(false);
-                onAdd(state.current);
-              }}
-            >
-              <ShoppingBag size={17} /> Adicionar ao carrinho
-            </button>
-          </footer>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
-function ShieldNote() {
-  return <Check size={17} />;
 }

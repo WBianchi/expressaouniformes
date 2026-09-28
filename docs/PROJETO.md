@@ -146,3 +146,11 @@ Publicação solicitada: commit e push no GitHub. Nenhum deploy manual na Vercel
 - [ ] Modelagens distintas (regata, manga longa, gola polo) exigem ativos 3D próprios.
 
 As texturas não representam amostras comerciais calibradas. A exportação PNG continua sendo a arte da área de impressão; as especificações de gola/mangas/tecido acompanham o JSON do projeto. Preços seguem demonstrativos e não variam com essas opções.
+
+### Estrutura do configurador — 28/09/2026
+- [x] Layout inspirado na referência: cabeçalho compacto, navegação de partes à esquerda, peça central e painel contextual à direita.
+- [x] Paleta azul escura, painéis translúcidos e seletor de cores em lista.
+- [x] Opções separadas para cor da peça, gola, mangas, tecido, logo/texto e grade/pedido.
+- [x] Compra abaixo da prévia; editor Fabric permanece montado ao trocar painéis.
+- [x] Layout mobile com navegação horizontal e painéis empilhados.
+- [x] Verificação em navegador: ativar gola, alterar cor, adicionar/editar texto e abrir grade sem erros no console. Build e oito testes aprovados.

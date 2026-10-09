@@ -79,11 +79,6 @@
   --container-wide: 1920px;
   --gutter: clamp(16px, 3.2vw, 56px);
   --section-y: clamp(64px, 8vw, 128px);
-}
-@media (max-width: 899px) {
-  :root {
-    --header-h: 100px;
-  }
   --header-h: 168px;
 
   /* patterns */
@@ -92,6 +87,11 @@
     linear-gradient(90deg, rgb(29 95 209 / 0.06) 1px, transparent 1px);
   --gradient-brand: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-600) 55%, var(--cyan-500) 130%);
   --gradient-gold: linear-gradient(135deg, var(--gold-400), var(--gold-500) 60%, var(--gold-600));
+}
+@media (max-width: 899px) {
+  :root {
+    --header-h: 100px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

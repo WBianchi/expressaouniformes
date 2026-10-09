@@ -1,0 +1,21 @@
+.num {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bump {
+  animation: num-bump 520ms var(--ease-spring);
+}
+@keyframes num-bump {
+  0% {
+    transform: translateY(0);
+    color: inherit;
+  }
+  30% {
+    transform: translateY(-2px) scale(1.06);
+    color: var(--link);
+  }
+  100% {
+    transform: none;
+  }
+}

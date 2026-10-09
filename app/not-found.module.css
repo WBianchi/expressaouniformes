@@ -1,0 +1,213 @@
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 40px var(--gutter);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--bg-soft);
+}
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--pattern-grid);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 0%, transparent 70%);
+}
+.orb,
+.orb2 {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.22;
+}
+.orb {
+  width: 520px;
+  aspect-ratio: 1;
+  left: -160px;
+  top: -180px;
+  background: var(--cyan-500);
+}
+.orb2 {
+  width: 420px;
+  aspect-ratio: 1;
+  right: -140px;
+  bottom: -160px;
+  background: var(--gold-500);
+  opacity: 0.18;
+}
+
+.logo img {
+  width: 190px;
+  height: auto;
+}
+.logoDark {
+  display: none;
+}
+:global(:root[data-theme="dark"]) .logoLight {
+  display: none;
+}
+:global(:root[data-theme="dark"]) .logoDark {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .logoLight {
+    display: none;
+  }
+  :global(:root:not([data-theme="light"])) .logoDark {
+    display: block;
+  }
+}
+
+.card {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(28px, 5vw, 48px);
+  border-radius: var(--radius-xl);
+  background: var(--glass-strong);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  animation: fade-up var(--dur-slow) var(--ease) both;
+}
+.code {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: clamp(88px, 18vw, 140px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.shirt {
+  display: grid;
+  place-items: center;
+  width: 0.9em;
+  height: 0.9em;
+  border-radius: 50%;
+  color: var(--accent-fg);
+  background: var(--gradient-gold);
+  box-shadow: 0 20px 40px -16px var(--gold-500);
+  animation: sway 3s var(--ease) infinite alternate;
+}
+.shirt svg {
+  width: 48%;
+  height: 48%;
+}
+@keyframes sway {
+  from {
+    transform: rotate(-8deg);
+  }
+  to {
+    transform: rotate(8deg) translateY(-4px);
+  }
+}
+.card h1 {
+  margin-top: 20px;
+  font-size: clamp(24px, 4vw, 34px);
+}
+.card > p {
+  margin-top: 10px;
+  max-width: 460px;
+  color: var(--text-2);
+  font-size: 15.5px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 26px;
+  width: 100%;
+}
+.actions :global(.btn) {
+  flex: 1 1 200px;
+  max-width: 260px;
+}
+.quick {
+  width: 100%;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.quick small {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.quick ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 650;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+.chip:hover {
+  color: var(--link);
+  border-color: var(--link);
+  transform: translateY(-2px);
+}
+.help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--text-2);
+}
+.help svg {
+  color: #1faa53;
+}
+.help:hover {
+  color: var(--link);
+}
+
+/* keyframes locais (CSS Modules renomeia nomes de animação) */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

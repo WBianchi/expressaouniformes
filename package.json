@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types tests/design.test.ts",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "format": "prettier --write app components lib tests docs package.json tsconfig.json README.md"
   },
   "dependencies": {

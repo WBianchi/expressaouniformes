@@ -1,0 +1,220 @@
+.wrap {
+  position: relative;
+}
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 12px 0 5px;
+  border-radius: var(--radius-full);
+  text-align: left;
+  transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  background: var(--surface-2);
+}
+.trigger:active {
+  transform: scale(0.97);
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--info-soft);
+  color: var(--link);
+}
+.triggerText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.triggerText small {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.triggerText b {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chev {
+  transition: transform var(--dur) var(--ease);
+}
+.trigger[aria-expanded="true"] .chev {
+  transform: rotate(180deg);
+}
+@media (max-width: 1240px) {
+  .triggerText {
+    display: none;
+  }
+  .trigger {
+    padding: 0 5px;
+  }
+}
+
+.panel {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--glass-strong);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  transform-origin: top right;
+  animation: pop-in var(--dur) var(--ease);
+}
+.panel[hidden] {
+  display: none;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+}
+.head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 14px;
+}
+.head b {
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+.head p {
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.headAvatar {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--gradient-brand);
+  color: #fff;
+}
+.authRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.links {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.links a,
+.links button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  transition: background-color var(--dur-fast) var(--ease), padding var(--dur) var(--ease);
+}
+.links a svg,
+.links button svg {
+  color: var(--muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+.links a:hover,
+.links button:hover {
+  background: var(--surface-2);
+  padding-left: 14px;
+}
+.links a:hover svg,
+.links button:hover svg {
+  color: var(--link);
+}
+.tag {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--gold-100);
+  color: var(--gold-600);
+}
+.count {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--info-soft);
+  color: var(--link);
+  font-size: 11.5px;
+  font-weight: 750;
+}
+.theme {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+}
+.theme > span {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.avatar[data-user],
+.headAvatar {
+  font-family: var(--font-display);
+  font-weight: 750;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.avatar[data-user] {
+  background: var(--gradient-brand);
+  color: #fff;
+}
+.email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+.links .signOut {
+  color: var(--danger);
+}
+.links .signOut svg,
+.links .signOut:hover svg {
+  color: var(--danger);
+}
+.links .signOut:hover {
+  background: var(--danger-soft);
+}
+.trigger:hover .avatar svg {
+  animation: wiggle 0.5s var(--ease-spring);
+}
+@keyframes wiggle {
+  30% { transform: rotate(-12deg); }
+  60% { transform: rotate(8deg); }
+}

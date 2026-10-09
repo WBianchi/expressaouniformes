@@ -1,0 +1,106 @@
+.grid {
+  display: grid;
+  gap: 32px;
+}
+@media (min-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(280px, 0.8fr) 1.2fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .aside {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+}
+.aside :global(.btn) {
+  margin-top: 24px;
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.item {
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition:
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.item:hover {
+  border-color: var(--line-strong);
+}
+.item[data-open] {
+  border-color: color-mix(in srgb, var(--link) 35%, var(--line));
+  box-shadow: var(--shadow);
+}
+.item h3 {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: normal;
+}
+.question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 18px 22px;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  border-radius: inherit;
+}
+.plus {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--link);
+  background: var(--info-soft);
+  transition:
+    transform var(--dur-slow) var(--ease-spring),
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.item[data-open] .plus {
+  transform: rotate(135deg);
+  color: var(--accent-fg);
+  background: var(--gradient-gold);
+}
+.answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-slow) var(--ease);
+}
+.item[data-open] .answer {
+  grid-template-rows: 1fr;
+}
+.answer > div {
+  overflow: hidden;
+}
+.answer p {
+  padding: 0 22px 20px;
+  font-size: 15px;
+  color: var(--text-2);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+.item[data-open] .answer p {
+  opacity: 1;
+  transform: none;
+  transition-delay: 80ms;
+}

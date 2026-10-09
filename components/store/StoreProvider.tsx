@@ -1,130 +1,223 @@
 "use client";
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
-import dynamic from "next/dynamic";
-import { flushSync } from "react-dom";
-import { registerStoreTools } from "@/lib/webmcp";
-import { cartItemSchema, localStoreSchema } from "@/lib/design-validation";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { getProduct } from "@/lib/catalog";
+import { cartLineSchema, localStoreSchema } from "@/lib/validation";
 import {
-  type Product,
-  type Design,
-  type CartItem,
-  quantity,
-} from "@/lib/catalog";
-const Studio = dynamic(() => import("@/components/studio/StudioModal"), {
-  ssr: false,
-});
-type Context = {
-  cart: CartItem[];
-  favorites: string[];
-  compare: string[];
-  openStudio: (p: Product, d?: Design, id?: string) => void;
-  removeItem: (id: string) => void;
-  toggleFavorite: (id: string) => void;
-  toggleCompare: (id: string) => void;
+  type CartLine,
+  type Coupon,
+  type ShippingOption,
+  quoteShipping,
+  totals,
+  validateCoupon,
+  lineQuantity,
+} from "@/lib/pricing";
+
+export type Drawer = "cart" | "favorites" | "menu" | "search" | null;
+export type Theme = "light" | "dark" | "system";
+
+type StoreContext = {
   ready: boolean;
+  // carrinho
+  cart: CartLine[];
+  addToCart: (line: Omit<CartLine, "id">) => boolean;
+  updateLine: (id: string, patch: Partial<Omit<CartLine, "id" | "slug">>) => void;
+  removeLine: (id: string) => void;
+  /** desfaz a última remoção, devolvendo a linha à posição original */
+  restoreLine: (id: string) => void;
+  clearCart: () => void;
+  // cupom e frete
+  coupon: Coupon | null;
+  applyCoupon: (code: string) => boolean;
+  removeCoupon: () => void;
+  cep: string;
+  setCep: (cep: string) => void;
+  shippingOptions: ShippingOption[] | null;
+  shipping: ShippingOption | null;
+  selectShipping: (id: string) => void;
+  summary: ReturnType<typeof totals>;
+  // favoritos
+  favorites: string[];
+  isFavorite: (slug: string) => boolean;
+  toggleFavorite: (slug: string) => void;
+  // UI
+  drawer: Drawer;
+  openDrawer: (d: Drawer) => void;
+  closeDrawer: () => void;
+  theme: Theme;
+  setTheme: (t: Theme) => void;
 };
-const StoreContext = createContext<Context>(null!);
+
+const Ctx = createContext<StoreContext | null>(null);
 export function useStore() {
-  return useContext(StoreContext);
+  const c = useContext(Ctx);
+  if (!c) throw new Error("useStore fora do StoreProvider");
+  return c;
 }
+
+const KEY = "eu-store-v2";
+export const THEME_KEY = "eu-theme";
+
 export default function StoreProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]),
-    [favorites, setFavorites] = useState<string[]>([]),
-    [compare, setCompare] = useState<string[]>([]),
-    [ready, setReady] = useState(false);
-  const [studio, setStudio] = useState<{
-    product: Product;
-    design?: Design;
-    id?: string;
-  } | null>(null);
-  useEffect(
-    () =>
-      registerStoreTools((product) => flushSync(() => setStudio({ product }))),
-    [],
-  );
+  const [ready, setReady] = useState(false);
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [cep, setCep] = useState("");
+  const [shippingId, setShippingId] = useState<string | null>(null);
+  const [drawer, setDrawer] = useState<Drawer>(null);
+  const [theme, setThemeState] = useState<Theme>("system");
+  const removed = useRef(new Map<string, { line: CartLine; index: number }>());
+
+  // hidratação do armazenamento local
   useEffect(() => {
     try {
-      const s = localStoreSchema.parse(
-        JSON.parse(localStorage.getItem("expressao-demo-v1") || "{}"),
-      );
-      if (Array.isArray(s.cart)) setCart(s.cart);
-      if (Array.isArray(s.favorites)) setFavorites(s.favorites);
+      const raw = JSON.parse(localStorage.getItem(KEY) || "{}");
+      const s = localStoreSchema.parse(raw);
+      setCart(s.cart.flatMap((l) => {
+        const r = cartLineSchema.safeParse(l);
+        return r.success ? [r.data as CartLine] : [];
+      }));
+      setFavorites(s.favorites);
+      setCouponCode(s.coupon);
+      setCep(s.cep);
+      const t = localStorage.getItem(THEME_KEY);
+      if (t === "light" || t === "dark") setThemeState(t);
     } catch {
-      toast.error("Não foi possível restaurar os dados locais.");
+      /* armazenamento indisponível ou corrompido: começa vazio */
     }
     setReady(true);
   }, []);
+
   useEffect(() => {
-    if (ready)
-      try {
-        localStorage.setItem(
-          "expressao-demo-v1",
-          JSON.stringify({ cart, favorites }),
-        );
-      } catch {
-        toast.error(
-          "Armazenamento local cheio. Exporte seu projeto para preservá-lo.",
-        );
-      }
-  }, [cart, favorites, ready]);
-  function add(design: Design) {
-    if (!studio) return;
-    const item = {
-      id: studio.id || crypto.randomUUID(),
-      productId: studio.product.id,
-      design: structuredClone(design),
-      quantity: quantity(design.sizes),
-    };
-    const parsed = cartItemSchema.safeParse(item);
-    if (!parsed.success) {
-      toast.error("Confira a grade e a personalização antes de adicionar.");
-      return;
+    if (!ready) return;
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ cart, favorites, coupon: couponCode, cep }));
+    } catch {
+      toast.error("Armazenamento do navegador cheio. Remova logos grandes do carrinho.");
     }
-    setCart((v) =>
-      studio.id ? v.map((x) => (x.id === studio.id ? item : x)) : [...v, item],
-    );
-    setStudio(null);
-    toast.success("Personalização adicionada ao carrinho local.");
-  }
-  return (
-    <StoreContext.Provider
-      value={{
-        cart,
-        favorites,
-        compare,
-        ready,
-        openStudio: (product, design, id) => setStudio({ product, design, id }),
-        removeItem: (id) => setCart((v) => v.filter((x) => x.id !== id)),
-        toggleFavorite: (id) =>
-          setFavorites((v) =>
-            v.includes(id) ? v.filter((x) => x !== id) : [...v, id],
-          ),
-        toggleCompare: (id) =>
-          setCompare((v) =>
-            v.includes(id)
-              ? v.filter((x) => x !== id)
-              : v.length < 3
-                ? [...v, id]
-                : (toast.info("Compare até 3 produtos."), v),
-          ),
-      }}
-    >
-      {children}
-      {studio && (
-        <Studio
-          product={studio.product}
-          initial={studio.design}
-          onClose={() => setStudio(null)}
-          onAdd={add}
-        />
-      )}
-    </StoreContext.Provider>
+  }, [cart, favorites, couponCode, cep, ready]);
+
+  // trava rolagem com drawer aberto e fecha com Esc
+  useEffect(() => {
+    if (!drawer) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDrawer(null);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [drawer]);
+
+  const setTheme = useCallback((t: Theme) => {
+    setThemeState(t);
+    const root = document.documentElement;
+    try {
+      if (t === "system") {
+        localStorage.removeItem(THEME_KEY);
+        root.removeAttribute("data-theme");
+      } else {
+        localStorage.setItem(THEME_KEY, t);
+        root.setAttribute("data-theme", t);
+      }
+    } catch {
+      if (t !== "system") root.setAttribute("data-theme", t);
+    }
+  }, []);
+
+  const subtotalForCoupon = useMemo(() => totals(cart).subtotal, [cart]);
+  const coupon = useMemo(() => {
+    if (!couponCode) return null;
+    const r = validateCoupon(couponCode, subtotalForCoupon);
+    return r.ok ? r.coupon : null;
+  }, [couponCode, subtotalForCoupon]);
+
+  const itemCount = cart.reduce((s, l) => s + lineQuantity(l), 0);
+  const shippingOptions = useMemo(
+    () => (cart.length ? quoteShipping(cep, subtotalForCoupon, itemCount) : null),
+    [cep, subtotalForCoupon, itemCount, cart.length],
   );
+  const shipping = shippingOptions?.find((o) => o.id === shippingId) ?? shippingOptions?.[0] ?? null;
+  const summary = useMemo(() => totals(cart, coupon, shipping), [cart, coupon, shipping]);
+
+  const value: StoreContext = {
+    ready,
+    cart,
+    addToCart(line) {
+      const full = { ...line, id: crypto.randomUUID() };
+      const r = cartLineSchema.safeParse(full);
+      if (!r.success) {
+        toast.error(r.error.issues[0]?.message || "Confira as opções do produto.");
+        return false;
+      }
+      setCart((c) => [...c, full]);
+      const p = getProduct(line.slug);
+      toast.success(`${p?.name} adicionado ao carrinho`, {
+        action: { label: "Ver carrinho", onClick: () => setDrawer("cart") },
+      });
+      return true;
+    },
+    updateLine(id, patch) {
+      setCart((c) =>
+        c.map((l) => {
+          if (l.id !== id) return l;
+          const next = { ...l, ...patch };
+          const r = cartLineSchema.safeParse(next);
+          if (!r.success) {
+            toast.error(r.error.issues[0]?.message || "Alteração inválida.");
+            return l;
+          }
+          return next;
+        }),
+      );
+    },
+    removeLine(id) {
+      const index = cart.findIndex((l) => l.id === id);
+      if (index >= 0) removed.current.set(id, { line: cart[index], index });
+      setCart((c) => c.filter((l) => l.id !== id));
+    },
+    restoreLine(id) {
+      const r = removed.current.get(id);
+      if (!r) return;
+      removed.current.delete(id);
+      setCart((c) => (c.some((l) => l.id === id) ? c : [...c.slice(0, r.index), r.line, ...c.slice(r.index)]));
+    },
+    clearCart: () => setCart([]),
+    coupon,
+    applyCoupon(code) {
+      const r = validateCoupon(code, subtotalForCoupon);
+      if (!r.ok) {
+        toast.error(r.error);
+        return false;
+      }
+      setCouponCode(r.coupon.code);
+      toast.success(`Cupom ${r.coupon.code} aplicado: ${r.coupon.label}`);
+      return true;
+    },
+    removeCoupon: () => setCouponCode(null),
+    cep,
+    setCep,
+    shippingOptions,
+    shipping,
+    selectShipping: setShippingId,
+    summary,
+    favorites,
+    isFavorite: (slug) => favorites.includes(slug),
+    toggleFavorite(slug) {
+      const has = favorites.includes(slug);
+      setFavorites((f) => (has ? f.filter((s) => s !== slug) : [...f, slug]));
+      toast(has ? "Removido dos favoritos" : "Salvo nos favoritos", {
+        action: has ? undefined : { label: "Ver", onClick: () => setDrawer("favorites") },
+      });
+    },
+    drawer,
+    openDrawer: setDrawer,
+    closeDrawer: () => setDrawer(null),
+    theme,
+    setTheme,
+  };
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

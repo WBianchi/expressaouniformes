@@ -1,0 +1,470 @@
+.page {
+  padding-block: clamp(24px, 3vw, 48px) clamp(56px, 6vw, 96px);
+  overflow-x: clip; /* confete não cria rolagem horizontal */
+}
+.muted {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+.muted a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.skel {
+  height: 420px;
+  border-radius: var(--radius-lg);
+}
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  margin-bottom: 28px;
+  animation: fade-up var(--dur-slow) var(--ease) both;
+}
+.hero h1 {
+  font-size: clamp(26px, 4.4vw, 38px);
+  margin-top: 8px;
+}
+.burst {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-full);
+  background-color: var(--success-soft);
+  animation: pop 700ms var(--ease-spring) 200ms both;
+}
+.checkSvg {
+  width: 68px;
+  height: 68px;
+  stroke: var(--success);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.checkSvg circle {
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: draw 700ms var(--ease) 150ms forwards;
+}
+.checkSvg path {
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: draw 450ms var(--ease) 750ms forwards;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.orderId {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 14px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  font-size: 14px;
+}
+.orderId b {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- layout ---------- */
+.layout {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) clamp(360px, 30vw, 500px);
+    gap: clamp(28px, 3vw, 56px);
+  }
+}
+.main {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.card,
+.side {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  animation: fade-up var(--dur-slow) var(--ease) both;
+}
+@media (min-width: 640px) {
+  .card,
+  .side {
+    padding: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .side {
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
+  }
+}
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 19px;
+}
+.cardTitle svg {
+  color: var(--link);
+}
+.demo {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--gold-100);
+  border: 1px solid color-mix(in srgb, var(--gold-500) 35%, transparent);
+  font-size: 13.5px;
+}
+.demo svg {
+  color: var(--gold-600);
+}
+.statusLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.statusLine::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--gold-500);
+}
+.statusLine[data-tone="ok"] {
+  color: var(--success);
+}
+.statusLine[data-tone="ok"]::before {
+  background: var(--success);
+  box-shadow: 0 0 0 4px var(--success-soft);
+}
+.statusLine[data-tone="bad"] {
+  color: var(--danger);
+}
+.statusLine[data-tone="bad"]::before {
+  background: var(--danger);
+}
+
+/* ---------- pix ---------- */
+.pix {
+  display: grid;
+  gap: 20px;
+}
+@media (min-width: 700px) {
+  .pix {
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+  }
+}
+.qr {
+  justify-self: center;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: #fff; /* QR Code precisa de fundo claro para leitura, também no tema escuro */
+  box-shadow: var(--shadow);
+}
+.qr img {
+  width: 220px;
+  height: 220px;
+  image-rendering: pixelated;
+}
+.pixInfo {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.howTo {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+.copyField {
+  display: grid;
+  gap: 6px;
+}
+.copyField :global(.input) {
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+}
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-2);
+}
+.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.02em;
+}
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.countdown[data-expired] {
+  color: var(--danger);
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--link);
+}
+
+/* ---------- próximos passos ---------- */
+.timeline {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.timeline li {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: 18px;
+  animation: fade-up var(--dur-slow) var(--ease) both;
+}
+.timeline li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--line);
+}
+.tlIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--info-soft);
+  color: var(--link);
+}
+.timeline li:first-child .tlIcon {
+  background: var(--gradient-brand);
+  color: #fff;
+}
+.timeline strong {
+  font-size: 14.5px;
+}
+.timeline p {
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ---------- itens ---------- */
+.items {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+}
+.items li div {
+  display: grid;
+  min-width: 0;
+}
+.items small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.items li > span {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.totals {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+}
+.totals div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.totals dt {
+  color: var(--text-2);
+}
+.totals dd {
+  margin: 0;
+  font-weight: 650;
+}
+.green dt,
+.green dd {
+  color: var(--success);
+}
+.total {
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+.total dt {
+  color: var(--text);
+  font-weight: 700;
+}
+.total dd {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.missing {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+  max-width: 520px;
+  margin: 40px auto;
+  color: var(--text-2);
+}
+.missing h1 {
+  font-size: 24px;
+  color: var(--text);
+}
+.missing svg {
+  color: var(--muted);
+}
+
+/* ---------- confete ---------- */
+.confetti {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.confetti span {
+  position: absolute;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--gold-500);
+  opacity: 0;
+  animation: confetti 1800ms var(--ease) calc(500ms + var(--d)) forwards;
+}
+.confetti span:nth-child(4n + 1) {
+  background: var(--cyan-500);
+  border-radius: var(--radius-full);
+  width: 9px;
+  height: 9px;
+}
+.confetti span:nth-child(4n + 2) {
+  background: var(--brand-500);
+}
+.confetti span:nth-child(4n + 3) {
+  background: var(--success);
+  width: 6px;
+}
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0) scale(var(--s));
+  }
+  35% {
+    opacity: 1;
+    transform: translate(calc(var(--x) * 0.75), calc(var(--y) * -0.35)) rotate(calc(var(--r) * 0.5)) scale(var(--s));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(var(--s));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti {
+    display: none;
+  }
+}
+.hero > :not(.confetti) {
+  position: relative;
+  z-index: 1;
+}
+.itemThumb {
+  position: relative;
+  width: 56px;
+  height: 68px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.items li {
+  animation: fade-up var(--dur-slow) var(--ease) both;
+  align-items: flex-start;
+}
+.items li div {
+  flex: 1;
+}
+
+/* keyframes locais (CSS Modules renomeia nomes de animação) */
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

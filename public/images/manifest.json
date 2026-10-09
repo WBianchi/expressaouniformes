@@ -1,0 +1,1341 @@
+{
+  "generatedWith": "gpt-image-2.5-sunburst",
+  "items": {
+    "polo-com-friso": {
+      "id": "polo-com-friso",
+      "file": "/images/products/polo-com-friso.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: short-sleeve piqué polo shirt in navy blue (#1b2a4a) with contrast tipping: the ribbed collar and both sleeve cuffs have two thin stripes (frisos) in warm gold (#e8ac2c) and white, 3-button placket. A tiny abstract generic embroidered emblem (simple geometric shape, no letters) on the left chest.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 235,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 235
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1991
+      },
+      "estimatedCostUsd": 0.0539,
+      "generatedAt": "2026-10-09T20:07:42.428Z"
+    },
+    "polo-piquet-basica": {
+      "id": "polo-piquet-basica",
+      "file": "/images/products/polo-piquet-basica.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: classic short-sleeve polo shirt in navy blue (#1b2a4a), 100% cotton piqué knit with clearly visible honeycomb piqué texture, ribbed collar, 3-button placket, short side vents at the hem. Men's regular fit, premium look.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 216,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 216
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1972
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:41:07.327Z"
+    },
+    "polo-pv-basica": {
+      "id": "polo-pv-basica",
+      "file": "/images/products/polo-pv-basica.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: classic short-sleeve polo shirt in navy blue (#1b2a4a), lightweight smooth poly-viscose jersey knit with soft sheen, ribbed knit collar and ribbed sleeve cuffs, 3-button placket with matching navy buttons, straight hem. Men's regular fit.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 215,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 215
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1971
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:41:07.502Z"
+    },
+    "polo-dry-fit-basica": {
+      "id": "polo-dry-fit-basica",
+      "file": "/images/products/polo-dry-fit-basica.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: sporty short-sleeve polo shirt in navy blue (#1b2a4a), technical dry-fit polyamide performance fabric with fine micro-mesh texture and subtle sheen, flat knit collar, 3-button placket, modern athletic fit.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 207,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 207
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1963
+      },
+      "estimatedCostUsd": 0.0537,
+      "generatedAt": "2026-10-09T20:41:11.042Z"
+    },
+    "camiseta-algodao-basica": {
+      "id": "camiseta-algodao-basica",
+      "file": "/images/products/camiseta-algodao-basica.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: basic crew-neck short-sleeve t-shirt in clean white (#f6f6f3), soft 100% combed cotton jersey, ribbed crew neck, double-needle stitched hems, regular unisex fit. Make the white garment clearly separated from the light background with soft shading.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 217,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 217
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1973
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:41:38.508Z"
+    },
+    "polo-piquet-feminina": {
+      "id": "polo-piquet-feminina",
+      "file": "/images/products/polo-piquet-feminina.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: women's short-sleeve polo shirt in navy blue (#1b2a4a), cotton piqué with elastane, tailored fitted waist with feminine contour, shorter sleeves with fitted ribbed cuffs, 2-button placket, ribbed collar. Women's ghost mannequin.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 212,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 212
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1968
+      },
+      "estimatedCostUsd": 0.0537,
+      "generatedAt": "2026-10-09T20:41:40.586Z"
+    },
+    "camiseta-dry-fit": {
+      "id": "camiseta-dry-fit",
+      "file": "/images/products/camiseta-dry-fit.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: athletic crew-neck short-sleeve t-shirt in white (#f6f6f3), lightweight polyester dry-fit fabric with fine breathable micro-perforated texture, raglan sleeves, sporty regular fit. Make the white garment clearly separated from the light background with soft shading.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 213,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 213
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1969
+      },
+      "estimatedCostUsd": 0.0537,
+      "generatedAt": "2026-10-09T20:41:44.284Z"
+    },
+    "calca-brim-profissional": {
+      "id": "calca-brim-profissional",
+      "file": "/images/products/calca-brim-profissional.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: professional work trousers in navy blue (#1b2a4a), heavy 100% cotton drill (twill) fabric with visible diagonal twill weave, waistband with elastic at the sides and belt loops, slanted front pockets, triple-stitched seams, straight leg, full length shown front view, ghost mannequin.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 223,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 223
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1979
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:42:10.398Z"
+    },
+    "jaleco-gabardine": {
+      "id": "jaleco-gabardine",
+      "file": "/images/products/jaleco-gabardine.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: women's long-sleeve medical lab coat in white (#f6f6f3), structured gabardine with elastane, tailored fitted waist, notched lapel collar, front closure with discreet snap buttons, two lower patch pockets and one chest pocket, long sleeves with cuffs, length to mid-thigh. Make the white garment clearly separated from the light background with soft shading.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 235,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 235
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1991
+      },
+      "estimatedCostUsd": 0.0539,
+      "generatedAt": "2026-10-09T20:42:13.557Z"
+    },
+    "moletom-canguru": {
+      "id": "moletom-canguru",
+      "file": "/images/products/moletom-canguru.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: pullover hoodie sweatshirt in black (#17191e), thick brushed fleece cotton blend, lined hood with flat drawcords, front kangaroo pocket, ribbed cuffs and ribbed waistband, regular unisex fit.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 201,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 201
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1957
+      },
+      "estimatedCostUsd": 0.0537,
+      "generatedAt": "2026-10-09T20:42:18.632Z"
+    },
+    "camisa-operacional-brim": {
+      "id": "camisa-operacional-brim",
+      "file": "/images/products/camisa-operacional-brim.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: short-sleeve professional work shirt in navy blue (#1b2a4a), lightweight cotton drill twill, pointed shirt collar, full front button placket, two chest patch pockets with button flaps, pen slot on the left pocket, reinforced shoulder yoke, robust stitching.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 216,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 216
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1972
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:42:44.244Z"
+    },
+    "dolma-chef": {
+      "id": "dolma-chef",
+      "file": "/images/products/dolma-chef.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: professional chef jacket (dólmã) in white (#f6f6f3), oxford fabric with elastane, double-breasted front with two rows of discreet white snap buttons, mandarin stand collar, long sleeves, small thermometer pocket on the left sleeve. Make the white garment clearly separated from the light background with soft shading.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 228,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 228
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1984
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:42:47.701Z"
+    },
+    "camiseta-alta-visibilidade": {
+      "id": "camiseta-alta-visibilidade",
+      "file": "/images/products/camiseta-alta-visibilidade.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: high-visibility safety crew-neck t-shirt in fluorescent lime yellow (#c6e22a), breathable polyester, with two horizontal 5 cm silver-grey retroreflective tape stripes sewn around the torso and around both upper sleeves, regular fit.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 206,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 206
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1962
+      },
+      "estimatedCostUsd": 0.0537,
+      "generatedAt": "2026-10-09T20:42:51.126Z"
+    },
+    "polo-bicolor": {
+      "id": "polo-bicolor",
+      "file": "/images/products/polo-bicolor.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: short-sleeve polo shirt in heather grey melange (#a3a8ae) with color-block panels: navy blue (#1b2a4a) shoulder yokes extending over the top of the sleeves and navy side panels, navy ribbed collar, 3-button placket, modern two-tone design. A tiny abstract generic embroidered emblem (simple geometric shape, no letters) on the left chest.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 242,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 242
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1998
+      },
+      "estimatedCostUsd": 0.0539,
+      "generatedAt": "2026-10-09T20:43:18.675Z"
+    },
+    "polo-gola-personalizada": {
+      "id": "polo-gola-personalizada",
+      "file": "/images/products/polo-gola-personalizada.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: short-sleeve premium piqué polo shirt in black (#17191e) with a contrasting solid red (#c8102e) ribbed collar and red sleeve cuffs, red buttons on the placket, elegant design.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 203,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 203
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1959
+      },
+      "estimatedCostUsd": 0.0537,
+      "generatedAt": "2026-10-09T20:43:18.956Z"
+    },
+    "polo-manga-longa": {
+      "id": "polo-manga-longa",
+      "file": "/images/products/polo-manga-longa.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: long-sleeve piqué polo shirt in navy blue (#1b2a4a), ribbed collar, 3-button placket, long sleeves with ribbed cuffs, a horizontal silver-grey retroreflective tape band around each forearm, subtle reinforced elbow patches in the same navy.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 217,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 217
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1973
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:43:24.200Z"
+    },
+    "cat-polos": {
+      "id": "cat-polos",
+      "file": "/images/categories/polos.webp",
+      "base": "/images/categories/_base/polos.webp",
+      "title": "Polos",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area (occupying the top ~65% of the card) with a soft realistic drop shadow and gentle rim light. Keep the BOTTOM 30% of the card as calm, empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a neatly presented navy blue piqué polo shirt on an invisible ghost mannequin, front view, slightly angled.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 278,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 278
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1788
+      },
+      "estimatedCostUsd": 0.0467,
+      "generatedAt": "2026-10-09T20:43:50.545Z"
+    },
+    "polo-alta-visibilidade": {
+      "id": "polo-alta-visibilidade",
+      "file": "/images/products/polo-alta-visibilidade.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1024",
+      "finalSize": "1024x1024",
+      "prompt": "Premium e-commerce packshot, single garment shown alone on an invisible ghost mannequin (no person, no hanger), front view, perfectly centered, the entire garment fully visible with generous even margin on all sides, occupying about 78% of the frame height. Seamless light neutral background in very soft cool grey #eef1f5 with a subtle soft contact shadow below. Soft diffused studio lighting from the upper left, true-to-life color, crisp fabric texture, realistic seams and stitching, catalog consistency. Plain chest with no print or embroidery unless described.\n\nGarment: high-visibility safety polo shirt, two-tone: fluorescent lime yellow (#c6e22a) upper body and sleeves, charcoal grey (#4a4f57) lower body panel, grey collar, with horizontal silver-grey retroreflective tape stripes around the torso and around both sleeves, breathable dry-fit fabric, 3-button placket.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 227,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 227
+        },
+        "output_tokens": 1756,
+        "output_tokens_details": {
+          "image_tokens": 1756,
+          "text_tokens": 0
+        },
+        "total_tokens": 1983
+      },
+      "estimatedCostUsd": 0.0538,
+      "generatedAt": "2026-10-09T20:43:54.272Z"
+    },
+    "cat-camisetas": {
+      "id": "cat-camisetas",
+      "file": "/images/categories/camisetas.webp",
+      "base": "/images/categories/_base/camisetas.webp",
+      "title": "Camisetas",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area (occupying the top ~65% of the card) with a soft realistic drop shadow and gentle rim light. Keep the BOTTOM 30% of the card as calm, empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a stack of three neatly folded crew-neck cotton t-shirts in white, cyan and royal blue, with one white t-shirt on an invisible ghost mannequin standing behind them.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 290,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 290
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1800
+      },
+      "estimatedCostUsd": 0.0467,
+      "generatedAt": "2026-10-09T20:43:56.215Z"
+    },
+    "cat-calcas": {
+      "id": "cat-calcas",
+      "file": "/images/categories/calcas.webp",
+      "base": "/images/categories/_base/calcas.webp",
+      "title": "Calças",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area (occupying the top ~65% of the card) with a soft realistic drop shadow and gentle rim light. Keep the BOTTOM 30% of the card as calm, empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a pair of navy blue cotton drill professional work trousers, neatly folded in half and standing upright, showing twill texture and triple stitching.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 284,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 284
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1794
+      },
+      "estimatedCostUsd": 0.0467,
+      "generatedAt": "2026-10-09T20:44:22.602Z"
+    },
+    "cat-jalecos": {
+      "id": "cat-jalecos",
+      "file": "/images/categories/jalecos.webp",
+      "base": "/images/categories/_base/jalecos.webp",
+      "title": "Jalecos",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area (occupying the top ~65% of the card) with a soft realistic drop shadow and gentle rim light. Keep the BOTTOM 30% of the card as calm, empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: an elegant white tailored gabardine lab coat on an invisible ghost mannequin with a stethoscope draped around the collar, front view.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 285,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 285
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1795
+      },
+      "estimatedCostUsd": 0.0467,
+      "generatedAt": "2026-10-09T20:44:24.991Z"
+    },
+    "cat-moletons": {
+      "id": "cat-moletons",
+      "file": "/images/categories/moletons.webp",
+      "base": "/images/categories/_base/moletons.webp",
+      "title": "Moletons",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area (occupying the top ~65% of the card) with a soft realistic drop shadow and gentle rim light. Keep the BOTTOM 30% of the card as calm, empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a heather grey and black pullover hoodie on an invisible ghost mannequin, kangaroo pocket and drawcords visible, cozy fleece texture.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 285,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 285
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1795
+      },
+      "estimatedCostUsd": 0.0467,
+      "generatedAt": "2026-10-09T20:44:33.013Z"
+    },
+    "cat-operacional": {
+      "id": "cat-operacional",
+      "file": "/images/categories/operacional.webp",
+      "base": "/images/categories/_base/operacional.webp",
+      "title": "Uniforme Operacional",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area with a soft realistic drop shadow and gentle rim light; the whole product (including any accessories) must fit inside the top 60% of the card — its lowest point must stay above 62% of the card height, with nothing below it. The BOTTOM 38% of the card must be calm, completely empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a navy blue short-sleeve work shirt with button-flap chest pockets on an invisible ghost mannequin, with a white safety helmet and work gloves placed at its base.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 319,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 319
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1829
+      },
+      "estimatedCostUsd": 0.0469,
+      "generatedAt": "2026-10-09T20:50:46.721Z"
+    },
+    "cat-alimenticia": {
+      "id": "cat-alimenticia",
+      "file": "/images/categories/alimenticia.webp",
+      "base": "/images/categories/_base/alimenticia.webp",
+      "title": "Área Alimentícia",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area with a soft realistic drop shadow and gentle rim light; the whole product (including any accessories) must fit inside the top 60% of the card — its lowest point must stay above 62% of the card height, with nothing below it. The BOTTOM 38% of the card must be calm, completely empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a white double-breasted chef jacket (dólmã) on an invisible ghost mannequin, with a black chef apron folded beside it.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 314,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 314
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1824
+      },
+      "estimatedCostUsd": 0.0469,
+      "generatedAt": "2026-10-09T20:50:46.396Z"
+    },
+    "cat-alta-visibilidade": {
+      "id": "cat-alta-visibilidade",
+      "file": "/images/categories/alta-visibilidade.webp",
+      "base": "/images/categories/_base/alta-visibilidade.webp",
+      "title": "Alta Visibilidade",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area with a soft realistic drop shadow and gentle rim light; the whole product (including any accessories) must fit inside the top 60% of the card — its lowest point must stay above 62% of the card height, with nothing below it. The BOTTOM 38% of the card must be calm, completely empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a fluorescent lime-yellow high-visibility safety t-shirt with silver retroreflective stripes on an invisible ghost mannequin, glowing reflective tape catching the light.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 314,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 314
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1824
+      },
+      "estimatedCostUsd": 0.0469,
+      "generatedAt": "2026-10-09T20:50:45.128Z"
+    },
+    "hero-1": {
+      "id": "hero-1",
+      "file": "/images/banners/hero-1.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "2400x1008",
+      "finalSize": "2400x1000",
+      "prompt": "Ultra-wide cinematic website hero photograph (21:9). A confident corporate team of four Brazilian professionals (men and women) standing together in a bright modern office with glass and warm wood, all wearing matching plain navy blue piqué polo shirts with a tiny abstract generic gold embroidered emblem on the chest (no letters), smiling, ready-to-wear corporate uniform look.\n\nComposition: all subjects placed in the RIGHT 55% of the frame; the LEFT 45% is calm negative space (softly out-of-focus background that gradually blends into deep navy #0b2545 at the far left edge) reserved for headline text added later. \n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 272,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 272
+        },
+        "output_tokens": 1061,
+        "output_tokens_details": {
+          "image_tokens": 1061,
+          "text_tokens": 0
+        },
+        "total_tokens": 1333
+      },
+      "estimatedCostUsd": 0.0332,
+      "generatedAt": "2026-10-09T20:45:25.857Z"
+    },
+    "hero-2": {
+      "id": "hero-2",
+      "file": "/images/banners/hero-2.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "2400x1008",
+      "finalSize": "2400x1000",
+      "prompt": "Ultra-wide cinematic website hero photograph (21:9). Inside a clean, well-lit Brazilian garment factory: a skilled seamstress in a navy uniform operating an industrial sewing machine, sewing a navy polo shirt, with bolts of navy, blue and cyan fabric, measuring tape and neatly stacked finished uniforms nearby; tailor-made uniform production, craftsmanship and quality.\n\nComposition: all subjects placed in the RIGHT 55% of the frame; the LEFT 45% is calm negative space (softly out-of-focus background that gradually blends into deep navy #0b2545 at the far left edge) reserved for headline text added later. \n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 269,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 269
+        },
+        "output_tokens": 1061,
+        "output_tokens_details": {
+          "image_tokens": 1061,
+          "text_tokens": 0
+        },
+        "total_tokens": 1330
+      },
+      "estimatedCostUsd": 0.0332,
+      "generatedAt": "2026-10-09T20:45:37.558Z"
+    },
+    "hero-1-mobile": {
+      "id": "hero-1-mobile",
+      "file": "/images/banners/hero-1-mobile.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1360",
+      "finalSize": "1080x1350",
+      "prompt": "Vertical 4:5 mobile website hero photograph. A confident corporate team of four Brazilian professionals (men and women) standing together in a bright modern office with glass and warm wood, all wearing matching plain navy blue piqué polo shirts with a tiny abstract generic gold embroidered emblem on the chest (no letters), smiling, ready-to-wear corporate uniform look.\n\nComposition: subjects in the MIDDLE band of the frame; the TOP 28% and the BOTTOM 22% are calm, uncluttered areas (soft background blending into deep navy #0b2545) reserved for text added later. \n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 266,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 266
+        },
+        "output_tokens": 1587,
+        "output_tokens_details": {
+          "image_tokens": 1587,
+          "text_tokens": 0
+        },
+        "total_tokens": 1853
+      },
+      "estimatedCostUsd": 0.0489,
+      "generatedAt": "2026-10-09T20:45:51.696Z"
+    },
+    "hero-2-mobile": {
+      "id": "hero-2-mobile",
+      "file": "/images/banners/hero-2-mobile.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1360",
+      "finalSize": "1080x1350",
+      "prompt": "Vertical 4:5 mobile website hero photograph. Inside a clean, well-lit Brazilian garment factory: a skilled seamstress in a navy uniform operating an industrial sewing machine, sewing a navy polo shirt, with bolts of navy, blue and cyan fabric, measuring tape and neatly stacked finished uniforms nearby; tailor-made uniform production, craftsmanship and quality.\n\nComposition: subjects in the MIDDLE band of the frame; the TOP 28% and the BOTTOM 22% are calm, uncluttered areas (soft background blending into deep navy #0b2545) reserved for text added later. \n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 263,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 263
+        },
+        "output_tokens": 1587,
+        "output_tokens_details": {
+          "image_tokens": 1587,
+          "text_tokens": 0
+        },
+        "total_tokens": 1850
+      },
+      "estimatedCostUsd": 0.0489,
+      "generatedAt": "2026-10-09T20:46:02.252Z"
+    },
+    "hero-3": {
+      "id": "hero-3",
+      "file": "/images/banners/hero-3.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "2400x1008",
+      "finalSize": "2400x1000",
+      "prompt": "Ultra-wide cinematic website hero photograph (21:9). A joyful group of Brazilian volunteers at an outdoor community event / church gathering at golden hour, wearing matching plain crew-neck t-shirts in vibrant colors (royal blue, cyan, golden yellow and white) without any prints, hugging and smiling together, festive bokeh lights in the background.\n\nComposition: all subjects placed in the RIGHT 55% of the frame; the LEFT 45% is calm negative space (softly out-of-focus background that gradually blends into deep navy #0b2545 at the far left edge) reserved for headline text added later. \n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 268,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 268
+        },
+        "output_tokens": 1061,
+        "output_tokens_details": {
+          "image_tokens": 1061,
+          "text_tokens": 0
+        },
+        "total_tokens": 1329
+      },
+      "estimatedCostUsd": 0.0332,
+      "generatedAt": "2026-10-09T20:46:08.877Z"
+    },
+    "hero-3-mobile": {
+      "id": "hero-3-mobile",
+      "file": "/images/banners/hero-3-mobile.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1360",
+      "finalSize": "1080x1350",
+      "prompt": "Vertical 4:5 mobile website hero photograph. A joyful group of Brazilian volunteers at an outdoor community event / church gathering at golden hour, wearing matching plain crew-neck t-shirts in vibrant colors (royal blue, cyan, golden yellow and white) without any prints, hugging and smiling together, festive bokeh lights in the background.\n\nComposition: subjects in the MIDDLE band of the frame; the TOP 28% and the BOTTOM 22% are calm, uncluttered areas (soft background blending into deep navy #0b2545) reserved for text added later. \n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 262,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 262
+        },
+        "output_tokens": 1587,
+        "output_tokens_details": {
+          "image_tokens": 1587,
+          "text_tokens": 0
+        },
+        "total_tokens": 1849
+      },
+      "estimatedCostUsd": 0.0489,
+      "generatedAt": "2026-10-09T20:46:26.994Z"
+    },
+    "promo-empresas": {
+      "id": "promo-empresas",
+      "file": "/images/banners/promo-empresas.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1600x912",
+      "finalSize": "1600x900",
+      "prompt": "16:9 editorial promotional photograph for a website banner. A professional Brazilian businesswoman and businessman in a modern reception area wearing matching navy polo shirts with a tiny abstract gold embroidered emblem, greeting a client with a warm smile; corporate uniforms for companies. Subjects positioned on the right side. Natural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\n\nKeep the left third relatively calm and uncluttered so overlaid text stays readable.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 217,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 217
+        },
+        "output_tokens": 1121,
+        "output_tokens_details": {
+          "image_tokens": 1121,
+          "text_tokens": 0
+        },
+        "total_tokens": 1338
+      },
+      "estimatedCostUsd": 0.0347,
+      "generatedAt": "2026-10-09T20:46:30.555Z"
+    },
+    "promo-eventos": {
+      "id": "promo-eventos",
+      "file": "/images/banners/promo-eventos.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1600x912",
+      "finalSize": "1600x900",
+      "prompt": "16:9 editorial promotional photograph for a website banner. Energetic Brazilian participants at an outdoor running / community event wearing matching bright cyan and royal blue dry-fit t-shirts without prints, high-fiving at the finish area, sunny daylight, motion and joy. Subjects positioned on the right side. Natural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\n\nKeep the left third relatively calm and uncluttered so overlaid text stays readable.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 220,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 220
+        },
+        "output_tokens": 1121,
+        "output_tokens_details": {
+          "image_tokens": 1121,
+          "text_tokens": 0
+        },
+        "total_tokens": 1341
+      },
+      "estimatedCostUsd": 0.0347,
+      "generatedAt": "2026-10-09T20:46:39.420Z"
+    },
+    "promo-sob-medida": {
+      "id": "promo-sob-medida",
+      "file": "/images/banners/promo-sob-medida.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1600x912",
+      "finalSize": "1600x900",
+      "prompt": "16:9 editorial promotional photograph for a website banner. Close-up overhead flat lay on a tailor's work table: navy and royal blue piqué fabric swatches, a polo collar with gold contrast tipping, color fabric swatch fan in navy, blue, cyan and gold, tailor's measuring tape, chalk, sharp scissors and a pattern paper sketch of a polo shirt; custom uniform design process. Main objects on the right two thirds.\n\nKeep the left third relatively calm and uncluttered so overlaid text stays readable.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 219,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 219
+        },
+        "output_tokens": 1121,
+        "output_tokens_details": {
+          "image_tokens": 1121,
+          "text_tokens": 0
+        },
+        "total_tokens": 1340
+      },
+      "estimatedCostUsd": 0.0347,
+      "generatedAt": "2026-10-09T20:46:54.386Z"
+    },
+    "promo-kit-completo": {
+      "id": "promo-kit-completo",
+      "file": "/images/banners/promo-kit-completo.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1600x912",
+      "finalSize": "1600x900",
+      "prompt": "16:9 editorial promotional photograph for a website banner. Premium product still life of a complete uniform kit neatly folded and stacked on a light stone surface with a navy backdrop: a navy piqué polo shirt, navy drill work trousers, a white lab coat and a grey hoodie, arranged in a tidy elegant composition, soft studio light, subtle geometric shadow pattern. Products positioned on the right two thirds.\n\nKeep the left third relatively calm and uncluttered so overlaid text stays readable.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 211,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 211
+        },
+        "output_tokens": 1121,
+        "output_tokens_details": {
+          "image_tokens": 1121,
+          "text_tokens": 0
+        },
+        "total_tokens": 1332
+      },
+      "estimatedCostUsd": 0.0347,
+      "generatedAt": "2026-10-09T20:46:57.052Z"
+    },
+    "login": {
+      "id": "login",
+      "file": "/images/banners/login.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1360",
+      "finalSize": "1080x1350",
+      "prompt": "Vertical 4:5 elegant macro photograph of textile craftsmanship: extreme close-up of an abstract geometric embroidery being stitched in shiny gold #e8ac2c and cyan #13b5d6 thread on deep navy #0b2545 piqué fabric, with a sewing needle and spools of navy, blue and gold thread softly out of focus, rich fabric texture, shallow depth of field, moody premium lighting with soft highlights. \n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 204,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 204
+        },
+        "output_tokens": 1587,
+        "output_tokens_details": {
+          "image_tokens": 1587,
+          "text_tokens": 0
+        },
+        "total_tokens": 1791
+      },
+      "estimatedCostUsd": 0.0486,
+      "generatedAt": "2026-10-09T20:47:14.637Z"
+    },
+    "about-factory": {
+      "id": "about-factory",
+      "file": "/images/sections/about-factory.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1600x1008",
+      "finalSize": "1600x1000",
+      "prompt": "Wide editorial photograph of a modern, bright Brazilian uniform factory floor: rows of industrial sewing machines operated by focused seamstresses in navy uniforms, neatly stacked navy and blue polo shirts, large rolls of navy, royal blue and cyan fabric, clean organized space with natural daylight from large windows, depth of field.\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 205,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 205
+        },
+        "output_tokens": 1301,
+        "output_tokens_details": {
+          "image_tokens": 1301,
+          "text_tokens": 0
+        },
+        "total_tokens": 1506
+      },
+      "estimatedCostUsd": 0.0401,
+      "generatedAt": "2026-10-09T20:51:28.980Z"
+    },
+    "how-1": {
+      "id": "how-1",
+      "file": "/images/sections/how-1.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1216x912",
+      "finalSize": "1200x900",
+      "prompt": "Close-up lifestyle photograph over the shoulder of a Brazilian business owner at a light wooden desk browsing a uniform catalog on a tablet: the tablet screen shows a clean grid of polo shirt photos in different colors (no readable text), with a physical fabric color swatch fan in navy, blue, cyan and gold next to it, coffee cup, soft morning light. Choosing model and colors.\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 220,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 220
+        },
+        "output_tokens": 1344,
+        "output_tokens_details": {
+          "image_tokens": 1344,
+          "text_tokens": 0
+        },
+        "total_tokens": 1564
+      },
+      "estimatedCostUsd": 0.0414,
+      "generatedAt": "2026-10-09T20:51:30.120Z"
+    },
+    "how-2": {
+      "id": "how-2",
+      "file": "/images/sections/how-2.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1216x912",
+      "finalSize": "1200x900",
+      "prompt": "Photograph of a graphic designer's workspace: a large monitor displaying a simple abstract geometric vector emblem (blue and gold shapes, no letters) placed on a navy polo shirt mockup in a design application with generic interface panels (no readable text), the designer's hand on a mouse, a drawing tablet and pantone-style color swatches on the desk, modern studio with soft light. Sending the logo file.\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 226,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 226
+        },
+        "output_tokens": 1344,
+        "output_tokens_details": {
+          "image_tokens": 1344,
+          "text_tokens": 0
+        },
+        "total_tokens": 1570
+      },
+      "estimatedCostUsd": 0.0415,
+      "generatedAt": "2026-10-09T20:51:31.407Z"
+    },
+    "how-3": {
+      "id": "how-3",
+      "file": "/images/sections/how-3.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1216x912",
+      "finalSize": "1200x900",
+      "prompt": "Close-up photograph of a person's hands holding a smartphone showing a clean preview of a navy polo shirt mockup with a small abstract gold emblem on the chest, and a large green circular check-mark approval button below it (no readable text), blurred modern office background in navy and blue tones. Approving the layout on the phone.\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 209,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 209
+        },
+        "output_tokens": 1344,
+        "output_tokens_details": {
+          "image_tokens": 1344,
+          "text_tokens": 0
+        },
+        "total_tokens": 1553
+      },
+      "estimatedCostUsd": 0.0414,
+      "generatedAt": "2026-10-09T20:52:04.208Z"
+    },
+    "how-4": {
+      "id": "how-4",
+      "file": "/images/sections/how-4.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1216x912",
+      "finalSize": "1200x900",
+      "prompt": "Photograph of neatly packed uniform orders ready for shipping: plain kraft cardboard boxes, one open box showing folded navy polo shirts in clear protective bags with tissue paper, sealed boxes stacked on a clean workbench in a bright logistics area, a roll of packing tape, soft daylight. Plain boxes with no printed logos or labels.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 179,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 179
+        },
+        "output_tokens": 1344,
+        "output_tokens_details": {
+          "image_tokens": 1344,
+          "text_tokens": 0
+        },
+        "total_tokens": 1523
+      },
+      "estimatedCostUsd": 0.0412,
+      "generatedAt": "2026-10-09T20:52:04.450Z"
+    },
+    "segment-saude": {
+      "id": "segment-saude",
+      "file": "/images/sections/segment-saude.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1328",
+      "finalSize": "900x1100",
+      "prompt": "Vertical editorial portrait photograph for a uniform-segment card. A Brazilian healthcare professional (nurse or doctor) wearing a tailored white lab coat over navy scrubs, stethoscope around the neck, in a bright modern clinic corridor. Uniforms are plain, clean and well-fitted, with at most a tiny abstract generic embroidered emblem (no letters). Subject framed from the waist or knees up, centered, background softly blurred with navy and blue tones, lower 25% slightly darker and calm (a caption will be overlaid).\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 250,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 250
+        },
+        "output_tokens": 1613,
+        "output_tokens_details": {
+          "image_tokens": 1613,
+          "text_tokens": 0
+        },
+        "total_tokens": 1863
+      },
+      "estimatedCostUsd": 0.0496,
+      "generatedAt": "2026-10-09T20:52:08.477Z"
+    },
+    "segment-industria": {
+      "id": "segment-industria",
+      "file": "/images/sections/segment-industria.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1328",
+      "finalSize": "900x1100",
+      "prompt": "Vertical editorial portrait photograph for a uniform-segment card. A Brazilian industrial worker wearing a navy drill work shirt with silver reflective tape, white safety helmet and safety glasses, inside a clean modern factory with machinery in soft focus. Uniforms are plain, clean and well-fitted, with at most a tiny abstract generic embroidered emblem (no letters). Subject framed from the waist or knees up, centered, background softly blurred with navy and blue tones, lower 25% slightly darker and calm (a caption will be overlaid).\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 248,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 248
+        },
+        "output_tokens": 1613,
+        "output_tokens_details": {
+          "image_tokens": 1613,
+          "text_tokens": 0
+        },
+        "total_tokens": 1861
+      },
+      "estimatedCostUsd": 0.0496,
+      "generatedAt": "2026-10-09T20:52:43.680Z"
+    },
+    "segment-alimentacao": {
+      "id": "segment-alimentacao",
+      "file": "/images/sections/segment-alimentacao.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1328",
+      "finalSize": "900x1100",
+      "prompt": "Vertical editorial portrait photograph for a uniform-segment card. A Brazilian chef wearing a white double-breasted chef jacket and black apron, arms relaxed, in a clean professional stainless-steel restaurant kitchen with warm light. Uniforms are plain, clean and well-fitted, with at most a tiny abstract generic embroidered emblem (no letters). Subject framed from the waist or knees up, centered, background softly blurred with navy and blue tones, lower 25% slightly darker and calm (a caption will be overlaid).\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 247,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 247
+        },
+        "output_tokens": 1613,
+        "output_tokens_details": {
+          "image_tokens": 1613,
+          "text_tokens": 0
+        },
+        "total_tokens": 1860
+      },
+      "estimatedCostUsd": 0.0496,
+      "generatedAt": "2026-10-09T20:52:46.490Z"
+    },
+    "segment-educacao": {
+      "id": "segment-educacao",
+      "file": "/images/sections/segment-educacao.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1328",
+      "finalSize": "900x1100",
+      "prompt": "Vertical editorial portrait photograph for a uniform-segment card. A friendly middle-aged Brazilian male teacher with short grey-streaked hair and glasses wearing a navy polo shirt, holding a few notebooks, in a bright modern school hallway with colorful but blurred background. Uniforms are plain, clean and well-fitted, with at most a tiny abstract generic embroidered emblem (no letters). Subject framed from the waist or knees up, centered, background softly blurred with navy and blue tones, lower 25% slightly darker and calm (a caption will be overlaid).\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 254,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 254
+        },
+        "output_tokens": 1613,
+        "output_tokens_details": {
+          "image_tokens": 1613,
+          "text_tokens": 0
+        },
+        "total_tokens": 1867
+      },
+      "estimatedCostUsd": 0.0497,
+      "generatedAt": "2026-10-09T20:56:00.355Z"
+    },
+    "segment-igrejas": {
+      "id": "segment-igrejas",
+      "file": "/images/sections/segment-igrejas.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1328",
+      "finalSize": "900x1100",
+      "prompt": "Vertical editorial portrait photograph for a uniform-segment card. A small group of three smiling Brazilian church volunteers wearing matching plain royal blue t-shirts, welcoming people at the entrance of a bright, simple modern church hall with warm light. Uniforms are plain, clean and well-fitted, with at most a tiny abstract generic embroidered emblem (no letters). Subject framed from the waist or knees up, centered, background softly blurred with navy and blue tones, lower 25% slightly darker and calm (a caption will be overlaid).\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 249,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 249
+        },
+        "output_tokens": 1613,
+        "output_tokens_details": {
+          "image_tokens": 1613,
+          "text_tokens": 0
+        },
+        "total_tokens": 1862
+      },
+      "estimatedCostUsd": 0.0496,
+      "generatedAt": "2026-10-09T20:53:17.453Z"
+    },
+    "segment-eventos": {
+      "id": "segment-eventos",
+      "file": "/images/sections/segment-eventos.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1328",
+      "finalSize": "900x1100",
+      "prompt": "Vertical editorial portrait photograph for a uniform-segment card. Two cheerful Brazilian event staff members wearing matching plain cyan t-shirts and lanyards with blank badges, at an outdoor festival or sports event with bokeh lights. Uniforms are plain, clean and well-fitted, with at most a tiny abstract generic embroidered emblem (no letters). Subject framed from the waist or knees up, centered, background softly blurred with navy and blue tones, lower 25% slightly darker and calm (a caption will be overlaid).\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 247,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 247
+        },
+        "output_tokens": 1613,
+        "output_tokens_details": {
+          "image_tokens": 1613,
+          "text_tokens": 0
+        },
+        "total_tokens": 1860
+      },
+      "estimatedCostUsd": 0.0496,
+      "generatedAt": "2026-10-09T20:53:22.568Z"
+    },
+    "segment-comercio": {
+      "id": "segment-comercio",
+      "file": "/images/sections/segment-comercio.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1088x1328",
+      "finalSize": "900x1100",
+      "prompt": "Vertical editorial portrait photograph for a uniform-segment card. A young Brazilian man with short straight black hair (East Asian–Brazilian descent), a retail store attendant wearing a navy polo shirt, smiling behind the counter of a modern, well-organized shop with shelves in soft focus. Uniforms are plain, clean and well-fitted, with at most a tiny abstract generic embroidered emblem (no letters). Subject framed from the waist or knees up, centered, background softly blurred with navy and blue tones, lower 25% slightly darker and calm (a caption will be overlaid).\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 260,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 260
+        },
+        "output_tokens": 1613,
+        "output_tokens_details": {
+          "image_tokens": 1613,
+          "text_tokens": 0
+        },
+        "total_tokens": 1873
+      },
+      "estimatedCostUsd": 0.0497,
+      "generatedAt": "2026-10-09T20:55:56.833Z"
+    },
+    "custom-hero": {
+      "id": "custom-hero",
+      "file": "/images/sections/custom-hero.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "2016x1104",
+      "finalSize": "2000x1100",
+      "prompt": "Wide overhead-angled photograph of a tailor's pattern-making table for custom uniforms: paper sewing patterns of a polo shirt, swatches of navy, royal blue, cyan and gold piqué fabric, loose polo collars with contrast tipping, color sample cards, measuring tape, tailor's chalk and brass scissors, warm soft studio light. No mannequin, no people. Composition: ALL objects are placed on the RIGHT 60% of the frame; the LEFT 40% is only plain, calm dark wooden table surface fading into deep navy shadow, reserved for headline text.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 227,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 227
+        },
+        "output_tokens": 1319,
+        "output_tokens_details": {
+          "image_tokens": 1319,
+          "text_tokens": 0
+        },
+        "total_tokens": 1546
+      },
+      "estimatedCostUsd": 0.0407,
+      "generatedAt": "2026-10-09T20:55:53.229Z"
+    },
+    "quality-fabric": {
+      "id": "quality-fabric",
+      "file": "/images/sections/quality-fabric.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1216x1216",
+      "finalSize": "1200x1200",
+      "prompt": "Extreme macro photograph of navy blue cotton piqué fabric showing the honeycomb knit texture in fine detail, with a crisp double-needle seam of perfect even stitches in matching thread, and the edge of a ribbed polo collar with a thin gold tipping stripe, raking soft light revealing texture, shallow depth of field.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 178,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 178
+        },
+        "output_tokens": 2004,
+        "output_tokens_details": {
+          "image_tokens": 2004,
+          "text_tokens": 0
+        },
+        "total_tokens": 2182
+      },
+      "estimatedCostUsd": 0.061,
+      "generatedAt": "2026-10-09T20:54:02.648Z"
+    },
+    "embroidery": {
+      "id": "embroidery",
+      "file": "/images/sections/embroidery.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1216x1216",
+      "finalSize": "1200x1200",
+      "prompt": "Close-up photograph of an industrial embroidery machine head stitching an abstract geometric emblem (interlocking blue, cyan and gold shapes, no letters) onto a navy polo shirt held in an embroidery hoop, colorful thread cones in the background softly blurred, needle in motion, precise detailed stitches, warm workshop light.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 174,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 174
+        },
+        "output_tokens": 2004,
+        "output_tokens_details": {
+          "image_tokens": 2004,
+          "text_tokens": 0
+        },
+        "total_tokens": 2178
+      },
+      "estimatedCostUsd": 0.061,
+      "generatedAt": "2026-10-09T20:54:10.355Z"
+    },
+    "team-corporate": {
+      "id": "team-corporate",
+      "file": "/images/sections/team-corporate.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1600x1008",
+      "finalSize": "1600x1000",
+      "prompt": "Editorial photograph of a diverse Brazilian corporate team of five professionals of different ages and ethnicities smiling together in a modern bright office, all wearing matching plain navy piqué polo shirts with a tiny abstract gold embroidered emblem (no letters), relaxed natural poses, warm daylight.\n\nNatural, diverse Brazilian people with realistic faces, natural relaxed hands with correct anatomy (five fingers), genuine friendly expressions, not looking like stock clichés.\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 196,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 196
+        },
+        "output_tokens": 1301,
+        "output_tokens_details": {
+          "image_tokens": 1301,
+          "text_tokens": 0
+        },
+        "total_tokens": 1497
+      },
+      "estimatedCostUsd": 0.04,
+      "generatedAt": "2026-10-09T20:54:21.854Z"
+    },
+    "cta-bg": {
+      "id": "cta-bg",
+      "file": "/images/sections/cta-bg.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "2400x912",
+      "finalSize": "2400x900",
+      "prompt": "Abstract premium background texture: deep navy #0b2545 surface with a subtle fine fabric/woven texture, a few elegant thin flowing gold #e8ac2c lines and very faint cyan geometric accents, soft vignette, lots of calm space, no objects, suitable as a background behind white text.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 177,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 177
+        },
+        "output_tokens": 905,
+        "output_tokens_details": {
+          "image_tokens": 905,
+          "text_tokens": 0
+        },
+        "total_tokens": 1082
+      },
+      "estimatedCostUsd": 0.028,
+      "generatedAt": "2026-10-09T20:54:26.248Z"
+    },
+    "catalog-hero": {
+      "id": "catalog-hero",
+      "file": "/images/sections/catalog-hero.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "2400x800",
+      "finalSize": "2400x800",
+      "prompt": "Ultra-wide studio photograph of a sleek metal clothing rack with a neat row of polo shirts on hangers in a color gradient (navy, royal blue, cyan, white, grey, black, red, golden yellow), placed on the right half of the frame, against a clean light grey studio wall with a soft geometric shadow pattern; the left half is calm empty space for text. Hangers without labels.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 197,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 197
+        },
+        "output_tokens": 753,
+        "output_tokens_details": {
+          "image_tokens": 753,
+          "text_tokens": 0
+        },
+        "total_tokens": 950
+      },
+      "estimatedCostUsd": 0.0236,
+      "generatedAt": "2026-10-09T20:54:34.581Z"
+    },
+    "account-bg": {
+      "id": "account-bg",
+      "file": "/images/sections/account-bg.webp",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1600x1008",
+      "finalSize": "1600x1000",
+      "prompt": "Abstract soft light background: very light cool white and pale blue textile pattern, gentle diagonal woven texture and faint geometric line pattern in pale cyan and a hint of soft gold, airy, minimal, low contrast, calm, no objects, suitable as a subtle page background.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 168,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 168
+        },
+        "output_tokens": 1301,
+        "output_tokens_details": {
+          "image_tokens": 1301,
+          "text_tokens": 0
+        },
+        "total_tokens": 1469
+      },
+      "estimatedCostUsd": 0.0399,
+      "generatedAt": "2026-10-09T20:54:50.850Z"
+    }
+  }
+}

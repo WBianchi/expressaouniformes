@@ -34,8 +34,7 @@ import {
   X,
   Globe,
 } from "lucide-react";
-import { products, money } from "@/lib/catalog";
-import { useStore } from "@/components/store/StoreProvider";
+import { products, money, getColor } from "@/lib/catalog";
 const navigation = [
   ["Visão geral", LayoutDashboard],
   ["Pedidos", ShoppingBag],
@@ -151,7 +150,6 @@ export default function AdminDashboard() {
     [query, setQuery] = useState(""),
     [filter, setFilter] = useState("Todos"),
     [detail, setDetail] = useState<(typeof demoOrders)[number] | null>(null);
-  const { openStudio } = useStore();
   const orders = demoOrders.filter(
     (o) =>
       (o.company + " " + o.id).toLowerCase().includes(query.toLowerCase()) &&
@@ -567,25 +565,28 @@ export default function AdminDashboard() {
               </div>
               <div className="admin-product-list">
                 {products.map((p) => (
-                  <div key={p.id}>
+                  <div key={p.slug}>
                     <span
                       className="product-color"
-                      style={{ background: p.color }}
+                      style={{ background: getColor(p.colors[0])?.hex }}
                     >
                       <Shirt size={24} />
                     </span>
                     <div>
                       <strong>{p.name}</strong>
                       <small>
-                        {p.category} · {money(p.price)} / un.
+                        {p.category} ·{" "}
+                        {p.kind === "stock"
+                          ? money(p.price) + " / un."
+                          : "Sob medida"}
                       </small>
                     </div>
-                    <button
+                    <a
                       className="button secondary small"
-                      onClick={() => openStudio(p)}
+                      href={"/produto/" + p.slug}
                     >
-                      <Palette size={15} /> Abrir estúdio
-                    </button>
+                      <Palette size={15} /> Ver na loja
+                    </a>
                   </div>
                 ))}
               </div>
@@ -685,18 +686,9 @@ export default function AdminDashboard() {
               arquivo da arte, a aprovação e os dados de entrega serão
               associados ao conectar a operação.
             </p>
-            <button
-              className="button primary"
-              onClick={() => {
-                const p = products.find((p) => p.name === detail.product);
-                if (p) {
-                  setDetail(null);
-                  openStudio(p);
-                }
-              }}
-            >
-              Abrir modelo no estúdio
-            </button>
+            <a className="button primary" href="/loja">
+              Ver catálogo
+            </a>
           </aside>
         </div>
       )}

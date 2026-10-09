@@ -1,0 +1,37 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs);
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur) var(--ease);
+}
+.logo:hover {
+  opacity: 0.88;
+}
+.logo:active {
+  transform: scale(0.98);
+}
+.logo img {
+  height: var(--logo-h);
+  width: auto;
+  transition: height var(--dur) var(--ease);
+}
+.dark {
+  display: none;
+}
+:global(:root[data-theme="dark"]) .light,
+.logo[data-on-dark] .light {
+  display: none;
+}
+:global(:root[data-theme="dark"]) .dark,
+.logo[data-on-dark] .dark {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .light {
+    display: none;
+  }
+  :global(:root:not([data-theme="light"])) .dark {
+    display: block;
+  }
+}

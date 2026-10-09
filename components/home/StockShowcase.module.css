@@ -1,0 +1,145 @@
+.head {
+  display: grid;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+@media (min-width: 960px) {
+  .head {
+    grid-template-columns: 1fr minmax(280px, 360px);
+  }
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px;
+  margin-bottom: 16px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--success);
+  box-shadow: 0 10px 22px -10px var(--success);
+}
+.info {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.info p {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.info b {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.infoIcon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-inline: calc(var(--gutter) * -1);
+  padding: 4px var(--gutter) 14px;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tab {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px 0 16px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition:
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+.tab:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+.tab:active {
+  transform: scale(0.97);
+}
+.tab[data-active] {
+  color: var(--primary-fg);
+  background: var(--primary);
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.tab[data-active] .count {
+  background: rgb(255 255 255 / 0.18);
+  color: var(--primary-fg);
+}
+
+.panel {
+  margin-top: 8px;
+}
+.item {
+  animation: fade-up var(--dur-slow) var(--ease) both;
+  animation-delay: calc(var(--i) * 60ms);
+}
+.item > * {
+  height: 100%;
+}
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* keyframes locais (CSS Modules renomeia nomes de animação) */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

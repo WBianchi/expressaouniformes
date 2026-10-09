@@ -1,0 +1,321 @@
+/* ---------- topo ---------- */
+.hero {
+  position: relative;
+  padding: clamp(36px, 6vw, 72px) 0 clamp(40px, 6vw, 72px);
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  isolation: isolate;
+}
+.heroBg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--pattern-dots);
+  background-size: 18px 18px;
+  mask-image: radial-gradient(ellipse at 80% 0%, #000 0%, transparent 65%);
+  -webkit-mask-image: radial-gradient(ellipse at 80% 0%, #000 0%, transparent 65%);
+}
+.heroBg::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  aspect-ratio: 1;
+  right: -100px;
+  top: -200px;
+  border-radius: 50%;
+  background: var(--brand-500);
+  opacity: 0.14;
+  filter: blur(70px);
+}
+.crumbs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.crumbs a:hover {
+  color: var(--link);
+}
+.crumbs [aria-current] {
+  color: var(--text);
+  font-weight: 650;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  margin-bottom: 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--success);
+  background: var(--success-soft);
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  animation: fade-up var(--dur-slow) var(--ease) both;
+}
+.hero p {
+  margin-top: 12px;
+  max-width: 620px;
+  font-size: 17px;
+  color: var(--text-2);
+}
+.updated {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- layout ---------- */
+.layout {
+  display: grid;
+  gap: 28px;
+  padding-block: clamp(28px, 5vw, 56px) clamp(56px, 8vw, 104px);
+}
+@media (min-width: 1000px) {
+  .layout {
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: clamp(40px, 4vw, 80px);
+    align-items: start;
+  }
+  .aside {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  .helpAside {
+    grid-column: 2;
+  }
+}
+@media (min-width: 1440px) {
+  .layout {
+    grid-template-columns: 300px minmax(0, 880px) minmax(260px, 1fr);
+  }
+  .helpAside {
+    grid-column: 3;
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  .helpAside .help {
+    margin-top: 0;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.toc {
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.tocTitle {
+  margin-bottom: 10px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+@media (min-width: 560px) and (max-width: 999px) {
+  .toc ol {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.toc a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition:
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.toc a span {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.toc a:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.toc a[data-active] {
+  color: var(--link);
+  background: var(--info-soft);
+}
+.toc a[data-active] span {
+  color: var(--link);
+}
+.toc a[data-active]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--gradient-gold);
+}
+
+/* ---------- conteúdo ---------- */
+.content {
+  min-width: 0;
+  max-width: 880px;
+}
+.helpAside {
+  min-width: 0;
+  max-width: 880px;
+}
+.summary {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  margin-bottom: 32px;
+  border-radius: var(--radius-lg);
+  background: var(--success-soft);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+}
+.summary svg {
+  color: var(--success);
+  margin-top: 2px;
+}
+.summary p {
+  font-size: 15px;
+}
+.section {
+  padding-block: 24px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+.section h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: clamp(20px, 2.4vw, 25px);
+}
+.section h2 span {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--link);
+  font-variant-numeric: tabular-nums;
+}
+.prose {
+  display: grid;
+  gap: 12px;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+.prose b {
+  color: var(--text);
+}
+.prose a {
+  color: var(--link);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.prose ul li {
+  position: relative;
+  padding-left: 22px;
+}
+.prose ul li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.7em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gradient-gold);
+}
+.rights {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .prose .rights {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+.prose .rights li {
+  padding: 12px 14px 12px 36px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.prose .rights li::before {
+  left: 16px;
+  top: 19px;
+}
+
+.help {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 20px 22px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-tint);
+  border: 1px solid var(--line);
+}
+.help b {
+  display: block;
+  font-size: 15px;
+}
+.help small {
+  display: block;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.helpActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* keyframes locais (CSS Modules renomeia nomes de animação) */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

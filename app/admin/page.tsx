@@ -1,3 +1,4 @@
+import "./admin-legacy.css";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 export const metadata = {
   title: "Administração · demonstração",

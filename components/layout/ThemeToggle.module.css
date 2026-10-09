@@ -1,0 +1,88 @@
+.toggle {
+  position: relative;
+  overflow: hidden;
+}
+.sun,
+.moon {
+  position: absolute;
+  transition:
+    transform var(--dur-slow) var(--ease-spring),
+    opacity var(--dur) var(--ease);
+}
+.sun {
+  color: var(--gold-500);
+}
+.moon {
+  color: var(--cyan-400);
+  opacity: 0;
+  transform: rotate(-90deg) translateY(16px) scale(0.6);
+}
+.toggle:hover .sun {
+  transform: rotate(45deg);
+}
+:global(:root[data-theme="dark"]) .sun {
+  opacity: 0;
+  transform: rotate(90deg) translateY(-16px) scale(0.6);
+}
+:global(:root[data-theme="dark"]) .moon {
+  opacity: 1;
+  transform: none;
+}
+:global(:root[data-theme="dark"]) .toggle:hover .moon {
+  transform: rotate(-18deg);
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .sun {
+    opacity: 0;
+    transform: rotate(90deg) translateY(-16px) scale(0.6);
+  }
+  :global(:root:not([data-theme="light"])) .moon {
+    opacity: 1;
+    transform: none;
+  }
+  :global(:root:not([data-theme="light"])) .toggle:hover .moon {
+    transform: rotate(-18deg);
+  }
+}
+
+/* ---------- seletor segmentado ---------- */
+.segment {
+  --i: 2;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 3);
+  border-radius: calc(var(--radius-sm) - 4px);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(calc(var(--i) * 100%));
+  transition: transform var(--dur) var(--ease);
+}
+.segment button {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--muted);
+  border-radius: calc(var(--radius-sm) - 4px);
+  transition: color var(--dur-fast) var(--ease);
+}
+.segment button:hover,
+.segment button[data-active] {
+  color: var(--text);
+}

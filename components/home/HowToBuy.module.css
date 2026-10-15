@@ -226,8 +226,8 @@
   font-weight: 650;
   color: var(--success);
 }
-.wa svg {
-  color: #1faa53;
+.note[data-tone="brand"] {
+  color: var(--link);
 }
 
 /* área visual em camadas */

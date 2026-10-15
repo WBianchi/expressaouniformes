@@ -4,7 +4,7 @@ export type Sleeve = "Curta" | "Longa" | "Raglan";
 export type LogoPosition = "Peito esquerdo" | "Peito direito" | "Costas" | "Manga";
 export const logoPositions: LogoPosition[] = ["Peito esquerdo", "Peito direito", "Costas", "Manga"];
 export const sizes: Size[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
-export const MIN_QTY = 30;
+export { CUSTOM_MIN_QTY as MIN_QTY } from "@/lib/quote";
 
 export type Brief = {
   model: string; // slug do modelo ou "zero"

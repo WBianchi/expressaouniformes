@@ -8,6 +8,7 @@ const body = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-body", di
 const heading = Sora({ subsets: ["latin"], variable: "--font-heading", display: "swap" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
     default: "Expressão Uniformes | Uniformes profissionais para sua empresa",
     template: "%s | Expressão Uniformes",

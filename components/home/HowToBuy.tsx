@@ -1,12 +1,13 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
   Building2,
   CloudUpload,
+  ClipboardList,
   Headset,
-  MessageCircle,
   Package,
   Palette,
   PencilRuler,
@@ -15,7 +16,8 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { getProduct, whatsappLink } from "@/lib/catalog";
+import { getProduct } from "@/lib/catalog";
+import { QuoteGate } from "@/components/custom/QuoteGate";
 import { SafeImage } from "@/components/ui/primitives";
 import { tiltHandlers } from "./motion";
 import { Reveal } from "./Reveal";
@@ -31,9 +33,9 @@ const stockSteps: Step[] = [
   { icon: Truck, label: "Receba em casa" },
 ];
 const customSteps: Step[] = [
-  { icon: PencilRuler, label: "Monte a peça ideal" },
+  { icon: ClipboardList, label: "Responda 3 perguntas" },
   { icon: Palette, label: "Tecidos, cores e acabamentos" },
-  { icon: Headset, label: "Consultoria pelo WhatsApp" },
+  { icon: Headset, label: "Atendimento com consultor" },
   { icon: Package, label: "Produção a partir de 30 peças" },
 ];
 
@@ -41,6 +43,7 @@ const collage = ["polo-pv-basica", "camiseta-algodao-basica", "polo-piquet-basic
 const tilt = tiltHandlers(4);
 
 export function HowToBuy() {
+  const [quoteOpen, setQuoteOpen] = useState(false);
   return (
     <section className={sec.section} aria-labelledby="como-comprar">
       <div className="container">
@@ -50,7 +53,7 @@ export function HowToBuy() {
             Escolha como você quer vestir sua equipe
           </h2>
           <p className={sec.subtitle}>
-            Compre online peças em estoque prontas para receber a sua logo, ou desenvolva com a gente um uniforme exclusivo para a sua empresa.
+            Compre online uniformes prontos para personalizar com a sua logo, ou solicite um orçamento de uniformes personalizados para a sua empresa.
           </p>
         </Reveal>
 
@@ -79,9 +82,9 @@ export function HowToBuy() {
                   <Package size={30} strokeWidth={1.6} />
                 </span>
               </header>
-              <h3>Peças em estoque, com a sua logo</h3>
+              <h3>Uniformes prontos para personalizar</h3>
               <p className={s.desc}>
-                Compra 100% online a partir de <b>5 peças</b>. Pague com Pix, boleto ou cartão e acompanhe tudo pela sua conta.
+                Compra online a partir de <b>cinco peças</b>. Escolha o modelo, envie a sua logo, aprove o layout no site e pague com Pix, boleto ou cartão.
               </p>
               <ol className={s.steps}>
                 {stockSteps.map(({ icon: Icon, label }, i) => (
@@ -96,7 +99,7 @@ export function HowToBuy() {
               </ol>
               <div className={s.foot}>
                 <Link href="/loja?tipo=stock" className={`btn btn-lg ${s.ctaSuccess}`}>
-                  Ver peças em estoque <ArrowRight size={18} />
+                  Personalizar e comprar <ArrowRight size={18} />
                 </Link>
                 <span className={s.note}>Pix com 5% de desconto</span>
               </div>
@@ -124,9 +127,9 @@ export function HowToBuy() {
                   <PencilRuler size={30} strokeWidth={1.6} />
                 </span>
               </header>
-              <h3>Um uniforme exclusivo para a sua empresa</h3>
+              <h3>Uniformes personalizados para sua empresa</h3>
               <p className={s.desc}>
-                Para empresas e atacado a partir de <b>30 peças</b>. Você define cada detalhe e um consultor acompanha o projeto do briefing à entrega.
+                Produção sob medida a partir de <b>30 peças</b>. Responda a um questionário rápido sobre quantidade, equipe e personalizações para falar com um consultor.
               </p>
               <ol className={s.steps}>
                 {customSteps.map(({ icon: Icon, label }, i) => (
@@ -140,22 +143,18 @@ export function HowToBuy() {
                 ))}
               </ol>
               <div className={s.foot}>
-                <Link href="/sob-medida" className="btn btn-primary btn-lg">
-                  Desenvolver meu uniforme <ArrowRight size={18} />
-                </Link>
-                <a
-                  className={`btn btn-outline btn-lg ${s.wa}`}
-                  href={whatsappLink("Olá! Quero falar com um consultor sobre uniformes sob medida.")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle size={18} /> Consultor
-                </a>
+                <button type="button" className="btn btn-primary btn-lg" onClick={() => setQuoteOpen(true)}>
+                  Solicitar orçamento <ArrowRight size={18} />
+                </button>
+                <span className={s.note} data-tone="brand">
+                  Mínimo de 30 peças
+                </span>
               </div>
             </article>
           </Reveal>
         </div>
       </div>
+      <QuoteGate open={quoteOpen} onOpenChange={setQuoteOpen} />
     </section>
   );
 }

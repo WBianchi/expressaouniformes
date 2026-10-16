@@ -6,11 +6,13 @@ import { categories, getProduct, money, products, stockProducts } from "@/lib/ca
 import { CategoryIcon, SafeImage } from "@/components/ui/primitives";
 import s from "./MegaMenu.module.css";
 
+import { useProductPhotos } from "@/components/store/MediaProvider";
 const featured = getProduct("polo-pv-basica") ?? stockProducts[0];
 const countBy = (slug: string) => products.filter((p) => p.category === slug).length;
 
 /** Painel do mega menu "Produtos": categorias com prévia em imagem, modos de compra, destaque e banner. */
 export function MegaMenu({ id, open, onNavigate }: { id: string; open: boolean; onNavigate: () => void }) {
+  const photosOf = useProductPhotos();
   const [active, setActive] = useState(categories[0].slug);
   const current = categories.find((c) => c.slug === active) ?? categories[0];
 
@@ -87,7 +89,7 @@ export function MegaMenu({ id, open, onNavigate }: { id: string; open: boolean; 
           {featured && (
             <Link href={`/produto/${featured.slug}`} onClick={onNavigate} className={s.feature}>
               <span className={s.featureMedia}>
-                <SafeImage src={featured.photos[0]} alt={featured.name} />
+                <SafeImage src={photosOf(featured)[0]} alt={featured.name} />
               </span>
               <span className={s.featureBody}>
                 <small>{featured.badge ?? "Destaque"}</small>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 import { inStock, money, type Product } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
+import { useProductPhotos } from "@/components/store/MediaProvider";
 import { SafeImage, Swatches } from "./primitives";
 import s from "./ui.module.css";
 
@@ -10,14 +11,15 @@ import s from "./ui.module.css";
 export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
   const { isFavorite, toggleFavorite } = useStore();
   const fav = isFavorite(product.slug);
+  const photos = useProductPhotos()(product);
   const available = inStock(product);
   const href = `/produto/${product.slug}`;
   const status = available ? "Pronta-entrega" : product.kind === "custom" ? "Sob encomenda" : "Sem estoque";
   return (
     <article className={s.card} data-available={available || undefined}>
       <Link href={href} className={s.cardMedia} aria-label={product.name}>
-        <SafeImage src={product.photos[0]} alt={product.name} priority={priority} />
-        {product.photos[1] && <SafeImage src={product.photos[1]} alt="" className={s.cardAlt} />}
+        <SafeImage src={photos[0]} alt={product.name} priority={priority} />
+        {photos[1] && <SafeImage src={photos[1]} alt="" className={s.cardAlt} />}
         {!available && <span className={s.cardTag}>{status}</span>}
       </Link>
       <button

@@ -37,6 +37,8 @@ import {
 import { products, money, getColor } from "@/lib/catalog";
 import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
 import { logout } from "@/app/admin/actions";
+import type { Banner, PhotoOverrides } from "@/lib/banners";
+import { BannersAdmin, ProductPhotosAdmin } from "./MediaAdmin";
 const navigation = [
   ["Visão geral", LayoutDashboard],
   ["Pedidos", ShoppingBag],
@@ -191,11 +193,15 @@ export default function AdminDashboard({
   source,
   error,
   integrations,
+  banners,
+  photos,
 }: {
   orders: AdminOrder[];
   source: OrdersResult["source"];
   error?: string;
   integrations: Integrations;
+  banners: Banner[] | null;
+  photos: PhotoOverrides;
 }) {
   const rows = allOrders.map(toRow);
   const paid = allOrders.filter((o) => o.status === "pago");
@@ -641,14 +647,16 @@ export default function AdminDashboard({
               </div>
               {orderTable}
             </>
-          ) : active === "Produtos" || active === "Personalizações" ? (
+          ) : active === "Banners" ? (
+            <BannersAdmin banners={banners} />
+          ) : active === "Produtos" ? (
+            <ProductPhotosAdmin photos={photos} enabled={integrations.database} />
+          ) : active === "Personalizações" ? (
             <div className="admin-panel">
               <div className="panel-heading">
                 <div>
                   <h3>
-                    {active === "Produtos"
-                      ? "Catálogo demonstrativo"
-                      : "Modelos do estúdio"}
+                    Modelos do estúdio
                   </h3>
                   <p>
                     O mesmo editor atende a criação do cliente e a revisão

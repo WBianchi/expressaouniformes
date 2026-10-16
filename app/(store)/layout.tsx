@@ -5,10 +5,13 @@ import { FavoritesDrawer } from "@/components/layout/FavoritesDrawer";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { WhatsAppFab } from "@/components/layout/WhatsAppFab";
+import { MediaProvider } from "@/components/store/MediaProvider";
+import { getPhotoOverrides } from "@/lib/site-media";
 
-export default function StoreLayout({ children }: { children: React.ReactNode }) {
+export default async function StoreLayout({ children }: { children: React.ReactNode }) {
+  const photos = await getPhotoOverrides();
   return (
-    <>
+    <MediaProvider photos={photos}>
       <a href="#conteudo" className="sr-only">
         Pular para o conteúdo
       </a>
@@ -20,6 +23,6 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <MobileMenu />
       <MobileTabBar />
       <WhatsAppFab />
-    </>
+    </MediaProvider>
   );
 }

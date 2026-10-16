@@ -1,0 +1,204 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+
+/* fundo: a foto do slide desfocada, sob um véu claro (esfumaçado) */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.backdrop img {
+  position: absolute;
+  inset: -60px;
+  width: calc(100% + 120px);
+  height: calc(100% + 120px);
+  object-fit: cover;
+  filter: blur(36px) saturate(1.15);
+  transform: scale(1.08);
+  opacity: 0;
+  transition: opacity 0.9s var(--ease);
+}
+.backdrop img[data-active] {
+  opacity: 1;
+}
+.veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--bg) 90%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 72%, transparent) 48%,
+      color-mix(in srgb, var(--bg) 38%, transparent) 100%
+    );
+}
+
+.inner {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+  padding-block: clamp(28px, 4vw, 56px);
+}
+@media (min-width: 900px) {
+  .inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+      "text photo"
+      "controls photo";
+    column-gap: clamp(32px, 5vw, 80px);
+    min-height: clamp(460px, 42vw, 600px);
+  }
+  .text {
+    grid-area: text;
+    align-self: end;
+  }
+  .photo {
+    grid-area: photo;
+  }
+  .controls {
+    grid-area: controls;
+    align-self: start;
+  }
+}
+
+.text {
+  animation: textIn 0.6s var(--ease) both;
+}
+@keyframes textIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4.2vw, 56px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  max-width: 15ch;
+  color: var(--text);
+}
+.sub {
+  margin-top: 14px;
+  max-width: 44ch;
+  font-size: clamp(15px, 1.2vw, 18px);
+  color: var(--text-2);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+.ghost {
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  color: var(--text);
+  backdrop-filter: blur(8px);
+}
+
+/* foto nítida */
+.photo {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  justify-self: center;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-2);
+  box-shadow: 0 24px 60px -24px rgb(12 26 46 / 0.35);
+}
+@media (max-width: 899px) {
+  .photo {
+    order: -1;
+    max-width: none;
+    aspect-ratio: 5 / 4;
+  }
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease);
+}
+.slide[data-active] {
+  opacity: 1;
+}
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+}
+
+/* controles */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  color: var(--text);
+}
+.arrow:hover {
+  background: var(--surface);
+}
+.dots {
+  display: flex;
+  gap: 6px;
+}
+.dot {
+  position: relative;
+  width: 36px;
+  height: 20px;
+}
+.dot span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  translate: 0 -50%;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text) 18%, transparent);
+  overflow: hidden;
+}
+.dot[aria-selected="true"] span {
+  background: color-mix(in srgb, var(--text) 30%, transparent);
+}
+.dot[aria-selected="true"] span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--text);
+  transform-origin: left;
+}
+.dot span[data-run]::after {
+  animation: progress linear both;
+  animation-duration: inherit;
+}
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .text,
+  .dot span[data-run]::after {
+    animation: none;
+  }
+}

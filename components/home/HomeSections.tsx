@@ -1,47 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, ClipboardList, ShoppingBag } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { categories, inStock, products } from "@/lib/catalog";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import { QuoteGate } from "@/components/custom/QuoteGate";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { SafeImage } from "@/components/ui/primitives";
+import { useProductPhotos } from "@/components/store/MediaProvider";
 import s from "./Home.module.css";
-
-const heroPieces = ["jaleco-gabardine", "polo-pv-basica", "camisa-operacional-brim"]
-  .map((slug) => products.find((p) => p.slug === slug)!)
-  .filter(Boolean);
-
-export function HomeHero() {
-  const [quoteOpen, setQuoteOpen] = useState(false);
-  return (
-    <section className={s.hero}>
-      <div className={`container ${s.heroGrid}`}>
-        <div className={s.heroText}>
-          <h1>Uniformes com a logo da sua empresa</h1>
-          <p>Compre online a partir de {STOCK_MIN_QTY} peças ou monte o pedido da sua empresa e receba um orçamento. Fábrica própria e entrega para todo o Brasil.</p>
-          <div className={s.heroActions}>
-            <Link href="/loja?tipo=stock" className="btn btn-primary btn-lg">
-              <ShoppingBag size={18} /> Comprar pronta-entrega
-            </Link>
-            <button type="button" className="btn btn-outline btn-lg" onClick={() => setQuoteOpen(true)}>
-              <ClipboardList size={18} /> Solicitar orçamento
-            </button>
-          </div>
-        </div>
-        <div className={s.heroPics} aria-hidden>
-          {heroPieces.map((p) => (
-            <span key={p.slug} className={s.heroPic}>
-              <SafeImage src={p.photos[1] ?? p.photos[0]} alt="" priority />
-            </span>
-          ))}
-        </div>
-      </div>
-      <QuoteGate open={quoteOpen} onOpenChange={setQuoteOpen} />
-    </section>
-  );
-}
 
 export function TwoWays() {
   const [quoteOpen, setQuoteOpen] = useState(false);
@@ -81,6 +48,7 @@ export function TwoWays() {
 }
 
 export function CategoryGrid() {
+  const photosOf = useProductPhotos();
   const cats = categories
     .map((c) => ({ ...c, cover: products.find((p) => p.category === c.slug) }))
     .filter((c) => c.cover);
@@ -100,7 +68,7 @@ export function CategoryGrid() {
             <li key={c.slug}>
               <Link href={`/loja?categoria=${c.slug}`} className={s.cat}>
                 <span className={s.catImg}>
-                  <SafeImage src={c.cover!.photos[0]} alt="" />
+                  <SafeImage src={photosOf(c.cover!)[0]} alt="" />
                 </span>
                 <span>{c.name}</span>
               </Link>

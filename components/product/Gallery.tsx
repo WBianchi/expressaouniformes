@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { inStock, type Position, type Product } from "@/lib/catalog";
 import type { View } from "@/lib/mockup";
 import { SafeImage } from "@/components/ui/primitives";
+import { useProductPhotos } from "@/components/store/MediaProvider";
 import { LogoMockup } from "./LogoMockup";
 import s from "./Gallery.module.css";
 
@@ -28,11 +29,12 @@ export function Gallery({
   view?: Slide;
   onViewChange?: (v: Slide) => void;
 }) {
+  const photos = useProductPhotos()(product);
   const VIEWS: { id: Slide; label: string; src?: string }[] = [
-    ...product.photos.slice(0, 1).map((src) => ({ id: "photo-0" as Slide, label: "Foto", src })),
+    ...photos.slice(0, 1).map((src) => ({ id: "photo-0" as Slide, label: "Foto", src })),
     { id: "front", label: "Frente" },
     { id: "back", label: "Costas" },
-    ...product.photos.slice(1).map((src, i) => ({ id: `photo-${i + 1}` as Slide, label: "Foto", src })),
+    ...photos.slice(1).map((src, i) => ({ id: `photo-${i + 1}` as Slide, label: "Foto", src })),
   ];
   const [own, setOwn] = useState<Slide>(VIEWS[0].id);
   const view = controlled ?? own;

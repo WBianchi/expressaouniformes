@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { company } from "@/lib/catalog";
-import { CategoryGrid, HomeHero, ProductSection, TwoWays } from "@/components/home/HomeSections";
+import { CategoryGrid, ProductSection, TwoWays } from "@/components/home/HomeSections";
+import { HeroSlider } from "@/components/home/HeroSlider";
+import { getBanners } from "@/lib/site-media";
 import { Faq } from "@/components/home/Faq";
 import { faqs } from "@/components/home/faqData";
 
@@ -41,11 +43,12 @@ const jsonLd = {
   ],
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const banners = await getBanners();
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <HomeHero />
+      <HeroSlider banners={banners} />
       <TwoWays />
       <CategoryGrid />
       <ProductSection mode="stock" />

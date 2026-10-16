@@ -18,6 +18,7 @@ import {
   findOrderByIdempotencyKey,
   insertOrder,
   newOrderId,
+  orderDescription,
   orderStatusFromPayment,
   parseExpiry,
   paymentStatusFromAsaas,
@@ -25,6 +26,8 @@ import {
   updateOrderPayment,
 } from "@/lib/orders";
 import type { CartLine } from "@/lib/pricing";
+import { PICKUP } from "@/lib/shipping";
+import { quoteFreight } from "@/lib/frenet";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -107,8 +110,11 @@ export async function POST(request: Request) {
   }
   const input = parsed.data;
 
-  // ------------------------------------------------ recálculo no servidor
+  // ------------------------------------------------ recálculo no servidor (preços e frete)
+  const freight = input.shippingId === "retirada" ? null : await quoteFreight(input.address.cep, input.lines as CartLine[]);
+  if (freight?.error && freight.options.length <= 1) return fail(freight.error, 422, { code: "shipping_unavailable" });
   const q = computeQuote({
+    shippingOptions: freight ? freight.options : [PICKUP],
     lines: input.lines as CartLine[],
     coupon: input.coupon,
     cep: input.address.cep,
@@ -198,7 +204,8 @@ export async function POST(request: Request) {
         billingType,
         value: quote.chargeTotal,
         dueDate: dueDateFromToday(quote.method === "boleto" ? 3 : quote.method === "pix" ? 1 : 0),
-        description: `Pedido ${orderId} — Expressão Uniformes (${quote.items} peças)`,
+        // os itens vão na descrição para o painel funcionar mesmo sem banco (limite do Asaas: 500 caracteres)
+        description: orderDescription(orderId, quote),
         externalReference: orderId,
       };
       if (quote.method === "cartao") {

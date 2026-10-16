@@ -44,7 +44,7 @@ const sections: { id: string; title: string; body: ReactNode }[] = [
             <b>Personalização:</b> arquivos de logo e artes enviados, posições de aplicação e observações do pedido.
           </li>
           <li>
-            <b>Produção sob medida:</b> informações do briefing (modelo, tecidos, cores, quantidades e prazos).
+            <b>Orçamento para empresas:</b> itens do pedido (modelos, cores, quantidades), dados da empresa e do responsável.
           </li>
           <li>
             <b>Navegação:</b> dados técnicos básicos (navegador, dispositivo, páginas acessadas) e preferências salvas no seu navegador.

@@ -35,6 +35,8 @@ import {
   Globe,
 } from "lucide-react";
 import { products, money, getColor } from "@/lib/catalog";
+import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
+import { logout } from "@/app/admin/actions";
 const navigation = [
   ["Visão geral", LayoutDashboard],
   ["Pedidos", ShoppingBag],
@@ -53,48 +55,91 @@ const navigation = [
   ["Promoções", Megaphone],
   ["Disparos", Send],
 ] as const;
-const demoOrders = [
-  {
-    id: "EXP-1028",
-    company: "Horizonte Engenharia",
-    initial: "HE",
-    product: "Camiseta Operacional",
-    quantity: 60,
-    status: "Aguardando arte",
-    total: 2694,
-    date: "25 set, 10:42",
-  },
-  {
-    id: "EXP-1027",
-    company: "Clínica Bem Viver",
-    initial: "BV",
-    product: "Camiseta Bem-estar",
-    quantity: 40,
-    status: "Em produção",
-    total: 1716,
-    date: "25 set, 09:18",
-  },
-  {
-    id: "EXP-1026",
-    company: "Café do Centro",
-    initial: "CC",
-    product: "Camiseta Chef",
-    quantity: 30,
-    status: "Arte aprovada",
-    total: 1377,
-    date: "24 set, 16:35",
-  },
-  {
-    id: "EXP-1025",
-    company: "Norte Eventos",
-    initial: "NE",
-    product: "Camiseta Conecta",
-    quantity: 100,
-    status: "Enviado",
-    total: 3690,
-    date: "24 set, 14:06",
-  },
-];
+type Row = {
+  id: string;
+  company: string;
+  initial: string;
+  product: string;
+  quantity: number;
+  status: string;
+  tone: "amber" | "blue" | "green" | "red";
+  total: number;
+  date: string;
+  order: AdminOrder;
+};
+
+const statusInfo: Record<string, [string, Row["tone"]]> = {
+  aguardando_pagamento: ["Aguardando pagamento", "amber"],
+  em_analise: ["Pagamento em análise", "blue"],
+  pago: ["Pago · aguardando arte", "green"],
+  vencido: ["Vencido", "red"],
+  recusado: ["Recusado", "red"],
+  cancelado: ["Cancelado", "red"],
+  estornado: ["Estornado", "red"],
+};
+const methodName = { pix: "Pix", boleto: "Boleto", cartao: "Cartão" } as const;
+
+const toRow = (o: AdminOrder): Row => {
+  const [status, tone] = statusInfo[o.status] ?? [o.status, "blue"];
+  const words = o.customer.name.trim().split(/\s+/);
+  return {
+    id: o.id,
+    company: o.customer.name,
+    initial:
+      ((words[0]?.[0] ?? "") + (words[1]?.[0] ?? "")).toUpperCase() || "EU",
+    product: o.items.length
+      ? o.items.length > 1
+        ? `${o.items[0].name} +${o.items.length - 1}`
+        : o.items[0].name
+      : o.summary.slice(0, 40),
+    quantity: o.items.reduce((a, i) => a + i.qty, 0),
+    status,
+    tone,
+    total: o.total,
+    date: new Date(o.createdAt).toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    order: o,
+  };
+};
+
+/** Linha da receita paga por dia (30 dias) no viewBox 600×180. */
+function revenueChart(paid: AdminOrder[]) {
+  const days = 30;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const totals = Array.from({ length: days }, () => 0);
+  for (const o of paid) {
+    const d = new Date(o.createdAt);
+    d.setHours(0, 0, 0, 0);
+    const idx =
+      days - 1 - Math.round((today.getTime() - d.getTime()) / 86_400_000);
+    if (idx >= 0 && idx < days) totals[idx] += o.total;
+  }
+  const max = Math.max(1000, ...totals);
+  const line = totals
+    .map(
+      (v, i) =>
+        `${i ? "L" : "M"}${((i / (days - 1)) * 600).toFixed(1)} ${(170 - (v / max) * 155).toFixed(1)}`,
+    )
+    .join(" ");
+  const labels = [29, 23, 17, 11, 5, 0].map((ago) =>
+    new Date(today.getTime() - ago * 86_400_000)
+      .toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
+      .replace(".", ""),
+  );
+  return { line, max, labels };
+}
+
+export type Integrations = {
+  asaas: "production" | "sandbox" | "demo";
+  frenet: boolean;
+  database: boolean;
+  webhook: boolean;
+};
 const moduleInfo: Record<string, [string, string]> = {
   Clientes: [
     "Uma visão de cada parceria",
@@ -141,7 +186,50 @@ const moduleInfo: Record<string, [string, string]> = {
     "Campanhas com consentimento e controle de destinatários.",
   ],
 };
-export default function AdminDashboard() {
+export default function AdminDashboard({
+  orders: allOrders,
+  source,
+  error,
+  integrations,
+}: {
+  orders: AdminOrder[];
+  source: OrdersResult["source"];
+  error?: string;
+  integrations: Integrations;
+}) {
+  const rows = allOrders.map(toRow);
+  const paid = allOrders.filter((o) => o.status === "pago");
+  const now = new Date();
+  const monthPaid = paid.filter((o) => {
+    const d = new Date(o.createdAt);
+    return (
+      d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    );
+  });
+  const pending = allOrders.filter(
+    (o) => o.status === "aguardando_pagamento" || o.status === "em_analise",
+  );
+  const lanes = [
+    {
+      label: "Aguardando pagamento",
+      items: allOrders.filter((o) => o.status === "aguardando_pagamento"),
+      color: "#edbe46",
+    },
+    {
+      label: "Pagamento em análise",
+      items: allOrders.filter((o) => o.status === "em_analise"),
+      color: "#5698f4",
+    },
+    { label: "Pago · aguardando arte", items: paid, color: "#55b5a6" },
+    {
+      label: "Cancelado ou vencido",
+      items: allOrders.filter((o) =>
+        ["vencido", "recusado", "cancelado", "estornado"].includes(o.status),
+      ),
+      color: "#d9534f",
+    },
+  ];
+  const chart = revenueChart(paid);
   const [active, setActive] = useState("Visão geral"),
     [collapsed, setCollapsed] = useState(false),
     [dark, setDark] = useState(false),
@@ -149,8 +237,8 @@ export default function AdminDashboard() {
     [notifications, setNotifications] = useState(false),
     [query, setQuery] = useState(""),
     [filter, setFilter] = useState("Todos"),
-    [detail, setDetail] = useState<(typeof demoOrders)[number] | null>(null);
-  const orders = demoOrders.filter(
+    [detail, setDetail] = useState<Row | null>(null);
+  const orders = rows.filter(
     (o) =>
       (o.company + " " + o.id).toLowerCase().includes(query.toLowerCase()) &&
       (filter === "Todos" || o.status === filter),
@@ -196,18 +284,7 @@ export default function AdminDashboard() {
                   <small>{o.quantity} unidades</small>
                 </td>
                 <td>
-                  <span
-                    className={
-                      "status " +
-                      (o.status === "Em produção"
-                        ? "blue"
-                        : o.status === "Aguardando arte"
-                          ? "amber"
-                          : "green")
-                    }
-                  >
-                    {o.status}
-                  </span>
+                  <span className={"status " + o.tone}>{o.status}</span>
                 </td>
                 <td>
                   <strong>{money(o.total)}</strong>
@@ -262,7 +339,9 @@ export default function AdminDashboard() {
               {!collapsed && (
                 <>
                   <span>{name}</span>
-                  {name === "Pedidos" && <b>4</b>}
+                  {name === "Pedidos" && pending.length > 0 && (
+                    <b>{pending.length}</b>
+                  )}
                 </>
               )}
               {i === 9 && !collapsed && null}
@@ -294,7 +373,13 @@ export default function AdminDashboard() {
             </span>
           </div>
           <div className="admin-actions">
-            <span className="demo-chip">DEMONSTRAÇÃO</span>
+            <span className="demo-chip">
+              {integrations.asaas === "production"
+                ? "ASAAS · PRODUÇÃO"
+                : integrations.asaas === "sandbox"
+                  ? "ASAAS · SANDBOX"
+                  : "SEM PAGAMENTOS"}
+            </span>
             <button
               className="icon-button"
               aria-label="Alternar tema"
@@ -316,15 +401,22 @@ export default function AdminDashboard() {
             >
               <span>EU</span>
               <div>
-                Expressão Uniformes<small>Administrador · prévia</small>
+                Expressão Uniformes<small>Administrador</small>
               </div>
               <ChevronDown size={13} />
             </button>
           </div>
           {profile && (
             <div className="admin-popover">
-              <strong>Perfil demonstrativo</strong>
-              <p>Nenhuma sessão administrativa real está ativa.</p>
+              <strong>Sessão administrativa</strong>
+              <p>
+                Você entrou com a senha do painel. A sessão expira em 12 horas.
+              </p>
+              <form action={logout}>
+                <button className="text-button" type="submit">
+                  Sair do painel
+                </button>
+              </form>
               <button
                 className="text-button"
                 onClick={() => {
@@ -340,8 +432,9 @@ export default function AdminDashboard() {
             <div className="admin-popover notification-popover">
               <strong>Notificações</strong>
               <p>
-                Sem notificações reais. A conexão com pedidos e produção está
-                prevista no checklist.
+                {pending.length
+                  ? `${pending.length} pedido(s) aguardando pagamento.`
+                  : "Nenhum pedido aguardando pagamento."}
               </p>
               <button
                 className="text-button"
@@ -371,35 +464,47 @@ export default function AdminDashboard() {
               Visitar loja <ArrowUpRight size={16} />
             </Link>
           </div>
-          <div className="demo-notice">
-            Dados fictícios para apresentação. Alterações comerciais e
-            integrações ainda não estão habilitadas.
-          </div>
+          {(error || source !== "db") && (
+            <div className="demo-notice">
+              {error
+                ? error
+                : source === "asaas"
+                  ? "Pedidos lidos direto do Asaas. Conecte o banco (Neon) para guardar endereço, tamanhos e logos de cada pedido."
+                  : "Pagamentos não configurados: nenhum pedido real para exibir."}
+            </div>
+          )}
           {active === "Visão geral" ? (
             <>
               <div className="metric-grid">
                 {[
                   [
-                    "Receita do período",
-                    "R$ 28.470,00",
-                    "+12,8%",
-                    "vs. período anterior",
+                    "Receita paga no mês",
+                    money(monthPaid.reduce((a, o) => a + o.total, 0)),
+                    String(monthPaid.length),
+                    "pedidos pagos no mês",
                     ShoppingBag,
                   ],
-                  ["Pedidos recebidos", "24", "+6", "neste período", Package],
                   [
-                    "Artes para revisar",
-                    "08",
+                    "Pedidos recebidos",
+                    String(allOrders.length),
                     "",
-                    "aguardando seu olhar",
-                    Palette,
+                    "últimos 100 no Asaas",
+                    Package,
                   ],
                   [
-                    "Em produção",
-                    "12",
+                    "Aguardando pagamento",
+                    String(pending.length),
                     "",
-                    "equipes prestes a vestir",
-                    Factory,
+                    money(pending.reduce((a, o) => a + o.total, 0)) +
+                      " em aberto",
+                    Clock,
+                  ],
+                  [
+                    "Pagos · aguardando arte",
+                    String(paid.length),
+                    "",
+                    "prontos para enviar o layout",
+                    Palette,
                   ],
                 ].map(([label, value, change, note, Icon]) => {
                   const I = Icon as typeof ShoppingBag;
@@ -422,23 +527,24 @@ export default function AdminDashboard() {
                   <div className="panel-heading">
                     <div>
                       <h3>Uma visão das suas vendas</h3>
-                      <p>Evolução demonstrativa · setembro de 2026</p>
+                      <p>Receita paga · últimos 30 dias</p>
                     </div>
                     <span className="chart-legend">Receita</span>
                   </div>
                   <div className="chart-area">
                     <div className="chart-labels">
-                      <span>R$ 10 mil</span>
-                      <span>R$ 7,5 mil</span>
-                      <span>R$ 5 mil</span>
-                      <span>R$ 2,5 mil</span>
+                      {[1, 0.75, 0.5, 0.25].map((f) => (
+                        <span key={f}>
+                          {money(chart.max * f).replace(",00", "")}
+                        </span>
+                      ))}
                     </div>
                     <div className="chart-plot">
                       <svg
                         viewBox="0 0 600 180"
                         preserveAspectRatio="none"
                         role="img"
-                        aria-label="Gráfico demonstrativo de receita com tendência crescente"
+                        aria-label="Receita paga por dia nos últimos 30 dias"
                       >
                         <defs>
                           <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
@@ -455,25 +561,18 @@ export default function AdminDashboard() {
                           </linearGradient>
                         </defs>
                         <path
-                          d="M0 150 C30 160 35 100 70 115 S110 150 145 110 S170 135 200 85 S235 115 265 65 S300 95 330 72 S370 125 400 80 S430 90 460 42 S500 60 525 30 S565 70 600 12 L600 180 L0 180Z"
+                          d={`${chart.line} L600 180 L0 180Z`}
                           fill="url(#fill)"
                         />
                         <path
-                          d="M0 150 C30 160 35 100 70 115 S110 150 145 110 S170 135 200 85 S235 115 265 65 S300 95 330 72 S370 125 400 80 S430 90 460 42 S500 60 525 30 S565 70 600 12"
+                          d={chart.line}
                           fill="none"
                           stroke="#2b70df"
                           strokeWidth="3"
                         />
                       </svg>
                       <div className="chart-dates">
-                        {[
-                          "01 set",
-                          "05 set",
-                          "10 set",
-                          "15 set",
-                          "20 set",
-                          "25 set",
-                        ].map((d) => (
+                        {chart.labels.map((d) => (
                           <span key={d}>{d}</span>
                         ))}
                       </div>
@@ -483,26 +582,24 @@ export default function AdminDashboard() {
                 <section className="admin-panel production-card">
                   <div className="panel-heading">
                     <div>
-                      <h3>Na linha de produção</h3>
-                      <p>Cada peça, uma etapa.</p>
+                      <h3>Situação dos pedidos</h3>
+                      <p>Do pagamento ao layout.</p>
                     </div>
                   </div>
-                  {[
-                    ["Aguardando aprovação", 8, "#edbe46"],
-                    ["Arte aprovada", 4, "#5698f4"],
-                    ["Em produção", 12, "#2964c5"],
-                    ["Pronto para envio", 6, "#55b5a6"],
-                  ].map(([label, n, color]) => (
+                  {lanes.map(({ label, items, color }) => (
                     <div className="production-stat" key={label}>
                       <div>
                         <span>{label}</span>
-                        <strong>{n}</strong>
+                        <strong>{items.length}</strong>
                       </div>
                       <div className="progress-track">
                         <span
                           style={{
-                            width: Number(n) / 0.16 + "%",
-                            background: String(color),
+                            width:
+                              (allOrders.length
+                                ? (items.length / allOrders.length) * 100
+                                : 0) + "%",
+                            background: color,
                           }}
                         />
                       </div>
@@ -535,15 +632,11 @@ export default function AdminDashboard() {
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                 >
-                  {[
-                    "Todos",
-                    "Aguardando arte",
-                    "Arte aprovada",
-                    "Em produção",
-                    "Enviado",
-                  ].map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
+                  {["Todos", ...Object.values(statusInfo).map(([l]) => l)].map(
+                    (s) => (
+                      <option key={s}>{s}</option>
+                    ),
+                  )}
                 </select>
               </div>
               {orderTable}
@@ -578,7 +671,7 @@ export default function AdminDashboard() {
                         {p.category} ·{" "}
                         {p.kind === "stock"
                           ? money(p.price) + " / un."
-                          : "Sob medida"}
+                          : "Orçamento"}
                       </small>
                     </div>
                     <a
@@ -593,26 +686,24 @@ export default function AdminDashboard() {
             </div>
           ) : active === "Produção" ? (
             <div className="kanban">
-              {[
-                "Aguardando arte",
-                "Arte aprovada",
-                "Em produção",
-                "Enviado",
-              ].map((status) => (
-                <section key={status}>
-                  <h3>{status}</h3>
-                  {demoOrders
-                    .filter((o) => o.status === status)
-                    .map((o) => (
-                      <button key={o.id} onClick={() => setDetail(o)}>
+              {lanes.map(({ label, items }) => (
+                <section key={label}>
+                  <h3>{label}</h3>
+                  {items.map((o) => {
+                    const r = toRow(o);
+                    return (
+                      <button key={o.id} onClick={() => setDetail(r)}>
                         <small>#{o.id}</small>
-                        <strong>{o.company}</strong>
+                        <strong>{r.company}</strong>
                         <span>
-                          {o.quantity} peças · {o.product}
+                          {r.quantity} peças · {r.product}
                         </span>
-                        <span className="status blue">{money(o.total)}</span>
+                        <span className={"status " + r.tone}>
+                          {money(o.total)}
+                        </span>
                       </button>
-                    ))}
+                    );
+                  })}
                 </section>
               ))}
             </div>
@@ -630,16 +721,36 @@ export default function AdminDashboard() {
               <p>{moduleInfo[active]?.[1]}</p>
               {active === "Integrações" ? (
                 <div className="integration-list">
-                  {[
-                    "Neon PostgreSQL",
-                    "Vercel Blob",
-                    "Gateway de pagamento",
-                    "Cálculo de frete",
-                    "E-mail transacional",
-                  ].map((n) => (
+                  {(
+                    [
+                      [
+                        "Pagamentos · Asaas",
+                        integrations.asaas === "production"
+                          ? "Ativo · produção"
+                          : integrations.asaas === "sandbox"
+                            ? "Ativo · sandbox"
+                            : "A configurar",
+                      ],
+                      [
+                        "Webhook do Asaas",
+                        integrations.webhook
+                          ? "Token definido · cadastrar URL no Asaas"
+                          : "A configurar",
+                      ],
+                      [
+                        "Frete · Frenet",
+                        integrations.frenet ? "Ativo" : "A configurar",
+                      ],
+                      [
+                        "Banco de pedidos · Neon",
+                        integrations.database ? "Ativo" : "A configurar",
+                      ],
+                      ["E-mail transacional", "A configurar"],
+                    ] as const
+                  ).map(([n, st]) => (
                     <div key={n}>
                       <strong>{n}</strong>
-                      <span>A configurar</span>
+                      <span>{st}</span>
                     </div>
                   ))}
                 </div>
@@ -661,10 +772,10 @@ export default function AdminDashboard() {
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="Detalhes do pedido demonstrativo"
+            aria-label={"Detalhes do pedido " + detail.id}
           >
             <div className="row-between">
-              <span className="eyebrow">PEDIDO DEMONSTRATIVO</span>
+              <span className="eyebrow">PEDIDO DA LOJA</span>
               <button
                 className="icon-button"
                 aria-label="Fechar detalhes"
@@ -674,21 +785,63 @@ export default function AdminDashboard() {
               </button>
             </div>
             <h2>#{detail.id}</h2>
-            <p>{detail.company}</p>
-            <span className="status blue">{detail.status}</span>
+            <p>
+              <strong>{detail.company}</strong>
+              {detail.order.customer.email && (
+                <>
+                  <br />
+                  {detail.order.customer.email}
+                </>
+              )}
+              {detail.order.customer.phone && (
+                <>
+                  <br />
+                  {detail.order.customer.phone}
+                </>
+              )}
+              {detail.order.customer.document && (
+                <>
+                  <br />
+                  CPF/CNPJ {detail.order.customer.document}
+                </>
+              )}
+            </p>
+            <span className={"status " + detail.tone}>{detail.status}</span>
             <hr />
-            <h3>{detail.product}</h3>
-            <p>{detail.quantity} unidades</p>
+            <h3>Itens</h3>
+            {detail.order.items.length ? (
+              <ul className="drawer-items">
+                {detail.order.items.map((i, k) => (
+                  <li key={k}>
+                    {i.qty}x {i.name}
+                    {i.color ? ` · ${i.color}` : ""}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>{detail.order.summary}</p>
+            )}
+            <p>
+              {detail.quantity} peças ·{" "}
+              {detail.order.method ? methodName[detail.order.method] : "—"} ·{" "}
+              {detail.date}
+            </p>
+            {detail.order.shipping && <p>Entrega: {detail.order.shipping}</p>}
+            {detail.order.address && <p>{detail.order.address}</p>}
             <strong>{money(detail.total)}</strong>
             <hr />
-            <p className="muted">
-              Exemplo de acompanhamento. Nenhum pedido real foi criado. O
-              arquivo da arte, a aprovação e os dados de entrega serão
-              associados ao conectar a operação.
-            </p>
-            <a className="button primary" href="/loja">
-              Ver catálogo
-            </a>
+            <div className="button-row">
+              {detail.order.invoiceUrl && (
+                <a
+                  className="button primary"
+                  href={detail.order.invoiceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ver fatura <ExternalLink size={15} />
+                </a>
+              )}
+            </div>
           </aside>
         </div>
       )}

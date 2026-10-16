@@ -66,7 +66,7 @@ export function SearchBox({
       const top: Item[] = [...products]
         .sort((a, b) => b.reviews - a.reviews)
         .slice(0, 4)
-        .map((p) => ({ type: "product", key: `p-${p.slug}`, href: `/produto/${p.slug}`, label: p.name, meta: p.kind === "stock" ? `a partir de ${money(p.price)}` : "Sob medida · mín. 30 peças", image: p.image, custom: p.kind === "custom" }));
+        .map((p) => ({ type: "product", key: `p-${p.slug}`, href: `/produto/${p.slug}`, label: p.name, meta: p.kind === "stock" ? `a partir de ${money(p.price)}` : "Por orçamento · mín. 30 peças", image: p.image, custom: p.kind === "custom" }));
       const cats: Item[] = categories.slice(0, 4).map((c) => ({ type: "category", key: `c-${c.slug}`, href: `/loja?categoria=${c.slug}`, label: c.name, icon: c.icon }));
       return [...top, ...cats];
     }
@@ -88,7 +88,7 @@ export function SearchBox({
         key: `p-${p.slug}`,
         href: `/produto/${p.slug}`,
         label: p.name,
-        meta: p.kind === "stock" ? `a partir de ${money(p.price)}` : "Sob medida · mín. 30 peças",
+        meta: p.kind === "stock" ? `a partir de ${money(p.price)}` : "Por orçamento · mín. 30 peças",
         image: p.image,
         custom: p.kind === "custom",
       }));

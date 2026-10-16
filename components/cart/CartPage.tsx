@@ -49,7 +49,7 @@ export function CartPage() {
             <Link href="/loja?tipo=stock" className="btn btn-accent btn-lg">
               Ver pronta-entrega <ArrowRight size={18} />
             </Link>
-            <Link href="/sob-medida" className="btn btn-outline btn-lg">Produção sob medida</Link>
+            <Link href="/orcamento" className="btn btn-outline btn-lg">Monte seu pedido</Link>
           </div>
           <ul className={s.emptySteps}>
             <li><Palette size={18} strokeWidth={1.75} /> Escolha cor e grade</li>

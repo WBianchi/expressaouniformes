@@ -3,10 +3,9 @@ import { Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { getCategory, type Product } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
-import { Rating } from "@/components/ui/primitives";
 import s from "./Product.module.css";
 
-/** Título, avaliação e ações (favoritar/compartilhar) comuns às duas modalidades. */
+/** Título e ações (favoritar/compartilhar) comuns às duas modalidades. */
 export function ProductHead({ product }: { product: Product }) {
   const { isFavorite, toggleFavorite } = useStore();
   const fav = isFavorite(product.slug);
@@ -48,15 +47,6 @@ export function ProductHead({ product }: { product: Product }) {
       </div>
       <h1 className={s.title}>{product.name}</h1>
       <div className={s.headMeta}>
-        <a
-          href="#detalhes"
-          className={s.ratingLink}
-          onClick={() => window.dispatchEvent(new CustomEvent("eu:product-tab", { detail: "avaliacoes" }))}
-        >
-          <Rating value={product.rating} reviews={product.reviews} />
-          <span>avaliações</span>
-        </a>
-        <span className={s.dot} aria-hidden />
         <span>{product.fabric}</span>
       </div>
       <p className={s.short}>{product.short}</p>

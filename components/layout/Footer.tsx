@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Clock, Instagram, Lock, Mail, MapPin, Phone, ShieldCheck, Sparkles, BadgeCheck, ChevronDown, Factory, Truck, Shirt, Scissors, Palette, Headset, FileCheck2 } from "lucide-react";
+import { Clock, Instagram, Lock, Mail, MapPin, Phone, ShieldCheck, BadgeCheck, ChevronDown } from "lucide-react";
 import { categories, company, whatsappLink } from "@/lib/catalog";
 import { CategoryIcon } from "@/components/ui/primitives";
 import { Logo } from "./Logo";
@@ -12,10 +12,9 @@ const cols: Col[] = [
   {
     title: "Institucional",
     links: [
-      { href: "/#sobre", label: "Sobre a Expressão" },
-      { href: "/sob-medida#empresas", label: "Para empresas" },
-      { href: "/sob-medida", label: "Produção sob medida" },
       { href: "/loja?tipo=stock", label: "Pronta-entrega" },
+      { href: "/orcamento", label: "Monte seu pedido" },
+      { href: "/contato", label: "Fale conosco" },
       { href: "/privacidade", label: "Política de privacidade" },
     ],
   },
@@ -33,17 +32,6 @@ const cols: Col[] = [
     title: "Categorias",
     links: categories.map((c) => ({ href: `/loja?categoria=${c.slug}`, label: c.name })),
   },
-];
-
-const marquee = [
-  { Icon: Factory, text: "Produção própria" },
-  { Icon: Truck, text: "Entrega para todo o Brasil" },
-  { Icon: Shirt, text: "A partir de 5 peças" },
-  { Icon: Palette, text: "DTF, silk, bordado e sublimação" },
-  { Icon: FileCheck2, text: "Aprovação do layout antes da produção" },
-  { Icon: Scissors, text: "Sob medida a partir de 30 peças" },
-  { Icon: Headset, text: "Atendimento consultivo" },
-  { Icon: PixIcon, text: "5% de desconto no Pix" },
 ];
 
 const payments = [
@@ -102,45 +90,11 @@ export function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className={s.footer}>
-      {/* ---------- faixa CTA ---------- */}
-      <div className="container">
-        <section className={s.cta} aria-labelledby="footer-cta-title">
-          <span className={s.ctaBg} aria-hidden />
-          <div className={s.ctaText}>
-            <span className={s.ctaEyebrow}><Sparkles size={14} /> Atendimento consultivo</span>
-            <h2 id="footer-cta-title">Precisa de um uniforme completo para a sua equipe?</h2>
-            <p>Polos, calças, jalecos e muito mais com a identidade da sua marca. Orçamento sem compromisso e condições especiais para grandes volumes.</p>
-          </div>
-          <div className={s.ctaActions}>
-            <Link href="/sob-medida" className="btn btn-accent btn-lg">
-              Montar meu uniforme <ArrowRight size={18} />
-            </Link>
-            <a className={`btn btn-lg ${s.ctaGhost}`} href={whatsappLink("Olá! Gostaria de um orçamento de uniformes para a minha empresa.")} target="_blank" rel="noopener noreferrer">
-              <WhatsAppIcon size={20} /> Falar com consultor
-            </a>
-          </div>
-        </section>
-      </div>
-
-      <div className={s.marquee} aria-label="Diferenciais">
-        <div className={s.marqueeTrack}>
-          {[0, 1].map((k) => (
-            <ul key={k} className={s.marqueeList} aria-hidden={k === 1 || undefined}>
-              {marquee.map(({ Icon, text }) => (
-                <li key={text}>
-                  <Icon size={18} /> {text}
-                </li>
-              ))}
-            </ul>
-          ))}
-        </div>
-      </div>
-
       <div className={`container ${s.main}`}>
         {/* ---------- marca ---------- */}
         <div className={s.brand}>
           <Logo height={40} />
-          <p>Fábrica de uniformes profissionais. Peças prontas para personalizar com a sua logo e produção sob medida para empresas de todo o Brasil.</p>
+          <p>Fábrica de uniformes profissionais. Uniformes prontos para personalizar com a sua logo e pedidos para empresas de todo o Brasil.</p>
           <ul className={s.seals}>
             <li><BadgeCheck size={16} strokeWidth={1.75} /> Produção própria</li>
             <li><ShieldCheck size={16} strokeWidth={1.75} /> Compra segura</li>

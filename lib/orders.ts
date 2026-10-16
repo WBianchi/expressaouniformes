@@ -101,7 +101,8 @@ export function parseExpiry(value: string, now = new Date()) {
 
 export const paymentMethods = ["pix", "boleto", "cartao"] as const;
 export type PaymentMethod = (typeof paymentMethods)[number];
-export const shippingIds = ["pac", "sedex", "retirada"] as const;
+/** id da opção de frete: "retirada", "f-<código Frenet>" ou ids da estimativa local */
+export const shippingIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,40}$/, "Selecione uma opção de frete válida.");
 
 export const cardSchema = z.object({
   holderName: z.string().trim().min(3, "Nome impresso no cartão").max(80),
@@ -135,7 +136,7 @@ export const checkoutRequestSchema = z.object({
   address: checkoutAddressSchema,
   lines: z.array(cartLineSchema).min(1, "Carrinho vazio").max(30),
   coupon: z.string().trim().max(40).nullish(),
-  shippingId: z.enum(shippingIds),
+  shippingId: shippingIdSchema,
   payment: z.object({
     method: z.enum(paymentMethods),
     installments: z.number().int().min(1).max(12).default(1),
@@ -192,6 +193,8 @@ export function computeQuote(input: {
   shippingId: string;
   method: PaymentMethod;
   installments?: number;
+  /** opções cotadas no servidor (Frenet); sem elas usa a estimativa local */
+  shippingOptions?: ShippingOption[] | null;
 }): { ok: true; quote: OrderQuote } | { ok: false; error: string } {
   if (!input.lines.length) return { ok: false, error: "Carrinho vazio." };
   const base = totals(input.lines);
@@ -201,7 +204,7 @@ export function computeQuote(input: {
     if (!r.ok) return { ok: false, error: r.error };
     coupon = r.coupon;
   }
-  const options = quoteShipping(input.cep, base.subtotal, base.items);
+  const options = input.shippingOptions ?? quoteShipping(input.cep, base.subtotal, base.items);
   const shipping = options?.find((o) => o.id === input.shippingId);
   if (!shipping) return { ok: false, error: "Selecione uma opção de frete válida." };
   const t = totals(input.lines, coupon, shipping);
@@ -241,6 +244,26 @@ export function computeQuote(input: {
       installmentValue: round(chargeTotal / installments),
     },
   };
+}
+
+/** Descrição da cobrança no Asaas (aparece na fatura do cliente e no painel). Máx. 500 caracteres. */
+export function orderDescription(orderId: string, q: Pick<OrderQuote, "items" | "lines" | "shipping">) {
+  const items = q.lines.map((l) => `${l.qty}x ${l.name} ${l.colorName}`).join("; ");
+  const text = `Pedido ${orderId} — Expressão Uniformes — ${q.items} peças: ${items}. Entrega: ${q.shipping.label}.`;
+  return text.length > 500 ? `${text.slice(0, 497)}...` : text;
+}
+
+/** Extrai os itens da descrição gravada pelo checkout: "... — 20 peças: 10x Polo Marinho; 10x ... Entrega: X." */
+export function parseDescription(desc?: string | null) {
+  const d = desc ?? "";
+  const itemsPart = d.match(/peças:\s*(.*?)(?:\.\s*Entrega:|$)/)?.[1] ?? "";
+  const items = itemsPart
+    .split(";")
+    .map((s) => s.trim().match(/^(\d+)x\s+(.+)$/))
+    .filter((m): m is RegExpMatchArray => !!m)
+    .map((m) => ({ name: m[2].replace(/\.\.\.$/, ""), qty: Number(m[1]) }));
+  const shipping = d.match(/Entrega:\s*(.*?)\.?$/)?.[1];
+  return { items, shipping };
 }
 
 export const positionsLabel = (p: Position[]) =>

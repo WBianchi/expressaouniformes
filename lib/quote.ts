@@ -1,4 +1,4 @@
-// Triagem do pedido de orçamento sob medida: só libera o consultor quando o
+// Triagem do pedido de orçamento para empresas: só libera o consultor quando o
 // pedido atende ao mínimo de fabricação; abaixo disso, direciona para a loja.
 
 export const CUSTOM_MIN_QTY = 30;
@@ -19,27 +19,16 @@ export const employeeOptions = [
   { id: "100+", label: "Mais de 100" },
 ] as const;
 
-export const customizationOptions = [
-  "Logo da empresa",
-  "Cores da marca",
-  "Tecido específico",
-  "Gola e punho personalizados",
-  "Friso",
-  "Refletivo, bolsos e extras",
-  "Ainda não sei",
-] as const;
-
 export type QuoteAnswers = {
   quantity: (typeof quantityOptions)[number]["id"] | null;
   employees: (typeof employeeOptions)[number]["id"] | null;
-  customizations: string[];
 };
 
-export const emptyAnswers: QuoteAnswers = { quantity: null, employees: null, customizations: [] };
+export const emptyAnswers: QuoteAnswers = { quantity: null, employees: null };
 
-export const isComplete = (a: QuoteAnswers) => !!a.quantity && !!a.employees && a.customizations.length > 0;
+export const isComplete = (a: QuoteAnswers) => !!a.quantity && !!a.employees;
 
-/** Pedido atende ao mínimo de fabricação sob medida? */
+/** Pedido atende ao mínimo de fabricação? */
 export function isEligible(a: QuoteAnswers) {
   const q = quantityOptions.find((o) => o.id === a.quantity);
   return !!q && q.min >= CUSTOM_MIN_QTY;
@@ -53,6 +42,5 @@ export function quoteMessage(a: QuoteAnswers) {
     "",
     `• Quantidade de peças: ${q}`,
     `• Funcionários: ${e}`,
-    `• Personalizações: ${a.customizations.join(", ") || "-"}`,
   ].join("\n");
 }

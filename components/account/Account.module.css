@@ -564,19 +564,10 @@
 }
 .layoutPlaceholder {
   position: relative;
-  display: grid;
-  place-items: center;
-  padding: 22px 22px 44px;
+  aspect-ratio: 1;
   border-radius: var(--radius);
-  border: 1px dashed var(--line-strong);
-  background: var(--bg-tint);
-  background-image: var(--pattern-dots);
-  background-size: 16px 16px;
-}
-.layoutPlaceholder svg {
-  width: 100%;
-  max-width: 260px;
-  height: auto;
+  overflow: hidden;
+  background: var(--surface-2);
 }
 .placeholderTag {
   position: absolute;

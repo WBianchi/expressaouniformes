@@ -7,11 +7,10 @@ import {
   type CartLine,
   type Coupon,
   type ShippingOption,
-  quoteShipping,
   totals,
   validateCoupon,
-  lineQuantity,
 } from "@/lib/pricing";
+import { fetchShippingQuote, shippingSignature } from "@/lib/shipping-client";
 
 export type Drawer = "cart" | "favorites" | "menu" | "search" | null;
 export type Theme = "light" | "dark" | "system";
@@ -33,6 +32,10 @@ type StoreContext = {
   cep: string;
   setCep: (cep: string) => void;
   shippingOptions: ShippingOption[] | null;
+  /** consulta à Frenet em andamento */
+  shippingLoading: boolean;
+  /** mensagem quando a cotação falha ou nenhuma transportadora atende o CEP */
+  shippingError: string | null;
   shipping: ShippingOption | null;
   selectShipping: (id: string) => void;
   summary: ReturnType<typeof totals>;
@@ -134,11 +137,34 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
     return r.ok ? r.coupon : null;
   }, [couponCode, subtotalForCoupon]);
 
-  const itemCount = cart.reduce((s, l) => s + lineQuantity(l), 0);
-  const shippingOptions = useMemo(
-    () => (cart.length ? quoteShipping(cep, subtotalForCoupon, itemCount) : null),
-    [cep, subtotalForCoupon, itemCount, cart.length],
-  );
+  // cotação real (Frenet) sempre que o CEP ou os itens mudam
+  const [quote, setQuote] = useState<{ key: string; options: ShippingOption[] | null; error: string | null } | null>(null);
+  const cepDigits = cep.replace(/\D/g, "");
+  const sig = shippingSignature(cart);
+  const quoteKey = cart.length && cepDigits.length === 8 ? `${cepDigits}|${sig}` : "";
+  const cartRef = useRef(cart);
+  useEffect(() => {
+    cartRef.current = cart;
+  }, [cart]);
+  useEffect(() => {
+    if (!quoteKey) return;
+    const ctrl = new AbortController();
+    const t = setTimeout(() => {
+      fetchShippingQuote(cepDigits, cartRef.current, ctrl.signal)
+        .then((r) => setQuote({ key: quoteKey, options: r.options.length ? r.options : null, error: r.error ?? null }))
+        .catch(() => {
+          if (!ctrl.signal.aborted) setQuote({ key: quoteKey, options: null, error: "Não foi possível calcular o frete. Verifique sua conexão." });
+        });
+    }, 350);
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
+  }, [quoteKey, cepDigits]);
+  const current = quote && quote.key === quoteKey ? quote : null;
+  const shippingOptions = quoteKey ? (current?.options ?? null) : null;
+  const shippingLoading = !!quoteKey && !current;
+  const shippingError = quoteKey ? (current?.error ?? null) : null;
   const shipping = shippingOptions?.find((o) => o.id === shippingId) ?? shippingOptions?.[0] ?? null;
   const summary = useMemo(() => totals(cart, coupon, shipping), [cart, coupon, shipping]);
 
@@ -200,6 +226,8 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
     cep,
     setCep,
     shippingOptions,
+    shippingLoading,
+    shippingError,
     shipping,
     selectShipping: setShippingId,
     summary,

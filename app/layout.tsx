@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | Expressão Uniformes",
   },
   description:
-    "Uniformes em estoque prontos para personalizar com sua logo e produção sob medida para empresas. Polos, camisetas, calças, jalecos e mais.",
+    "Uniformes em estoque prontos para personalizar com sua logo e orçamento de uniformes para empresas. Polos, camisetas, calças, jalecos e mais.",
 };
 
 export const viewport: Viewport = {

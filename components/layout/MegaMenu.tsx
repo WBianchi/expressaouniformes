@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Package, Sparkles } from "lucide-react";
+import { ArrowRight, Package, ClipboardList } from "lucide-react";
 import { categories, getProduct, money, products, stockProducts } from "@/lib/catalog";
 import { CategoryIcon, SafeImage } from "@/components/ui/primitives";
 import s from "./MegaMenu.module.css";
@@ -75,12 +75,12 @@ export function MegaMenu({ id, open, onNavigate }: { id: string; open: boolean; 
             </span>
             <ArrowRight className={s.modeArrow} size={18} />
           </Link>
-          <Link href="/sob-medida" onClick={onNavigate} className={s.mode} data-tone="custom">
-            <span className={s.modeIcon}><Sparkles size={21} strokeWidth={1.75} /></span>
+          <Link href="/orcamento" onClick={onNavigate} className={s.mode} data-tone="custom">
+            <span className={s.modeIcon}><ClipboardList size={21} strokeWidth={1.75} /></span>
             <span>
-              <em>Sob medida</em>
-              <b>Produção exclusiva</b>
-              <small>Tecido, gola, friso e cores da marca, a partir de 30 peças.</small>
+              <em>Para empresas</em>
+              <b>Monte seu pedido</b>
+              <small>Vários modelos, cores e quantidades em um orçamento, a partir de 30 peças.</small>
             </span>
             <ArrowRight className={s.modeArrow} size={18} />
           </Link>
@@ -101,21 +101,6 @@ export function MegaMenu({ id, open, onNavigate }: { id: string; open: boolean; 
           )}
         </div>
 
-        {/* banner */}
-        <Link href="/sob-medida" onClick={onNavigate} className={s.banner}>
-          <span className={s.bannerImg} aria-hidden>
-            <SafeImage src="/images/banners/promo-sob-medida.webp" alt="" />
-          </span>
-          <span className={s.bannerShade} aria-hidden />
-          <span className={s.bannerBody}>
-            <span className="chip chip-gold">Para empresas</span>
-            <b>Monte o uniforme com a cara da sua marca</b>
-            <small>Atendimento consultivo do briefing à entrega.</small>
-            <span className="btn btn-accent btn-sm">
-              Monte seu uniforme <ArrowRight size={16} />
-            </span>
-          </span>
-        </Link>
       </div>
     </div>
   );

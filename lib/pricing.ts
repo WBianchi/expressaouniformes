@@ -60,11 +60,11 @@ export function validateCoupon(code: string, subtotal: number): { ok: true; coup
 }
 
 // ---------------- frete (estimativa demonstrativa) ----------------
-export type ShippingOption = { id: string; label: string; days: string; price: number };
+export type ShippingOption = { id: string; label: string; days: string; price: number; carrier?: string };
 
 export const FREE_SHIPPING_FROM = 799;
 
-/** Estimativa por faixa de CEP até integrar Melhor Envio/Correios. */
+/** Estimativa por faixa de CEP, usada só quando a Frenet não está configurada (desenvolvimento e testes). */
 export function quoteShipping(cep: string, subtotal: number, qty: number): ShippingOption[] | null {
   const digits = cep.replace(/\D/g, "");
   if (digits.length !== 8) return null;

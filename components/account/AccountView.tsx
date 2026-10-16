@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { ORDER_ID_RE } from "@/lib/orders";
+import { updateStoredOrderStatus } from "@/components/checkout/orderStorage";
+import { fetchOrderStatus } from "@/components/checkout/useOrderStatus";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -94,6 +97,16 @@ export default function AccountView() {
     const h = window.location.hash.slice(1);
     if (SECTIONS.some((x) => x.id === h)) setSection(h as Section);
     setLoaded(true);
+    // sincroniza com o Asaas o status de pagamento dos pedidos ainda em aberto
+    const ctrl = new AbortController();
+    const open = list.filter((o) => !o.sample && !(o as { demo?: boolean }).demo && o.payment?.status !== "pago" && ORDER_ID_RE.test(o.id)).slice(0, 10);
+    Promise.all(open.map((o) => fetchOrderStatus(o.id, ctrl.signal).then((s) => [o.id, s] as const).catch(() => [o.id, null] as const))).then((res) => {
+      const changed = res.filter(([, s]) => s);
+      if (!changed.length) return;
+      for (const [oid, s] of changed) updateStoredOrderStatus(oid, s!);
+      setOrders(readOrders().sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")));
+    });
+    return () => ctrl.abort();
   }, []);
 
   const go = (id: Section) => {
@@ -284,11 +297,11 @@ export default function AccountView() {
                     </div>
                     <ArrowRight size={18} />
                   </Link>
-                  <Link href="/sob-medida" className={s.quickCard}>
+                  <Link href="/orcamento" className={s.quickCard}>
                     <Sparkles size={22} strokeWidth={1.75} />
                     <div>
                       <strong>Monte seu uniforme</strong>
-                      <span>Produção sob medida para empresas, a partir de 30 peças.</span>
+                      <span>Orçamento para empresas, a partir de 30 peças.</span>
                     </div>
                     <ArrowRight size={18} />
                   </Link>

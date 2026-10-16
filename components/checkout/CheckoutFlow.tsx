@@ -69,7 +69,7 @@ const newKey = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-$
 export function CheckoutFlow() {
   const router = useRouter();
   const store = useStore();
-  const { cart, ready, coupon, cep: storeCep, setCep, shippingOptions, shipping, selectShipping, clearCart } = store;
+  const { cart, ready, coupon, cep: storeCep, setCep, shippingOptions, shippingLoading, shippingError, shipping, selectShipping, clearCart } = store;
 
   const [step, setStep] = useState(0);
   const [customer, setCustomer] = useState<Customer>({ type: "pf", name: "", company: "", document: "", email: "", phone: "" });
@@ -141,11 +141,12 @@ export function CheckoutFlow() {
       coupon: coupon?.code,
       cep: storeCep,
       shippingId: shipping.id,
+      shippingOptions,
       method,
       installments: method === "cartao" ? installments : 1,
     });
     return r.ok ? r.quote : null;
-  }, [cart, coupon, storeCep, shipping, method, installments]);
+  }, [cart, coupon, storeCep, shipping, shippingOptions, method, installments]);
 
   const base = useMemo(() => cartTotals(cart, coupon, shipping), [cart, coupon, shipping]);
   const maxInst = maxInstallments(base.total);
@@ -534,8 +535,9 @@ export function CheckoutFlow() {
                     ))}
                   </div>
                 ) : (
-                  <p className={s.muted}>Informe o CEP para ver as opções de entrega.</p>
+                  <p className={s.muted} aria-live="polite">{shippingLoading ? "Calculando frete com as transportadoras…" : shippingError ? "" : "Informe o CEP para ver as opções de entrega."}</p>
                 )}
+                {shippingError && <p className={s.error} role="alert"><AlertCircle size={14} /> {shippingError}</p>}
                 {errors.shipping && <p className={s.error} role="alert"><AlertCircle size={14} /> {errors.shipping}</p>}
                 <p className={s.muted}>O prazo de entrega começa a contar após a aprovação do layout e a produção.</p>
               </>

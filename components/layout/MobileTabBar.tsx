@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, House, ShoppingBag, Sparkles, Store, type LucideIcon } from "lucide-react";
+import { Heart, House, ShoppingBag, ClipboardList, Store, type LucideIcon } from "lucide-react";
 import { useStore } from "@/components/store/StoreProvider";
 import s from "./MobileTabBar.module.css";
 
@@ -9,7 +9,7 @@ type Tab = { id: string; label: string; Icon: LucideIcon; href?: string; drawer?
 const tabs: Tab[] = [
   { id: "home", label: "Início", Icon: House, href: "/" },
   { id: "loja", label: "Loja", Icon: Store, href: "/loja" },
-  { id: "custom", label: "Sob medida", Icon: Sparkles, href: "/sob-medida" },
+  { id: "custom", label: "Orçamento", Icon: ClipboardList, href: "/orcamento" },
   { id: "fav", label: "Favoritos", Icon: Heart, drawer: "favorites" },
   { id: "cart", label: "Carrinho", Icon: ShoppingBag, drawer: "cart" },
 ];
@@ -23,7 +23,7 @@ export function MobileTabBar() {
     drawer === "cart" ? "cart" : drawer === "favorites" ? "fav" :
     pathname === "/" ? "home" :
     pathname.startsWith("/loja") || pathname.startsWith("/produto") ? "loja" :
-    pathname.startsWith("/sob-medida") ? "custom" :
+    pathname.startsWith("/orcamento") ? "custom" :
     pathname.startsWith("/favoritos") ? "fav" :
     pathname.startsWith("/carrinho") || pathname.startsWith("/checkout") ? "cart" : null;
   const idx = tabs.findIndex((t) => t.id === activeId);

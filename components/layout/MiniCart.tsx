@@ -196,7 +196,7 @@ function CouponBox() {
 }
 
 function ShippingBox() {
-  const { cep, setCep, shippingOptions, shipping, selectShipping } = useStore();
+  const { cep, setCep, shippingOptions, shippingLoading, shippingError, shipping, selectShipping } = useStore();
   return (
     <Collapsible
       icon={<Truck size={18} strokeWidth={1.75} />}
@@ -218,6 +218,8 @@ function ShippingBox() {
           Não sei meu CEP
         </a>
       </label>
+      {shippingLoading && <p className={s.shipNote} aria-live="polite">Calculando frete…</p>}
+      {shippingError && <p className={s.shipNote} role="alert">{shippingError}</p>}
       {shippingOptions ? (
         <div className={s.shipList} role="radiogroup" aria-label="Opções de frete">
           {shippingOptions.map((o) => (
@@ -236,7 +238,7 @@ function ShippingBox() {
           <p className={s.shipNote}>Prazo de entrega contado após a aprovação do layout e produção.</p>
         </div>
       ) : (
-        cep.replace(/\D/g, "").length > 0 && <p className={s.shipNote}>Digite os 8 números do CEP.</p>
+        cep.replace(/\D/g, "").length > 0 && cep.replace(/\D/g, "").length < 8 && <p className={s.shipNote}>Digite os 8 números do CEP.</p>
       )}
     </Collapsible>
   );
@@ -321,8 +323,8 @@ export function MiniCart() {
             <Link href="/loja?tipo=stock" className="btn btn-primary btn-block" onClick={closeDrawer}>
               <Package size={18} /> Ver pronta-entrega <ArrowRight size={18} />
             </Link>
-            <Link href="/sob-medida" className="btn btn-outline btn-block" onClick={closeDrawer}>
-              <Sparkles size={18} /> Produção sob medida
+            <Link href="/orcamento" className="btn btn-outline btn-block" onClick={closeDrawer}>
+              <Sparkles size={18} /> Orçamento para empresas
             </Link>
           </div>
         </div>

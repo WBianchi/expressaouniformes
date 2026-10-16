@@ -1,13 +1,12 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BadgeCheck, Check, MessageCircle, PencilRuler, ShoppingBag } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, ClipboardList, MessageCircle, ShoppingBag } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 import { whatsappLink } from "@/lib/catalog";
 import {
   CUSTOM_MIN_QTY,
   STOCK_MIN_QTY,
-  customizationOptions,
   emptyAnswers,
   employeeOptions,
   isComplete,
@@ -30,13 +29,6 @@ export function QuoteGate({ open, onOpenChange }: { open: boolean; onOpenChange:
     onOpenChange(o);
     if (!o) setDone(false);
   };
-  const toggle = (c: string) =>
-    setA((p) => {
-      // "Ainda não sei" é exclusivo das demais opções
-      if (c === "Ainda não sei") return { ...p, customizations: p.customizations.includes(c) ? [] : [c] };
-      const rest = p.customizations.filter((x) => x !== "Ainda não sei");
-      return { ...p, customizations: rest.includes(c) ? rest.filter((x) => x !== c) : [...rest, c] };
-    });
 
   const eligible = isEligible(a);
 
@@ -45,7 +37,7 @@ export function QuoteGate({ open, onOpenChange }: { open: boolean; onOpenChange:
       open={open}
       onOpenChange={change}
       title="Solicitar orçamento"
-      description={done ? "Resultado da triagem" : "3 perguntas rápidas para direcionar o seu pedido"}
+      description={done ? "Resultado da triagem" : "2 perguntas rápidas para direcionar o seu pedido"}
       width={500}
       footer={
         done ? (
@@ -54,8 +46,8 @@ export function QuoteGate({ open, onOpenChange }: { open: boolean; onOpenChange:
               <a className="btn btn-whatsapp btn-lg btn-block" href={whatsappLink(quoteMessage(a))} target="_blank" rel="noopener noreferrer">
                 <MessageCircle size={19} /> Falar com um consultor
               </a>
-              <Link href="/sob-medida#montar" className="btn btn-outline btn-block" onClick={() => change(false)}>
-                <PencilRuler size={17} /> Montar o briefing completo
+              <Link href="/orcamento" className="btn btn-outline btn-block" onClick={() => change(false)}>
+                <ClipboardList size={17} /> Montar meu pedido no site
               </Link>
             </div>
           ) : (
@@ -103,21 +95,6 @@ export function QuoteGate({ open, onOpenChange }: { open: boolean; onOpenChange:
             </div>
           </fieldset>
 
-          <fieldset className={s.group}>
-            <legend>
-              <span className={s.num}>3</span> Quais personalizações você deseja?
-            </legend>
-            <div className={s.options}>
-              {customizationOptions.map((c) => {
-                const on = a.customizations.includes(c);
-                return (
-                  <button key={c} type="button" role="checkbox" aria-checked={on} className={s.option} data-active={on || undefined} onClick={() => toggle(c)}>
-                    {on && <Check size={14} strokeWidth={3} />} {c}
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
         </div>
       ) : (
         <div className={s.result} data-tone={eligible ? "brand" : "success"} aria-live="polite">
@@ -126,14 +103,14 @@ export function QuoteGate({ open, onOpenChange }: { open: boolean; onOpenChange:
             <>
               <h3>Seu pedido atende ao mínimo de fabricação</h3>
               <p>
-                Ótimo! Um consultor vai receber suas respostas e ajudar a definir tecido, modelagem, cores e acabamentos do uniforme da sua empresa.
+                Um consultor recebe suas respostas pelo WhatsApp e monta o orçamento com você: modelos, cores, personalização e prazo.
               </p>
             </>
           ) : (
             <>
               <h3>Para esse volume, a linha pronta é o melhor caminho</h3>
               <p>
-                A produção sob medida começa em <b>{CUSTOM_MIN_QTY} peças</b>. Com os uniformes prontos para personalizar, você compra online a partir de{" "}
+                O orçamento para empresas começa em <b>{CUSTOM_MIN_QTY} peças</b>. Com os uniformes prontos para personalizar, você compra online a partir de{" "}
                 <b>{STOCK_MIN_QTY} peças</b>, coloca a sua logo, aprova o layout no site e recebe em poucos dias.
               </p>
             </>

@@ -1,17 +1,15 @@
 "use client";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Check, Droplets, Info, Shirt, Star, ThermometerSun, Wind } from "lucide-react";
-import type { Product, Size } from "@/lib/catalog";
-import { Rating } from "@/components/ui/primitives";
+import { Check, Droplets, Info, Shirt, ThermometerSun, Wind } from "lucide-react";
+import { inStock, type Product, type Size } from "@/lib/catalog";
 import s from "./Product.module.css";
 
-type TabId = "descricao" | "caracteristicas" | "tecido" | "medidas" | "avaliacoes";
+type TabId = "descricao" | "caracteristicas" | "tecido" | "medidas";
 const tabs: { id: TabId; label: string }[] = [
   { id: "descricao", label: "Descrição" },
   { id: "caracteristicas", label: "Características" },
   { id: "tecido", label: "Tecido e cuidados" },
   { id: "medidas", label: "Tabela de medidas" },
-  { id: "avaliacoes", label: "Avaliações" },
 ];
 
 // medidas ilustrativas (cm)
@@ -32,29 +30,6 @@ const pants: Record<Size, [number, number, number]> = {
   GG: [92, 116, 108],
   XG: [98, 122, 110],
   XGG: [104, 128, 111],
-};
-
-const sampleReviews = (p: Product) => {
-  const stock = p.kind === "stock";
-  return [
-    {
-      who: "Cliente empresarial · Logística",
-      stars: 5,
-      text: stock
-        ? "Peças com ótimo acabamento e a logo ficou idêntica ao layout aprovado. Processo muito simples pelo site."
-        : "O consultor entendeu exatamente o que precisávamos. O modelo ficou com a cara da nossa marca.",
-    },
-    {
-      who: "Igreja · pedido para evento",
-      stars: 5,
-      text: "Atendimento atencioso e prazo cumprido. A grade mista de tamanhos facilitou muito para vestir todo mundo.",
-    },
-    {
-      who: "Clínica · equipe de recepção",
-      stars: 4,
-      text: `O tecido (${p.fabric.toLowerCase()}) é confortável e não amassa fácil. Já estamos planejando o próximo pedido.`,
-    },
-  ];
 };
 
 function careFor(p: Product) {
@@ -118,7 +93,6 @@ export function ProductTabs({ product }: { product: Product }) {
             onClick={() => setTab(t.id)}
           >
             {t.label}
-            {t.id === "avaliacoes" && <span className={s.tabCount}>{product.reviews}</span>}
           </button>
         ))}
       </div>
@@ -128,9 +102,9 @@ export function ProductTabs({ product }: { product: Product }) {
           <div className={s.prose}>
             <p className={s.lead}>{product.description}</p>
             <p>
-              {product.kind === "stock"
+              {inStock(product)
                 ? `Disponível para pronta personalização a partir de ${product.minQty} peças, com grade mista de tamanhos. Personalize com ${product.techniques.join(", ").replace(/, ([^,]*)$/, " ou $1")} e acompanhe tudo pelo site: você envia a logo, recebe o layout e aprova antes da produção.`
-                : `Modelo desenvolvido sob medida a partir de ${product.minQty} peças. Um consultor ajuda a definir tecido, cores e acabamentos para que o uniforme represente a sua marca com consistência.`}
+                : `Disponível por orçamento para empresas, a partir de 30 peças no pedido. Um consultor confirma cores, personalização e prazo antes da produção.`}
             </p>
           </div>
         )}
@@ -199,34 +173,6 @@ export function ProductTabs({ product }: { product: Product }) {
           </div>
         )}
 
-        {tab === "avaliacoes" && (
-          <div className={s.reviews}>
-            <div className={s.reviewSummary}>
-              <strong>{product.rating.toFixed(1)}</strong>
-              <div>
-                <span className={s.stars} aria-hidden>
-                  {Array.from({ length: 5 }, (_, i) => <Star key={i} size={16} fill={i < Math.round(product.rating) ? "currentColor" : "none"} />)}
-                </span>
-                <small>{product.reviews} avaliações</small>
-              </div>
-            </div>
-            <p className={s.note}>Exemplos ilustrativos de avaliações. Os depoimentos reais dos clientes aparecerão aqui.</p>
-            <ul className={s.reviewList}>
-              {sampleReviews(product).map((r) => (
-                <li key={r.who}>
-                  <div className={s.reviewHead}>
-                    <span className={s.avatar} aria-hidden>{r.who.charAt(0)}</span>
-                    <div>
-                      <b>{r.who}</b>
-                      <Rating value={r.stars} />
-                    </div>
-                  </div>
-                  <p>{r.text}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
     </section>
   );

@@ -43,7 +43,7 @@ export default function Favorites() {
           <p>Toque no coração dos produtos para salvá-los aqui. Seus favoritos ficam guardados neste navegador.</p>
           <div className={s.emptyActions}>
             <Link href="/loja" className="btn btn-accent">Explorar a loja <ArrowRight size={16} /></Link>
-            <Link href="/sob-medida" className="btn btn-outline">Criar sob medida</Link>
+            <Link href="/orcamento" className="btn btn-outline">Monte seu pedido</Link>
           </div>
           <div className={s.emptyCats}>
             {categories.map((c) => (

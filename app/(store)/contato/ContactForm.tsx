@@ -7,7 +7,7 @@ import s from "./contato.module.css";
 
 const subjects = [
   "Pronta-entrega (peças em estoque)",
-  "Produção sob medida para empresa",
+  "Orçamento para empresa (30+ peças)",
   "Camisetas para evento ou igreja",
   "Pedido em andamento",
   "Outro assunto",

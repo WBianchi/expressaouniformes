@@ -3,7 +3,6 @@ import { MessageCircle, Plus } from "lucide-react";
 import { useId, useState } from "react";
 import { whatsappLink } from "@/lib/catalog";
 import { faqs } from "./faqData";
-import { Reveal } from "./Reveal";
 import sec from "./section.module.css";
 import s from "./Faq.module.css";
 
@@ -13,7 +12,7 @@ export function Faq() {
   return (
     <section className={`${sec.section} ${sec.soft}`} aria-labelledby="faq-titulo">
       <div className={`container ${s.grid}`}>
-        <Reveal className={s.aside}>
+        <div className={s.aside}>
           <span className={sec.kicker}>Dúvidas frequentes</span>
           <h2 id="faq-titulo" className={sec.title}>
             Perguntas frequentes
@@ -27,9 +26,9 @@ export function Faq() {
           >
             <MessageCircle size={18} /> Tirar dúvidas no WhatsApp
           </a>
-        </Reveal>
+        </div>
 
-        <Reveal delay={80}>
+        <div>
           <ul className={s.list}>
             {faqs.map((f, i) => {
               const isOpen = open === i;
@@ -59,7 +58,7 @@ export function Faq() {
               );
             })}
           </ul>
-        </Reveal>
+        </div>
       </div>
     </section>
   );

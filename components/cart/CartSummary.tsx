@@ -10,7 +10,7 @@ import { AnimatedMoney } from "./AnimatedMoney";
 import s from "./Cart.module.css";
 
 export function CartSummary() {
-  const { summary, coupon, applyCoupon, removeCoupon, cep, setCep, shippingOptions, shipping, selectShipping } = useStore();
+  const { summary, coupon, applyCoupon, removeCoupon, cep, setCep, shippingOptions, shippingLoading, shippingError, shipping, selectShipping } = useStore();
   const [code, setCode] = useState("");
   const [cepDraft, setCepDraft] = useState(cep);
   const missing = Math.max(0, FREE_SHIPPING_FROM - summary.subtotal);
@@ -104,6 +104,8 @@ export function CartSummary() {
         <a className={s.smallLink} href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer">
           Não sei meu CEP
         </a>
+        {shippingLoading && <p className={s.smallLink} aria-live="polite">Calculando frete…</p>}
+        {shippingError && <p className={s.smallLink} role="alert">{shippingError}</p>}
         {shippingOptions && (
           <div className={s.shipOptions} role="radiogroup" aria-label="Opções de frete">
             {shippingOptions.map((o) => (

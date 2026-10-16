@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { colors, getProduct, type Size } from "./catalog.ts";
+import { colors, getProduct, inStock, type Size } from "./catalog.ts";
 
 const sizeKeys = ["PP", "P", "M", "G", "GG", "XG", "XGG"] as const satisfies readonly Size[];
 const count = z.number().int().min(0).max(9999);
@@ -22,6 +22,7 @@ export const cartLineSchema = z
   .superRefine((l, ctx) => {
     const p = getProduct(l.slug);
     if (!p || p.kind !== "stock") return ctx.addIssue({ code: "custom", message: "Produto indisponível." });
+    if (!inStock(p)) return ctx.addIssue({ code: "custom", message: `${p.name} está sem estoque no momento. Inclua no orçamento.` });
     if (!p.colors.includes(l.color)) ctx.addIssue({ code: "custom", message: "Cor indisponível." });
     const qty = Object.values(l.sizes).reduce<number>((a, b) => a + (b || 0), 0);
     if (qty < p.minQty) ctx.addIssue({ code: "custom", message: `Mínimo de ${p.minQty} peças.` });

@@ -2,15 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { company, getCategory, getProduct, products } from "@/lib/catalog";
+import { company, getCategory, getProduct, inStock, products } from "@/lib/catalog";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { SectionHeader } from "@/components/ui/primitives";
-import { Gallery } from "@/components/product/Gallery";
-import { StockBuyBox } from "@/components/product/StockBuyBox";
-import { CustomBuyBox } from "@/components/product/CustomBuyBox";
+import { ProductTop } from "@/components/product/ProductTop";
 import { ProductTabs } from "@/components/product/ProductTabs";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
-import { ProductStory } from "@/components/product/ProductStory";
 import { RevealRoot } from "@/components/product/motion";
 import s from "@/components/product/Product.module.css";
 
@@ -24,10 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const p = getProduct(slug);
   if (!p) return { title: "Produto não encontrado" };
-  const title = p.kind === "stock" ? `${p.name} com sua logo` : `${p.name} sob medida`;
+  const title = `${p.name} personalizada com sua logo`;
   return {
     title,
-    description: `${p.short} ${p.kind === "stock" ? `A partir de ${p.minQty} peças, pronta para personalizar.` : `Produção sob medida a partir de ${p.minQty} peças.`}`,
+    description: `${p.short} ${inStock(p) ? `Compre online a partir de ${p.minQty} peças, com a sua logo.` : "Disponível por orçamento para empresas, a partir de 30 peças."}`,
     alternates: { canonical: `/produto/${p.slug}` },
     openGraph: { title: p.name, description: p.short, images: [{ url: p.image }], type: "website" },
   };
@@ -52,7 +49,6 @@ export default async function ProductPage({ params }: Props) {
     category: category?.name,
     material: product.fabric,
     brand: { "@type": "Brand", name: company.name },
-    aggregateRating: { "@type": "AggregateRating", ratingValue: product.rating, reviewCount: product.reviews },
     ...(product.kind === "stock"
       ? {
           offers: {
@@ -85,15 +81,10 @@ export default async function ProductPage({ params }: Props) {
           <span aria-current="page">{product.name}</span>
         </nav>
 
-        <div className={s.top}>
-          <Gallery product={product} />
-          {product.kind === "stock" ? <StockBuyBox product={product} /> : <CustomBuyBox product={product} />}
-        </div>
+        <ProductTop product={product} />
 
         <ProductTabs product={product} />
       </div>
-
-      <ProductStory product={product} />
 
       {related.length + fill.length > 0 && (
         <section className={`container ${s.related}`} aria-labelledby="related-title" data-reveal="">

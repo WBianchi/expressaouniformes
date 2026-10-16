@@ -52,3 +52,36 @@ export function readStoredOrder(id: string): StoredOrder | null {
     return null;
   }
 }
+
+/** Atualiza o status salvo neste navegador quando o Asaas confirma (ou cancela) o pagamento. */
+export function updateStoredOrderStatus(id: string, live: { status: string; paymentStatus: string; invoiceUrl?: string }) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
+    if (!Array.isArray(raw)) return;
+    const next = raw.map((o: StoredOrder) =>
+      o?.id === id
+        ? {
+            ...o,
+            // não sobrescreve etapas posteriores ao pagamento (layout, produção, envio)
+            status: ["aguardando_pagamento", "em_analise", "vencido"].includes(o.status) ? live.status : o.status,
+            payment: { ...o.payment, method: o.payment?.method ?? "", status: live.paymentStatus, invoiceUrl: live.invoiceUrl ?? o.payment?.invoiceUrl },
+          }
+        : o,
+    );
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(next));
+  } catch {
+    /* armazenamento indisponível */
+  }
+  for (const store of [() => sessionStorage, () => localStorage]) {
+    try {
+      const raw = store().getItem(sessionKey(id));
+      if (!raw) continue;
+      const r = JSON.parse(raw) as CheckoutResponse;
+      r.status = live.status as CheckoutResponse["status"];
+      r.payment = { ...r.payment, status: live.paymentStatus as CheckoutResponse["payment"]["status"] };
+      store().setItem(sessionKey(id), JSON.stringify(r));
+    } catch {
+      /* ignora */
+    }
+  }
+}

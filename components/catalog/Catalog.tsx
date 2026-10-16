@@ -4,33 +4,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
-  Boxes,
-  Check,
   ChevronRight,
-  Cog,
-  Headset,
   LayoutGrid,
   List,
   MessageCircle,
-  Package,
-  Palette,
-  Ruler,
   Search,
-  ShieldCheck,
-  ShoppingBag,
   SlidersHorizontal,
-  Sparkles,
-  Stamp,
-  Truck,
   X,
-  Zap,
-} from "lucide-react";
-import { getCategory, whatsappLink, type Product } from "@/lib/catalog";
+  } from "lucide-react";
+import { getCategory, inStock, whatsappLink, type Product } from "@/lib/catalog";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Drawer } from "@/components/ui/Drawer";
 import { CategoryIcon } from "@/components/ui/primitives";
-import { useReveal } from "@/components/product/motion";
-import { HeroImage } from "./HeroImage";
 import { FilterPanel } from "./FilterPanel";
 import { ProductRow } from "./ProductRow";
 import {
@@ -96,16 +81,12 @@ export default function Catalog({ initial }: { initial: Filters }) {
   };
 
   const results = useMemo(() => applyFilters(filters), [filters]);
-  const stockList = results.filter((p) => p.kind === "stock");
-  const customList = results.filter((p) => p.kind === "custom");
-  const showStock = !filters.tipos.length || filters.tipos.includes("stock");
-  const showCustom = !filters.tipos.length || filters.tipos.includes("custom");
+  // em estoque primeiro; a ordenação escolhida vale dentro de cada grupo
+  const sorted = [...results.filter(inStock), ...results.filter((p) => !inStock(p))];
   const active = countActive(filters);
   const chips = activeChips(filters);
-  const category = filters.categoria ? getCategory(filters.categoria) : undefined;
   const clearAll = () => setFilters({ ...emptyFilters, ordem: filters.ordem });
   const listKey = `${qs}|${view}`;
-  useReveal(rootRef, [listKey]);
 
   return (
     <div className={s.page} ref={rootRef}>
@@ -180,75 +161,16 @@ export default function Catalog({ initial }: { initial: Filters }) {
             <EmptyState onClear={clearAll} q={filters.q} onCategory={(slug) => setFilters({ ...emptyFilters, categoria: slug })} />
           ) : (
             <>
-              {showStock && stockList.length > 0 && (
-                <section className={s.stockSection} aria-labelledby="sec-stock">
-                  <div className={s.secHead}>
-                    <div>
-                      <span className={s.stockTag}><Zap size={14} fill="currentColor" /> Pronta para personalizar</span>
-                      <h2 id="sec-stock">{category ? category.name : "Modelos"} disponíveis em estoque</h2>
-                      <p>Modelos básicos, ideais para personalização com a sua logo.</p>
-                    </div>
-                    <div className={s.infoCard}>
-                      <span className={s.infoIcon}><Boxes size={22} strokeWidth={1.75} /></span>
-                      <div>
-                        <b>Peças em estoque</b>
-                        <p>Escolha a cor, a quantidade e envie sua logo. Produção rápida após a aprovação da arte.</p>
-                      </div>
-                    </div>
-                  </div>
-                  <ProductList key={`s-${listKey}`} items={stockList} view={view} />
-                  <ul className={s.benefits} data-reveal="">
-                    <Benefit icon={<Palette size={20} strokeWidth={1.75} />} title="Diversas cores" text="em estoque" />
-                    <Benefit icon={<Ruler size={20} strokeWidth={1.75} />} title="Do P ao XG" text="grade completa" />
-                    <Benefit icon={<Stamp size={20} strokeWidth={1.75} />} title="DTF, silk ou bordado" text="personalização" />
-                    <Benefit icon={<ShoppingBag size={20} strokeWidth={1.75} />} title="Compra 100% online" text="a partir de 5 peças" />
-                    <Benefit icon={<Truck size={20} strokeWidth={1.75} />} title="Produção rápida" text="após aprovação da arte" />
-                  </ul>
-                </section>
-              )}
-
-              {showCustom && customList.length > 0 && (
-                <section className={s.customSection} aria-labelledby="sec-custom" data-reveal="">
-                  <div className={s.secHead}>
-                    <div>
-                      <span className={s.customTag}><Sparkles size={14} /> Produção sob medida</span>
-                      <h2 id="sec-custom">Modelos personalizados para sua empresa</h2>
-                      <p>Desenvolvemos uniformes exclusivos com tecidos, cores e acabamentos de acordo com a necessidade da sua operação.</p>
-                    </div>
-                    <ul className={s.checkCard}>
-                      {["Modelagem personalizada", "Escolha de tecidos e cores", "Gola, punho, friso e botões", "Recortes e detalhes especiais", "Atendimento consultivo"].map((t) => (
-                        <li key={t}><Check size={14} strokeWidth={3} /> {t}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <ProductList key={`c-${listKey}`} items={customList} view={view} />
-                  <div className={s.customCta} data-reveal="">
-                    <Link href="/sob-medida" className="btn btn-primary btn-lg">
-                      Desenvolver meu uniforme <ArrowRight size={17} />
-                    </Link>
-                    <a
-                      className={s.consultant}
-                      href={whatsappLink("Olá! Quero falar com um consultor para criar um uniforme sob medida.")}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className={s.consultantIcon}><Headset size={20} strokeWidth={1.75} /></span>
-                      <span>Falar com um consultor<small>para criar seu modelo pelo WhatsApp</small></span>
-                    </a>
-                  </div>
-                </section>
-              )}
-
-              {showCustom && customList.length === 0 && filters.tipos.length !== 1 && stockList.length > 0 && (
-                <aside className={s.customHint} data-reveal="">
-                  <span className={s.infoIcon}><Cog size={20} strokeWidth={1.75} /></span>
-                  <div>
-                    <b>Precisa de um modelo exclusivo?</b>
-                    <p>Criamos peças sob medida com as cores e os acabamentos da sua marca, a partir de 30 peças.</p>
-                  </div>
-                  <Link href="/sob-medida" className="btn btn-outline btn-sm">Conhecer <ArrowRight size={15} /></Link>
-                </aside>
-              )}
+              <ProductList key={listKey} items={sorted} view={view} />
+              <aside className={s.customHint}>
+                <div>
+                  <b>Pedido para empresa, com 30 peças ou mais?</b>
+                  <p>Junte vários modelos, cores e quantidades em um só orçamento, inclusive itens sem estoque.</p>
+                </div>
+                <Link href="/orcamento" className="btn btn-outline btn-sm">
+                  Monte seu pedido <ArrowRight size={15} />
+                </Link>
+              </aside>
             </>
           )}
         </div>
@@ -297,35 +219,20 @@ function ProductList({ items, view }: { items: Product[]; view: View }) {
   );
 }
 
-function Benefit({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return (
-    <li>
-      <span className={s.benefitIcon}>{icon}</span>
-      <span><b>{title}</b><small>{text}</small></span>
-    </li>
-  );
-}
 
 function CategoryHero({ filters }: { filters: Filters }) {
   const category = filters.categoria ? getCategory(filters.categoria) : undefined;
   const only = filters.tipos.length === 1 ? filters.tipos[0] : null;
-  const title = category?.name ?? (only === "custom" ? "Produção sob medida" : only === "stock" ? "Pronta para personalizar" : "Todos os produtos");
+  const title = category?.name ?? (only === "custom" ? "Por orçamento" : only === "stock" ? "Pronta-entrega" : "Todos os produtos");
   const subtitle =
     category?.description ??
     (only === "custom"
-      ? "Modelos exclusivos desenvolvidos com as cores e os acabamentos da sua marca."
+      ? "Modelos sem estoque ou sob encomenda, para pedidos de empresas a partir de 30 peças."
       : only === "stock"
-        ? "Peças em estoque para personalizar com a sua logo e receber rapidinho."
-        : "Uniformes em estoque para personalizar e modelos sob medida para a sua empresa.");
+        ? "Em estoque para comprar online, a partir de 5 peças com a sua logo."
+        : "Compre online os itens em estoque ou inclua qualquer modelo no orçamento da sua empresa.");
   return (
     <header className={s.hero}>
-      <div className={s.heroBg} aria-hidden>
-        <HeroImage
-          key={category?.slug ?? "all"}
-          sources={category ? [category.image, "/images/sections/catalog-hero.webp"] : ["/images/sections/catalog-hero.webp"]}
-          className={s.heroImg}
-        />
-      </div>
       <div className={`container ${s.heroInner}`}>
         <nav aria-label="Trilha de navegação" className={s.crumbs}>
           <Link href="/">Início</Link>
@@ -339,16 +246,9 @@ function CategoryHero({ filters }: { filters: Filters }) {
           )}
         </nav>
         <div className={s.heroTitle}>
-          {category && <span className={s.heroIcon}><CategoryIcon name={category.icon} size={26} /></span>}
-          <h1>{title}</h1>
+                    <h1>{title}</h1>
         </div>
         <p className={s.heroSub}>{subtitle}</p>
-        <ul className={s.heroBenefits}>
-          <li><ShieldCheck size={22} strokeWidth={1.75} /><span><b>Qualidade profissional</b><small>Produção própria</small></span></li>
-          <li><Stamp size={22} strokeWidth={1.75} /><span><b>Personalização</b><small>com a sua logo</small></span></li>
-          <li><Package size={22} strokeWidth={1.75} /><span><b>Em estoque</b><small>pronta personalização</small></span></li>
-          <li><Truck size={22} strokeWidth={1.75} /><span><b>A partir de 5 peças</b><small>Entregamos em todo o Brasil</small></span></li>
-        </ul>
       </div>
     </header>
   );

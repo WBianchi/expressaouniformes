@@ -7,7 +7,7 @@ import s from "./contato.module.css";
 
 export const metadata: Metadata = {
   title: "Contato",
-  description: "Fale com a Expressão Uniformes pelo WhatsApp, e-mail ou telefone. Orçamentos de uniformes em estoque e produção sob medida para empresas.",
+  description: "Fale com a Expressão Uniformes pelo WhatsApp, e-mail ou telefone. Compra online de uniformes com a sua logo e orçamentos para empresas.",
   alternates: { canonical: "/contato" },
 };
 

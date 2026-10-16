@@ -46,9 +46,9 @@ export function MobileMenu() {
             <b>Pronta-entrega</b>
             <small>A partir de 5 peças</small>
           </Link>
-          <Link href="/sob-medida" className={s.mode} data-tone="custom" onClick={closeDrawer}>
+          <Link href="/orcamento" className={s.mode} data-tone="custom" onClick={closeDrawer}>
             <Sparkles size={20} strokeWidth={1.75} />
-            <b>Sob medida</b>
+            <b>Monte seu pedido</b>
             <small>A partir de 30 peças</small>
           </Link>
         </div>

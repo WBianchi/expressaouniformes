@@ -1,16 +1,16 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, Check, Heart, MessageCircle, Package, Sparkles } from "lucide-react";
-import { getCategory, whatsappLink, type Product } from "@/lib/catalog";
+import { ArrowRight, Check, Heart } from "lucide-react";
+import { getCategory, inStock, type Product } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
-import { Price, Rating, SafeImage, Swatches } from "@/components/ui/primitives";
+import { Price, SafeImage, Swatches } from "@/components/ui/primitives";
 import s from "./Catalog.module.css";
 
 /** Versão em lista do card de produto (modo de exibição "lista"). */
 export function ProductRow({ product }: { product: Product }) {
   const { isFavorite, toggleFavorite } = useStore();
   const fav = isFavorite(product.slug);
-  const stock = product.kind === "stock";
+  const stock = inStock(product);
   const href = `/produto/${product.slug}`;
   return (
     <article className={s.row} data-kind={product.kind}>
@@ -19,12 +19,7 @@ export function ProductRow({ product }: { product: Product }) {
       </Link>
       <div className={s.rowBody}>
         <div className={s.rowTop}>
-          {stock ? (
-            <span className="chip chip-success"><Package size={12} /> Em estoque</span>
-          ) : (
-            <span className="chip chip-brand"><Sparkles size={12} /> Sob medida</span>
-          )}
-          {product.badge && <span className="chip chip-gold">{product.badge}</span>}
+          <span className={stock ? "chip chip-success" : "chip"}>{stock ? "Pronta-entrega" : product.kind === "custom" ? "Sob encomenda" : "Sem estoque"}</span>
           <span className={s.rowCat}>{getCategory(product.category)?.name}</span>
         </div>
         <Link href={href} className={s.rowTitle}>{product.name}</Link>
@@ -36,7 +31,6 @@ export function ProductRow({ product }: { product: Product }) {
         </ul>
         <div className={s.rowMeta}>
           <Swatches ids={product.colors} size="sm" max={8} />
-          <Rating value={product.rating} reviews={product.reviews} />
         </div>
       </div>
       <div className={s.rowAside}>
@@ -44,27 +38,14 @@ export function ProductRow({ product }: { product: Product }) {
           <Price value={product.price} compareAt={product.compareAt} prefix="A partir de" />
         ) : (
           <div>
-            <small className={s.rowMin}>Pedido mínimo</small>
-            <strong className={s.rowMinValue}>{product.minQty} peças</strong>
+            <small className={s.rowMin}>Por orçamento</small>
+            <strong className={s.rowMinValue}>mín. 30 peças</strong>
           </div>
         )}
         <div className={s.rowActions}>
-          {stock ? (
-            <Link href={href} className="btn btn-accent btn-sm">Personalizar <ArrowRight size={15} /></Link>
-          ) : (
-            <>
-              <Link href={`/sob-medida?modelo=${product.slug}`} className="btn btn-primary btn-sm">Desenvolver <ArrowRight size={15} /></Link>
-              <a
-                className="btn btn-outline btn-sm"
-                href={whatsappLink(`Olá! Quero um orçamento do modelo ${product.name} (mínimo ${product.minQty} peças).`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Falar com consultor sobre ${product.name}`}
-              >
-                <MessageCircle size={15} />
-              </a>
-            </>
-          )}
+          <Link href={href} className="btn btn-primary btn-sm">
+            {stock ? "Personalizar" : "Ver e orçar"} <ArrowRight size={15} />
+          </Link>
           <button
             type="button"
             className={s.rowFav}

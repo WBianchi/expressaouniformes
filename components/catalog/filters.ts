@@ -1,5 +1,5 @@
 // Estado de filtros do catálogo: parse/serialização da URL e aplicação sobre o catálogo (funções puras).
-import { categories, getCategory, getColor, products, type Product, type SaleKind, type Size, type Technique } from "@/lib/catalog";
+import { categories, getCategory, getColor, inStock, products, type Product, type SaleKind, type Size, type Technique } from "@/lib/catalog";
 
 export type SortKey = "relevancia" | "menor-preco" | "maior-preco" | "avaliados" | "novidades";
 export type PriceRange = "ate-40" | "40-70" | "acima-70";
@@ -33,9 +33,12 @@ export const priceRanges: { value: PriceRange; label: string; min: number; max: 
 ];
 
 export const kindLabels: Record<SaleKind, string> = {
-  stock: "Pronta para personalizar",
-  custom: "Produção sob medida",
+  stock: "Pronta-entrega",
+  custom: "Por orçamento",
 };
+
+/** Modo de venda para filtro: com estoque compra online, o resto vai para o orçamento. */
+export const saleMode = (p: Product): SaleKind => (inStock(p) ? "stock" : "custom");
 
 export const emptyFilters: Filters = {
   categoria: null,
@@ -116,11 +119,11 @@ export function applyFilters(f: Filters, except?: keyof Filters): Product[] {
     .filter(({ p, score }) => {
       if (score <= 0) return false;
       if (except !== "categoria" && f.categoria && p.category !== f.categoria) return false;
-      if (except !== "tipos" && f.tipos.length && !f.tipos.includes(p.kind)) return false;
+      if (except !== "tipos" && f.tipos.length && !f.tipos.includes(saleMode(p))) return false;
       if (except !== "cores" && f.cores.length && !f.cores.some((c) => p.colors.includes(c))) return false;
       if (except !== "tamanhos" && f.tamanhos.length && !f.tamanhos.some((s) => p.sizes.includes(s))) return false;
       if (except !== "tecnicas" && f.tecnicas.length && !f.tecnicas.some((t) => p.techniques.includes(t))) return false;
-      if (except !== "preco" && range && (p.kind !== "stock" || p.price < range.min || p.price >= range.max)) return false;
+      if (except !== "preco" && range && (!inStock(p) || p.price < range.min || p.price >= range.max)) return false;
       return true;
     });
 
@@ -142,8 +145,8 @@ export function applyFilters(f: Filters, except?: keyof Filters): Product[] {
   return scored.map((x) => x.p);
 }
 
-// sob medida (sem preço) vai para o fim nas ordenações por preço
-const priceOf = (p: Product) => (p.kind === "stock" ? p.price : Number.MAX_SAFE_INTEGER / 2);
+// sob encomenda (sem preço) vai para o fim nas ordenações por preço
+const priceOf = (p: Product) => (inStock(p) ? p.price : Number.MAX_SAFE_INTEGER / 2);
 
 export function countActive(f: Filters) {
   return (

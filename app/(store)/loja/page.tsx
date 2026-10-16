@@ -12,7 +12,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title: cat ? `${cat.name} para personalizar` :"Loja de uniformes",
     description:
       cat?.description ??
-      "Uniformes em estoque prontos para personalizar com a sua logo e modelos sob medida para empresas.",
+      "Uniformes em estoque prontos para personalizar com a sua logo e modelos por orçamento para empresas.",
     alternates: { canonical: cat ? `/loja?categoria=${cat.slug}` : "/loja" },
   };
 }

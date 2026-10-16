@@ -177,3 +177,23 @@ export function dueDateFromToday(days: number, now = new Date()) {
   const d = new Date(now.getTime() + days * 86_400_000);
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(d);
 }
+
+// ---------------------------------------------------------------- consultas (painel e acompanhamento)
+
+export type AsaasPaymentListItem = AsaasPayment & {
+  customer: string;
+  dateCreated: string;
+  description?: string | null;
+  paymentDate?: string | null;
+  clientPaymentDate?: string | null;
+};
+
+export type AsaasCustomer = { id: string; name: string; email?: string | null; mobilePhone?: string | null; phone?: string | null; cpfCnpj?: string | null; company?: string | null };
+
+export const listPayments = (params: { limit?: number; offset?: number; externalReference?: string } = {}) => {
+  const q = new URLSearchParams({ limit: String(params.limit ?? 100), offset: String(params.offset ?? 0) });
+  if (params.externalReference) q.set("externalReference", params.externalReference);
+  return request<{ data: AsaasPaymentListItem[]; totalCount?: number; hasMore?: boolean }>(`/payments?${q}`);
+};
+
+export const getCustomer = (id: string) => request<AsaasCustomer>(`/customers/${encodeURIComponent(id)}`);

@@ -4097,3 +4097,16 @@ footer {
     width: 100%;
   }
 }
+.status.red {
+  background: #fdecec;
+  color: #c0504d;
+}
+.drawer-items {
+  margin: 8px 0 12px;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.order-drawer {
+  overflow-y: auto;
+}

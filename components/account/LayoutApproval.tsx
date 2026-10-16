@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { CheckCircle2, Clock, MessageSquareText, PenLine, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
-import { GarmentPreview } from "@/components/custom/GarmentPreview";
-import { defaultBrief } from "@/components/custom/config";
+import { getProduct } from "@/lib/catalog";
+import { LogoMockup } from "@/components/product/LogoMockup";
+import { useBrandLogo } from "@/components/product/useBrandLogo";
 import { formatDate } from "./Orders";
 import type { LayoutStatus, Order } from "./storage";
 import s from "./Account.module.css";
@@ -26,6 +27,7 @@ export function LayoutApproval({
   onSelect: (id: string) => void;
   onUpdate: (id: string, layout: NonNullable<Order["layout"]>) => void;
 }) {
+  const [brandLogo] = useBrandLogo();
   const [adjusting, setAdjusting] = useState(false);
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
@@ -45,6 +47,7 @@ export function LayoutApproval({
   const info = statusInfo[layout.status] ?? statusInfo.aguardando;
   const canAct = layout.status === "enviado" || layout.status === "ajuste";
   const item = order.items[0];
+  const product = item ? getProduct(item.slug) : undefined;
 
   const approve = () => {
     onUpdate(order.id, { ...layout, status: "aprovado" });
@@ -86,16 +89,8 @@ export function LayoutApproval({
             <img src={layout.imageUrl} alt={`Layout do pedido #${order.id}`} />
           ) : (
             <div className={s.layoutPlaceholder}>
-              <GarmentPreview
-                brief={{
-                  ...defaultBrief,
-                  collar: "Polo tradicional",
-                  colors: { body: item?.color ?? "marinho", collar: item?.color ?? "marinho", sleeve: item?.color ?? "marinho", friso: "amarelo" },
-                  positions: ["Peito esquerdo"],
-                }}
-                title="Ilustração do layout"
-              />
-              <span className={s.placeholderTag}>{layout.status === "aguardando" ? "Layout em preparação" : "Ilustração — o layout real aparece aqui"}</span>
+              {product && <LogoMockup product={product} view="front" positions={["frente"]} logo={brandLogo?.thumb} />}
+              <span className={s.placeholderTag}>{layout.status === "aguardando" ? "Layout em preparação" : "Prévia — o layout final aparece aqui"}</span>
             </div>
           )}
           <figcaption>

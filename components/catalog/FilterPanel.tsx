@@ -2,7 +2,7 @@
 import { Check, LayoutGrid, Package, Sparkles } from "lucide-react";
 import { colors, products, type SaleKind } from "@/lib/catalog";
 import { CategoryIcon } from "@/components/ui/primitives";
-import { applyFilters, categories, kindLabels, priceRanges, SIZES, TECHNIQUES, toggle, type Filters } from "./filters";
+import { applyFilters, categories, kindLabels, saleMode, priceRanges, SIZES, TECHNIQUES, toggle, type Filters } from "./filters";
 import s from "./Catalog.module.css";
 
 const usedColors = colors.filter((c) => products.some((p) => p.colors.includes(c.id)));
@@ -12,7 +12,7 @@ export function FilterPanel({ filters, onChange }: { filters: Filters; onChange:
   const byCategory = applyFilters(filters, "categoria");
   const byKind = applyFilters(filters, "tipos");
   const countCat = (slug: string | null) => (slug ? byCategory.filter((p) => p.category === slug).length : byCategory.length);
-  const countKind = (k: SaleKind) => byKind.filter((p) => p.kind === k).length;
+  const countKind = (k: SaleKind) => byKind.filter((p) => saleMode(p) === k).length;
 
   return (
     <div className={s.filters}>

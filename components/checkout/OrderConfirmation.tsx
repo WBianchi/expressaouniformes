@@ -23,7 +23,8 @@ import { money } from "@/lib/catalog";
 import { positionsLabel, type CheckoutResponse, type StoredOrder } from "@/lib/orders";
 import { getProduct } from "@/lib/catalog";
 import { SafeImage } from "@/components/ui/primitives";
-import { readCompletedOrder, readStoredOrder } from "./orderStorage";
+import { readCompletedOrder, readStoredOrder, updateStoredOrderStatus } from "./orderStorage";
+import { useOrderStatus } from "./useOrderStatus";
 import s from "./Order.module.css";
 
 type State = { kind: "loading" } | { kind: "full"; order: CheckoutResponse } | { kind: "basic"; order: StoredOrder } | { kind: "missing" };
@@ -71,6 +72,23 @@ export function OrderConfirmation({ id }: { id: string }) {
     const basic = readStoredOrder(id);
     setState(basic ? { kind: "basic", order: basic } : { kind: "missing" });
   }, [id]);
+
+  // acompanha o pagamento no Asaas e atualiza a tela quando o Pix/boleto/cartão é confirmado
+  const isDemo = state.kind === "full" ? state.order.demo : state.kind === "basic" ? !!state.order.demo : true;
+  const shownStatus = state.kind === "full" ? state.order.payment.status : state.kind === "basic" ? state.order.payment?.status : undefined;
+  const live = useOrderStatus(id, !isDemo && shownStatus !== "pago");
+  useEffect(() => {
+    if (!live || live.paymentStatus === shownStatus) return;
+    updateStoredOrderStatus(id, live);
+    setState((st) =>
+      st.kind === "full"
+        ? { kind: "full", order: { ...st.order, status: live.status, payment: { ...st.order.payment, status: live.paymentStatus } } }
+        : st.kind === "basic"
+          ? { kind: "basic", order: { ...st.order, status: live.status, payment: { method: st.order.payment?.method ?? "", ...st.order.payment, status: live.paymentStatus } } }
+          : st,
+    );
+    if (live.paymentStatus === "pago") toast.success("Pagamento confirmado! Seu pedido já entrou na fila de layout.");
+  }, [live, shownStatus, id]);
 
   if (state.kind === "loading") {
     return (

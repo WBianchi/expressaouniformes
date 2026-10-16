@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, Heart, HeartOff, Sparkles } from "lucide-react";
-import { getCategory, getProduct, money, type Product } from "@/lib/catalog";
+import { ArrowRight, Heart, HeartOff } from "lucide-react";
+import { getCategory, getProduct, inStock, money, type Product } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
 import { Drawer } from "@/components/ui/Drawer";
 import { SafeImage } from "@/components/ui/primitives";
@@ -57,17 +57,15 @@ export function FavoritesDrawer() {
                 <Link href={`/produto/${p.slug}`} className={s.name} onClick={closeDrawer}>
                   {p.name}
                 </Link>
-                {p.kind === "stock" ? (
+                {inStock(p) ? (
                   <span className={s.price}>
                     <b>{money(p.price)}</b>/un. · mín. {p.minQty} peças
                   </span>
                 ) : (
-                  <span className="chip chip-brand">
-                    <Sparkles size={12} /> Sob medida
-                  </span>
+                  <span className="chip chip-brand">Por orçamento</span>
                 )}
                 <Link href={`/produto/${p.slug}`} className={s.go} onClick={closeDrawer}>
-                  {p.kind === "stock" ? "Personalizar" : "Ver modelo"} <ArrowRight size={14} />
+                  {inStock(p) ? "Personalizar" : "Ver modelo"} <ArrowRight size={14} />
                 </Link>
               </div>
               <button type="button" className={s.remove} aria-label={`Remover ${p.name} dos favoritos`} onClick={() => toggleFavorite(p.slug)}>

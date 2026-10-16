@@ -3,63 +3,44 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BadgeCheck,
   ChevronDown,
-  CreditCard,
-  Factory,
+  ClipboardList,
   Headset,
   Heart,
   Menu,
   PackageSearch,
   Search,
   ShoppingBag,
-  Truck,
   X,
 } from "lucide-react";
 import { company, money, whatsappLink } from "@/lib/catalog";
 import { FREE_SHIPPING_FROM } from "@/lib/pricing";
 import { useStore } from "@/components/store/StoreProvider";
+import { useQuote } from "@/components/quote/useQuote";
 import { Logo } from "./Logo";
 import { SearchBox } from "./SearchBox";
 import { ProfileMenu } from "./ProfileMenu";
 import { ThemeToggle } from "./ThemeToggle";
 import { MegaMenu } from "./MegaMenu";
-import { PixIcon } from "./icons";
 import { useDismiss } from "./hooks";
 import s from "./Header.module.css";
 
-const announcements = [
-  { Icon: Truck, text: `Frete grátis acima de ${money(FREE_SHIPPING_FROM).replace(",00", "")}` },
-  { Icon: PixIcon, text: "Pagamento no Pix com 5% de desconto" },
-  { Icon: Factory, text: "Produção própria — da costura à personalização" },
-  { Icon: CreditCard, text: "Parcele em até 6x sem juros no cartão" },
-];
-
 export const navLinks = [
-  { href: "/sob-medida", label: "Monte seu uniforme" },
-  { href: "/sob-medida#empresas", label: "Para empresas" },
-  { href: "/#sobre", label: "Sobre nós" },
-  { href: "/contato", label: "Ajuda" },
+  { href: "/loja?tipo=stock", label: "Pronta-entrega" },
+  { href: "/orcamento", label: "Monte seu pedido" },
+  { href: "/contato", label: "Contato" },
 ];
 
 function Announcement() {
-  const [i, setI] = useState(0);
-  const [paused, setPaused] = useState(false);
-  useEffect(() => {
-    if (paused) return;
-    const t = window.setInterval(() => setI((n) => (n + 1) % announcements.length), 4200);
-    return () => window.clearInterval(t);
-  }, [paused]);
-  const { Icon, text } = announcements[i];
   return (
-    <div className={s.announce} onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
+    <div className={s.announce}>
       <div className={`container ${s.announceInner}`}>
         <span className={s.announceLeft}>
           <Headset size={14} strokeWidth={1.9} /> {company.hours}
         </span>
-        <p className={s.ticker} aria-live="polite">
-          <span key={i} className={s.tickerItem}>
-            <Icon size={14} /> {text}
+        <p className={s.ticker}>
+          <span className={s.tickerItem}>
+            Pix com 5% de desconto · frete grátis acima de {money(FREE_SHIPPING_FROM).replace(",00", "")}
           </span>
         </p>
         <span className={s.announceRight}>
@@ -99,6 +80,19 @@ function CartButton({ compact = false }: { compact?: boolean }) {
         </span>
       )}
     </button>
+  );
+}
+
+function QuoteButton() {
+  const { total } = useQuote();
+  return (
+    <Link href="/orcamento" className={s.action} aria-label={`Orçamento${total ? `, ${total} peças` : ""}`}>
+      <span className={s.cartIcon}>
+        <ClipboardList size={21} strokeWidth={1.75} />
+        {total > 0 && <span className={s.badge} data-tone="fav">{total > 999 ? "999+" : total}</span>}
+      </span>
+      <span>Orçamento</span>
+    </Link>
   );
 }
 
@@ -182,6 +176,7 @@ export function Header() {
               </span>
               <span>Favoritos</span>
             </button>
+            <QuoteButton />
             <ProfileMenu />
             <ThemeToggle />
             <CartButton />
@@ -215,7 +210,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* ---------- barra navy ---------- */}
+      {/* ---------- navegação ---------- */}
       <nav
         ref={navRef}
         className={s.nav}
@@ -256,11 +251,6 @@ export function Header() {
                 </Link>
               </li>
             ))}
-          </ul>
-          <ul className={s.seals} aria-label="Diferenciais">
-            <li><Factory size={16} strokeWidth={1.75} /> Produção própria</li>
-            <li><Truck size={16} strokeWidth={1.75} /> Entrega para todo o Brasil</li>
-            <li><BadgeCheck size={16} strokeWidth={1.75} /> A partir de 5 peças</li>
           </ul>
         </div>
         <div onPointerEnter={() => window.clearTimeout(timer.current)}>

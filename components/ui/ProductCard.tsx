@@ -16,7 +16,8 @@ export function ProductCard({ product, priority }: { product: Product; priority?
   return (
     <article className={s.card} data-available={available || undefined}>
       <Link href={href} className={s.cardMedia} aria-label={product.name}>
-        <SafeImage src={product.image} alt={product.name} priority={priority} />
+        <SafeImage src={product.photos[0]} alt={product.name} priority={priority} />
+        {product.photos[1] && <SafeImage src={product.photos[1]} alt="" className={s.cardAlt} />}
         {!available && <span className={s.cardTag}>{status}</span>}
       </Link>
       <button

@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { inStock, type Position, type Product } from "@/lib/catalog";
-import { availablePositions, logoSpots, type View } from "@/lib/mockup";
-import { Gallery } from "./Gallery";
+import { availablePositions, logoSpots } from "@/lib/mockup";
+import { Gallery, type Slide } from "./Gallery";
 import { QuoteBuyBox } from "./QuoteBuyBox";
 import { StockBuyBox } from "./StockBuyBox";
 import { useBrandLogo } from "./useBrandLogo";
@@ -15,7 +15,7 @@ import s from "./Product.module.css";
 export function ProductTop({ product }: { product: Product }) {
   const [logo, setLogo] = useBrandLogo();
   const [positions, setPositionsState] = useState<Position[]>(() => availablePositions(product).slice(0, 1));
-  const [view, setView] = useState<View>("front");
+  const [view, setView] = useState<Slide>("photo-0");
 
   // ao marcar uma posição, a galeria vira para o lado onde ela fica
   const setPositions = (next: Position[]) => {
@@ -25,7 +25,14 @@ export function ProductTop({ product }: { product: Product }) {
     setPositionsState(next);
   };
 
-  const custom = { positions, onPositions: setPositions, logo, onLogo: setLogo };
+  // ao enviar a logo, sai da foto com modelo e mostra a peça com a logo aplicada
+  const onLogo: typeof setLogo = (next) => {
+    const spot = next && positions[0] && logoSpots(product)[positions[0]];
+    if (spot) setView(spot.view);
+    setLogo(next);
+  };
+
+  const custom = { positions, onPositions: setPositions, logo, onLogo };
   return (
     <div className={s.top}>
       <Gallery product={product} positions={positions} logo={logo?.thumb} view={view} onViewChange={setView} />

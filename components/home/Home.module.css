@@ -79,6 +79,10 @@
   overflow: hidden;
   background: var(--surface-2);
 }
+.heroPic img,
+.catImg img {
+  object-position: 50% 25%;
+}
 .heroPic:nth-child(2) {
   transform: translateY(-16px);
 }
@@ -162,7 +166,7 @@
 }
 .catImg {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--surface-2);

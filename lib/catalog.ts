@@ -43,6 +43,8 @@ export type Product = {
   /** vista de costas, mesmo enquadramento da frontal (prévia da logo nas costas) */
   back: string;
   gallery: string[];
+  /** fotos de vitrine com modelos (pessoas diferentes); o simulador usa image/back */
+  photos: string[];
   /** custom: opções de acabamento destacadas */
   options?: string[];
 };
@@ -76,8 +78,9 @@ export const categories: Category[] = [
 const ADULT: Size[] = ["P", "M", "G", "GG", "XG"];
 const img = (slug: string) => `/images/products/${slug}.webp`;
 const back = (slug: string) => `/images/products/${slug}-costas.webp`;
+const photos = (slug: string) => [1, 2].map((n) => `/images/products/${slug}-modelo-${n}.webp`);
 
-export const products: Product[] = [
+const base: Omit<Product, "photos">[] = [
   // ---------- pronta-entrega ----------
   {
     slug: "polo-pv-basica", name: "Polo PV Básica", kind: "stock", category: "polos",
@@ -247,6 +250,8 @@ export const products: Product[] = [
     options: ["Refletivo", "Recortes", "Cores"], image: img("polo-alta-visibilidade"), back: back("polo-alta-visibilidade"), gallery: [img("polo-alta-visibilidade"), back("polo-alta-visibilidade")],
   },
 ];
+
+export const products: Product[] = base.map((p) => ({ ...p, photos: photos(p.slug) }));
 
 export const stockProducts = products.filter((p) => p.kind === "stock");
 export const customProducts = products.filter((p) => p.kind === "custom");

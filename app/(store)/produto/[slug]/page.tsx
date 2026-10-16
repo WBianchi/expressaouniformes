@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description: `${p.short} ${inStock(p) ? `Compre online a partir de ${p.minQty} peças, com a sua logo.` : "Disponível por orçamento para empresas, a partir de 30 peças."}`,
     alternates: { canonical: `/produto/${p.slug}` },
-    openGraph: { title: p.name, description: p.short, images: [{ url: p.image }], type: "website" },
+    openGraph: { title: p.name, description: p.short, images: [{ url: p.photos[0] ?? p.image }], type: "website" },
   };
 }
 
@@ -44,7 +44,7 @@ export default async function ProductPage({ params }: Props) {
     "@type": "Product",
     name: product.name,
     description: product.description,
-    image: [product.image, ...product.gallery.filter((g) => g !== product.image)],
+    image: [...product.photos, product.image, product.back],
     sku: product.slug,
     category: category?.name,
     material: product.fabric,

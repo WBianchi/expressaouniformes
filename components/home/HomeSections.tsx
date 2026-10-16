@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { SafeImage } from "@/components/ui/primitives";
 import s from "./Home.module.css";
 
-const heroPieces = ["polo-pv-basica", "camiseta-algodao-basica", "polo-piquet-basica"]
+const heroPieces = ["jaleco-gabardine", "polo-pv-basica", "camisa-operacional-brim"]
   .map((slug) => products.find((p) => p.slug === slug)!)
   .filter(Boolean);
 
@@ -33,7 +33,7 @@ export function HomeHero() {
         <div className={s.heroPics} aria-hidden>
           {heroPieces.map((p) => (
             <span key={p.slug} className={s.heroPic}>
-              <SafeImage src={p.image} alt="" priority />
+              <SafeImage src={p.photos[1] ?? p.photos[0]} alt="" priority />
             </span>
           ))}
         </div>
@@ -100,7 +100,7 @@ export function CategoryGrid() {
             <li key={c.slug}>
               <Link href={`/loja?categoria=${c.slug}`} className={s.cat}>
                 <span className={s.catImg}>
-                  <SafeImage src={c.cover!.image} alt="" />
+                  <SafeImage src={c.cover!.photos[0]} alt="" />
                 </span>
                 <span>{c.name}</span>
               </Link>

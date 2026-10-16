@@ -87,7 +87,7 @@ export function MegaMenu({ id, open, onNavigate }: { id: string; open: boolean; 
           {featured && (
             <Link href={`/produto/${featured.slug}`} onClick={onNavigate} className={s.feature}>
               <span className={s.featureMedia}>
-                <SafeImage src={featured.image} alt={featured.name} />
+                <SafeImage src={featured.photos[0]} alt={featured.name} />
               </span>
               <span className={s.featureBody}>
                 <small>{featured.badge ?? "Destaque"}</small>

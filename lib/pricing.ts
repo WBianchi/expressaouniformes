@@ -8,7 +8,9 @@ export type CartLine = {
   color: string;
   sizes: Partial<Record<Size, number>>;
   positions: Position[];
-  /** miniatura da logo (dataURL ≤ ~150 KB) e nome do arquivo; o original vai ao servidor no checkout */
+  /** logo de cada posição: miniatura (dataURL ≤ ~150 KB) e nome do arquivo */
+  logos?: Partial<Record<Position, { name: string; thumb: string }>>;
+  /** formato antigo (uma logo para todas as posições); lido só para carrinhos já salvos */
   logo?: { name: string; thumb: string };
   notes?: string;
 };
@@ -104,3 +106,13 @@ export const maxInstallments = (total: number) => Math.max(1, Math.min(6, Math.f
 const round = (n: number) => Math.round(n * 100) / 100;
 const brl = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
+
+/** Logo de cada posição da linha (com o formato antigo, a mesma logo vale para todas). */
+export function lineLogos(l: Pick<CartLine, "positions" | "logos" | "logo">) {
+  const out: Partial<Record<Position, { name: string; thumb: string }>> = {};
+  for (const p of l.positions) {
+    const logo = l.logos?.[p] ?? l.logo;
+    if (logo) out[p] = logo;
+  }
+  return out;
+}

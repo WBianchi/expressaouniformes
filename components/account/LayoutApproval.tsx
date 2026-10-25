@@ -4,7 +4,7 @@ import { CheckCircle2, Clock, MessageSquareText, PenLine, ThumbsUp } from "lucid
 import { toast } from "sonner";
 import { getProduct } from "@/lib/catalog";
 import { LogoMockup } from "@/components/product/LogoMockup";
-import { useBrandLogo } from "@/components/product/useBrandLogo";
+import { logoThumbs, useBrandLogos } from "@/components/product/useBrandLogo";
 import { formatDate } from "./Orders";
 import type { LayoutStatus, Order } from "./storage";
 import s from "./Account.module.css";
@@ -27,7 +27,7 @@ export function LayoutApproval({
   onSelect: (id: string) => void;
   onUpdate: (id: string, layout: NonNullable<Order["layout"]>) => void;
 }) {
-  const [brandLogo] = useBrandLogo();
+  const [brandLogos] = useBrandLogos();
   const [adjusting, setAdjusting] = useState(false);
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
@@ -89,7 +89,7 @@ export function LayoutApproval({
             <img src={layout.imageUrl} alt={`Layout do pedido #${order.id}`} />
           ) : (
             <div className={s.layoutPlaceholder}>
-              {product && <LogoMockup product={product} view="front" positions={["frente"]} logo={brandLogo?.thumb} />}
+              {product && <LogoMockup product={product} view="front" positions={["frente"]} logos={logoThumbs(brandLogos)} />}
               <span className={s.placeholderTag}>{layout.status === "aguardando" ? "Layout em preparação" : "Prévia — o layout final aparece aqui"}</span>
             </div>
           )}

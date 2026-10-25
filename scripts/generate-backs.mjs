@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Gera a vista de costas de cada produto a partir da foto frontal (OpenAI Images edits),
-// mesmo enquadramento, para a prévia da logo nas costas.
+// Gera as vistas de costas e de lado de cada produto a partir da foto frontal
+// (OpenAI Images edits), mesmo enquadramento, para a galeria e a prévia da logo.
 //
 // Uso:
-//   node --env-file=.env.local scripts/generate-backs.mjs [--force] [--only=polo-pv-basica,...]
+//   node --env-file=.env.local scripts/generate-backs.mjs [--view=costas|lado] [--force] [--only=polo-pv-basica,...]
 //
-// Saída: public/images/products/<slug>-costas.webp (1024x1024, WebP q82).
+// Saída: public/images/products/<slug>-costas.webp ou <slug>-lado.webp (1024x1024, WebP q82).
 // A chave OPENAI_API_KEY vem do ambiente e nunca é impressa.
 
 import { spawnSync } from "node:child_process";
@@ -21,12 +21,22 @@ const PRICE = { textIn: 5, imageIn: 8, imageOut: 30 };
 const args = process.argv.slice(2);
 const FORCE = args.includes("--force");
 const ONLY = args.find((a) => a.startsWith("--only="))?.split("=")[1]?.split(",");
+const VIEW = args.find((a) => a.startsWith("--view="))?.split("=")[1] ?? "costas";
+if (!["costas", "lado"].includes(VIEW)) throw new Error("--view deve ser costas ou lado");
 
-const PROMPT =
+const BACK =
   "Show the BACK VIEW of this exact same garment: same fabric, same color, same trims, same lighting, same seamless light grey background, " +
   "same camera distance, same framing and same size in the frame, perfectly centered, invisible ghost mannequin (no person, no hanger). " +
   "The back is completely plain: no print, no embroidery, no logo, no text, no labels or tags. Realistic seams (back yoke, collar from behind, sleeve hems). " +
   "Premium e-commerce packshot, catalog consistency.";
+
+const SIDE =
+  "Show the SIDE VIEW (left profile, rotated 90 degrees) of this exact same garment: same fabric, same color, same collar, buttons and trims, same lighting, " +
+  "same seamless light grey background, same camera distance and same size in the frame, perfectly centered, invisible ghost mannequin (no person, no hanger). " +
+  "Realistic 3D volume of a worn garment seen from the side: the left sleeve facing the camera, side seam visible, collar in profile. " +
+  "Completely plain: no print, no embroidery, no logo, no text, no labels or tags. Premium e-commerce packshot, catalog consistency.";
+
+const PROMPT = VIEW === "lado" ? SIDE : BACK;
 
 const py = (code, ...a) => {
   const r = spawnSync("python3", ["-c", code, ...a], { encoding: "utf8" });
@@ -64,7 +74,7 @@ async function edit(pngPath) {
 }
 
 async function run(slug) {
-  const out = join(DIR, `${slug}-costas.webp`);
+  const out = join(DIR, `${slug}-${VIEW}.webp`);
   if (!FORCE && existsSync(out)) return console.log(`- ${slug} já existe`);
   const front = join(DIR, `${slug}.webp`);
   const inPng = join(DIR, `${slug}.in.tmp.png`);
@@ -89,7 +99,7 @@ async function run(slug) {
 }
 
 if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY ausente (rode com --env-file=.env.local)");
-const slugs = (ONLY ?? readdirSync(DIR).filter((f) => f.endsWith(".webp") && !f.includes("-costas")).map((f) => f.replace(/\.webp$/, "")));
+const slugs = (ONLY ?? readdirSync(DIR).filter((f) => f.endsWith(".webp") && !/-(costas|lado|modelo-\d)\.webp$/.test(f)).map((f) => f.replace(/\.webp$/, "")));
 let total = 0;
 const queue = [...slugs];
 await Promise.all(
@@ -97,7 +107,8 @@ await Promise.all(
     while (queue.length) {
       const slug = queue.shift();
       try {
-        total += (await run(slug)) ?? 0;
+        const cost = await run(slug);
+        total += cost ?? 0;
       } catch (e) {
         console.log(`✗ ${slug}: ${e.message}`);
       }

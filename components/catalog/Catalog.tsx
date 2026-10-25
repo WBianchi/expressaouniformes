@@ -165,7 +165,7 @@ export default function Catalog({ initial }: { initial: Filters }) {
               <aside className={s.customHint}>
                 <div>
                   <b>Pedido para empresa, com 30 peças ou mais?</b>
-                  <p>Junte vários modelos, cores e quantidades em um só orçamento, inclusive itens sem estoque.</p>
+                  <p>Junte vários modelos, cores e quantidades em um só orçamento, inclusive itens sob cotação.</p>
                 </div>
                 <Link href="/orcamento" className="btn btn-outline btn-sm">
                   Monte seu pedido <ArrowRight size={15} />
@@ -227,7 +227,7 @@ function CategoryHero({ filters }: { filters: Filters }) {
   const subtitle =
     category?.description ??
     (only === "custom"
-      ? "Modelos sem estoque ou sob encomenda, para pedidos de empresas a partir de 30 peças."
+      ? "Modelos sob cotação ou sob encomenda, para pedidos de empresas a partir de 30 peças."
       : only === "stock"
         ? "Em estoque para comprar online, a partir de 5 peças com a sua logo."
         : "Compre online os itens em estoque ou inclua qualquer modelo no orçamento da sua empresa.");

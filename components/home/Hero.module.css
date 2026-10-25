@@ -1,204 +1,160 @@
+/* banner rotativo em tela cheia */
 .hero {
   position: relative;
   overflow: hidden;
-  isolation: isolate;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-soft);
+  background: #0c1a2e;
+  color: #fff;
 }
-
-/* fundo: a foto do slide desfocada, sob um véu claro (esfumaçado) */
-.backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-.backdrop img {
-  position: absolute;
-  inset: -60px;
-  width: calc(100% + 120px);
-  height: calc(100% + 120px);
-  object-fit: cover;
-  filter: blur(36px) saturate(1.15);
-  transform: scale(1.08);
-  opacity: 0;
-  transition: opacity 0.9s var(--ease);
-}
-.backdrop img[data-active] {
-  opacity: 1;
-}
-.veil {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--bg) 90%, transparent) 0%,
-      color-mix(in srgb, var(--bg) 72%, transparent) 48%,
-      color-mix(in srgb, var(--bg) 38%, transparent) 100%
-    );
-}
-
-.inner {
-  display: grid;
-  gap: 24px;
-  align-items: center;
-  padding-block: clamp(28px, 4vw, 56px);
-}
-@media (min-width: 900px) {
-  .inner {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-    grid-template-areas:
-      "text photo"
-      "controls photo";
-    column-gap: clamp(32px, 5vw, 80px);
-    min-height: clamp(460px, 42vw, 600px);
-  }
-  .text {
-    grid-area: text;
-    align-self: end;
-  }
-  .photo {
-    grid-area: photo;
-  }
-  .controls {
-    grid-area: controls;
-    align-self: start;
-  }
-}
-
-.text {
-  animation: textIn 0.6s var(--ease) both;
-}
-@keyframes textIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-.title {
-  font-family: var(--font-display);
-  font-size: clamp(30px, 4.2vw, 56px);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  max-width: 15ch;
-  color: var(--text);
-}
-.sub {
-  margin-top: 14px;
-  max-width: 44ch;
-  font-size: clamp(15px, 1.2vw, 18px);
-  color: var(--text-2);
-}
-.actions {
+.track {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 26px;
-}
-.ghost {
-  border: 1px solid var(--line-strong);
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
-  color: var(--text);
-  backdrop-filter: blur(8px);
-}
-
-/* foto nítida */
-.photo {
-  position: relative;
-  width: 100%;
-  max-width: 460px;
-  justify-self: center;
-  aspect-ratio: 4 / 5;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface-2);
-  box-shadow: 0 24px 60px -24px rgb(12 26 46 / 0.35);
-}
-@media (max-width: 899px) {
-  .photo {
-    order: -1;
-    max-width: none;
-    aspect-ratio: 5 / 4;
-  }
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
 }
 .slide {
+  position: relative;
+  flex: 0 0 100%;
+  min-width: 0;
+  aspect-ratio: 12 / 5;
+  min-height: 420px;
+  max-height: 640px;
+  overflow: hidden;
+}
+.media {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transition: opacity 0.7s var(--ease);
-}
-.slide[data-active] {
-  opacity: 1;
-}
-.slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 22%;
+  object-position: 70% 30%;
 }
 
-/* controles */
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.arrow {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--line-strong);
-  background: color-mix(in srgb, var(--surface) 75%, transparent);
-  color: var(--text);
-}
-.arrow:hover {
-  background: var(--surface);
-}
-.dots {
-  display: flex;
-  gap: 6px;
-}
-.dot {
-  position: relative;
-  width: 36px;
-  height: 20px;
-}
-.dot span {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 3px;
-  translate: 0 -50%;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--text) 18%, transparent);
-  overflow: hidden;
-}
-.dot[aria-selected="true"] span {
-  background: color-mix(in srgb, var(--text) 30%, transparent);
-}
-.dot[aria-selected="true"] span::after {
-  content: "";
+/* escurece o lado do texto para leitura em qualquer foto */
+.scrim {
   position: absolute;
   inset: 0;
-  background: var(--text);
-  transform-origin: left;
+  background: linear-gradient(90deg, rgb(8 20 40 / 0.72) 0%, rgb(8 20 40 / 0.4) 38%, rgb(8 20 40 / 0) 64%);
 }
-.dot span[data-run]::after {
-  animation: progress linear both;
-  animation-duration: inherit;
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
-@keyframes progress {
-  from {
-    transform: scaleX(0);
+.copy {
+  max-width: 560px;
+}
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 58px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  color: #fff;
+}
+.sub {
+  margin-top: 16px;
+  max-width: 46ch;
+  font-size: clamp(15px, 1.25vw, 19px);
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.86);
+}
+.cta {
+  margin-top: 28px;
+  background: #fff;
+  color: #0c1a2e;
+}
+.cta:hover {
+  background: #eef2f7;
+}
+
+/* setas */
+.arrow {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.18);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  transition: background var(--dur-fast) var(--ease);
+}
+.arrow:hover {
+  background: rgb(255 255 255 / 0.34);
+}
+.arrow[data-dir="prev"] {
+  left: 16px;
+}
+.arrow[data-dir="next"] {
+  right: 16px;
+}
+
+/* bolinhas */
+.dots {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 18px;
+  translate: -50% 0;
+  display: flex;
+  gap: 8px;
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.5);
+  transition:
+    width 0.3s var(--ease),
+    background 0.3s var(--ease);
+}
+.dot:hover {
+  background: rgb(255 255 255 / 0.8);
+}
+.dot[aria-selected="true"] {
+  width: 30px;
+  background: #fff;
+}
+
+/* celular: imagem vertical, texto embaixo */
+@media (max-width: 767px) {
+  .slide {
+    aspect-ratio: 4 / 5;
+    min-height: 0;
+    max-height: 78svh;
+  }
+  .media {
+    object-position: 50% 0%;
+  }
+  .media:not([data-mobile]) {
+    object-position: 65% 50%;
+  }
+  .scrim {
+    background: linear-gradient(0deg, rgb(8 20 40 / 0.85) 0%, rgb(8 20 40 / 0.55) 38%, rgb(8 20 40 / 0) 62%);
+  }
+  .content {
+    align-items: flex-end;
+    padding-bottom: 52px;
+  }
+  .sub {
+    margin-top: 10px;
+  }
+  .cta {
+    margin-top: 18px;
+  }
+  .arrow {
+    display: none;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .text,
-  .dot span[data-run]::after {
-    animation: none;
+  .track {
+    transition: none;
   }
 }

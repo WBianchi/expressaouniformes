@@ -19,7 +19,7 @@ export function ProductRow({ product }: { product: Product }) {
       </Link>
       <div className={s.rowBody}>
         <div className={s.rowTop}>
-          <span className={stock ? "chip chip-success" : "chip"}>{stock ? "Pronta-entrega" : product.kind === "custom" ? "Sob encomenda" : "Sem estoque"}</span>
+          <span className={stock ? "chip chip-success" : "chip"}>{stock ? "Pronta-entrega" : product.kind === "custom" ? "Sob encomenda" : "Sob cotação"}</span>
           <span className={s.rowCat}>{getCategory(product.category)?.name}</span>
         </div>
         <Link href={href} className={s.rowTitle}>{product.name}</Link>

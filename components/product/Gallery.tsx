@@ -4,37 +4,30 @@ import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { inStock, type Position, type Product } from "@/lib/catalog";
 import type { View } from "@/lib/mockup";
-import { SafeImage } from "@/components/ui/primitives";
-import { useProductPhotos } from "@/components/store/MediaProvider";
 import { LogoMockup } from "./LogoMockup";
 import s from "./Gallery.module.css";
 
-/** Slide da galeria: fotos com modelo ("photo-N") e as vistas do simulador de logo. */
-export type Slide = View | `photo-${number}`;
+/** Slide da galeria: frente, costas e lado da peça (simulador de logo). Sem fotos com modelo aqui, a pedido do cliente. */
+export type Slide = View;
 
-/**
- * Fotos com modelos (vitrine) + frente e costas da peça com a logo do cliente
- * aplicada nas posições escolhidas (simulador).
- */
+/** Frente, costas e lado da peça, com a logo de cada posição aplicada (simulador). */
 export function Gallery({
   product,
   positions = [],
-  logo,
+  logos = {},
   view: controlled,
   onViewChange,
 }: {
   product: Product;
   positions?: Position[];
-  logo?: string | null;
+  logos?: Partial<Record<Position, string>>;
   view?: Slide;
   onViewChange?: (v: Slide) => void;
 }) {
-  const photos = useProductPhotos()(product);
-  const VIEWS: { id: Slide; label: string; src?: string }[] = [
-    ...photos.slice(0, 1).map((src) => ({ id: "photo-0" as Slide, label: "Foto", src })),
+  const VIEWS: { id: Slide; label: string }[] = [
     { id: "front", label: "Frente" },
     { id: "back", label: "Costas" },
-    ...photos.slice(1).map((src, i) => ({ id: `photo-${i + 1}` as Slide, label: "Foto", src })),
+    { id: "side", label: "Lado" },
   ];
   const [own, setOwn] = useState<Slide>(VIEWS[0].id);
   const view = controlled ?? own;
@@ -43,18 +36,14 @@ export function Gallery({
   const touch = useRef<number | null>(null);
   const index = Math.max(0, VIEWS.findIndex((v) => v.id === view));
   const current = VIEWS[index];
-  const isMock = current.id === "front" || current.id === "back";
   const go = (d: number) => setView(VIEWS[(index + d + VIEWS.length) % VIEWS.length].id);
   const available = inStock(product);
   const badge =
-    product.kind === "custom" ? "Sob encomenda" : available ? "Pronta-entrega" : "Sem estoque";
+    product.kind === "custom" ? "Sob encomenda" : available ? "Pronta-entrega" : "Sob cotação";
 
-  const render = (v: (typeof VIEWS)[number], priority?: boolean) =>
-    v.src ? (
-      <SafeImage src={v.src} alt={`${product.name} vestida por modelo`} priority={priority} className={s.photo} />
-    ) : (
-      <LogoMockup product={product} view={v.id as View} positions={positions} logo={logo?.length ? logo : null} priority={priority} markers={!!positions.length} />
-    );
+  const render = (v: (typeof VIEWS)[number], priority?: boolean) => (
+    <LogoMockup product={product} view={v.id} positions={positions} logos={logos} priority={priority} markers={!!positions.length} />
+  );
 
   return (
     <div className={s.gallery}>
@@ -77,7 +66,7 @@ export function Gallery({
         <span className={s.badge} data-tone={available ? "ok" : product.kind === "custom" ? "brand" : "muted"}>
           {badge}
         </span>
-        {isMock && logo && positions.length > 0 && <span className={s.previewTag}>Prévia com a sua logo</span>}
+        {positions.some((p) => logos[p]) && <span className={s.previewTag}>Prévia com a sua logo</span>}
 
         <button type="button" className={s.toolBtn} onClick={() => setOpen(true)} aria-label="Ampliar imagem">
           <Expand size={17} />

@@ -7,6 +7,7 @@ import {
   type CartLine,
   type Coupon,
   type ShippingOption,
+  lineLogos,
   lineQuantity,
   lineTotal,
   maxInstallments,
@@ -161,7 +162,8 @@ export type QuoteLine = {
   qty: number;
   unitPrice: number;
   total: number;
-  logo?: { name: string; thumb: string };
+  /** logo de cada posição */
+  logos?: Partial<Record<Position, { name: string; thumb: string }>>;
   notes?: string;
 };
 
@@ -228,7 +230,7 @@ export function computeQuote(input: {
         qty: lineQuantity(l),
         unitPrice: unitPrice(l),
         total: lineTotal(l),
-        logo: l.logo,
+        logos: lineLogos(l),
         notes: l.notes,
       })),
       items: t.items,
@@ -395,7 +397,7 @@ export type CheckoutResponse = {
   demo: boolean;
   createdAt: string;
   status: OrderStatus;
-  quote: Omit<OrderQuote, "lines"> & { lines: Omit<QuoteLine, "logo">[] };
+  quote: Omit<OrderQuote, "lines"> & { lines: Omit<QuoteLine, "logos">[] };
   payment: PublicPayment;
 };
 
@@ -425,7 +427,7 @@ export function toStoredOrder(r: CheckoutResponse): StoredOrder {
 }
 
 export function publicQuote(q: OrderQuote): CheckoutResponse["quote"] {
-  return { ...q, lines: q.lines.map(({ logo: _logo, ...rest }) => rest) };
+  return { ...q, lines: q.lines.map(({ logos: _logos, ...rest }) => rest) };
 }
 
 // ---------------------------------------------------------------- persistência (Neon, opcional)

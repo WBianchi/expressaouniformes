@@ -21,6 +21,7 @@ import {
   type CartLine,
   FREE_SHIPPING_FROM,
   PIX_DISCOUNT,
+  lineLogos,
   lineQuantity,
   lineTotal,
   maxInstallments,
@@ -73,10 +74,15 @@ function LineItem({ line, onNavigate }: { line: CartLine; onNavigate: () => void
         <div className={s.lineRow}>
           <Link href={`/produto/${p.slug}`} className={s.thumb} onClick={onNavigate} aria-label={p.name}>
             <SafeImage src={p.image} alt="" />
-            {line.logo && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img className={s.logoThumb} src={line.logo.thumb} alt={`Logo: ${line.logo.name}`} title={line.logo.name} />
-            )}
+            {(() => {
+              const logo = Object.values(lineLogos(line))[0];
+              return (
+                logo && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className={s.logoThumb} src={logo.thumb} alt={`Logo: ${logo.name}`} title={logo.name} />
+                )
+              );
+            })()}
           </Link>
           <div className={s.lineInfo}>
             <div className={s.lineTop}>

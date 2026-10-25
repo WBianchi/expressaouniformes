@@ -6,23 +6,24 @@ import { SafeImage } from "@/components/ui/primitives";
 import s from "./LogoMockup.module.css";
 
 /**
- * Foto real da peça com a logo do cliente nas posições escolhidas.
- * Sem logo, marca as áreas de aplicação com um contorno tracejado.
+ * Foto real da peça com a logo do cliente em cada posição escolhida (cada posição
+ * pode ter uma logo diferente). Posição sem logo fica marcada com contorno tracejado.
  * Preenche o contêiner (posicionado) como object-fit: cover.
  */
 export function LogoMockup({
   product,
   view,
   positions,
-  logo,
+  logos = {},
   priority,
   alt,
   markers = true,
 }: {
-  product: Pick<Product, "name" | "image" | "back" | "category">;
+  product: Pick<Product, "name" | "image" | "back" | "side" | "category"> & { slug?: string };
   view: View;
   positions: Position[];
-  logo?: string | null;
+  /** miniatura da logo de cada posição */
+  logos?: Partial<Record<Position, string | null | undefined>>;
   priority?: boolean;
   alt?: string;
   /** mostra as áreas de aplicação quando ainda não há logo */
@@ -37,12 +38,13 @@ export function LogoMockup({
     <div className={s.mock}>
       <div className={s.square}>
         <SafeImage
-          src={view === "back" ? product.back : product.image}
-          alt={alt ?? `${product.name}, ${view === "back" ? "costas" : "frente"}`}
+          src={view === "back" ? product.back : view === "side" ? product.side : product.image}
+          alt={alt ?? `${product.name}, ${view === "back" ? "costas" : view === "side" ? "lado" : "frente"}`}
           priority={priority}
         />
-        {visible.map(({ pos, spot }) =>
-          logo || markers ? (
+        {visible.map(({ pos, spot }) => {
+          const logo = logos[pos];
+          return logo || markers ? (
             <span
               key={pos}
               className={s.spot}
@@ -60,8 +62,8 @@ export function LogoMockup({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {logo ? <img src={logo} alt="" /> : <small>Logo</small>}
             </span>
-          ) : null,
-        )}
+          ) : null;
+        })}
       </div>
     </div>
   );

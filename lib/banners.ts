@@ -6,39 +6,44 @@ export type Banner = {
   subtitle: string;
   ctaLabel: string;
   ctaHref: string;
+  /** desktop, horizontal (2400×1000) */
   image: string;
+  /** celular, vertical (1080×1350); vazio = usa a de desktop */
+  imageMobile: string;
   active: boolean;
 };
 
 /** Fotos de vitrine trocadas pelo painel: slug → [foto principal, segunda foto] (posições vazias = padrão). */
 export type PhotoOverrides = Record<string, (string | null)[]>;
 
+const hero = (n: number) => ({ image: `/images/banners/hero-${n}.webp`, imageMobile: `/images/banners/hero-${n}-mobile.webp` });
+
 export const defaultBanners: Banner[] = [
   {
     id: "padrao-1",
     title: "Uniformes com a logo da sua empresa",
-    subtitle: "Compre online a partir de 5 peças. Fábrica própria e entrega para todo o Brasil.",
+    subtitle: "Modelos em estoque a partir de 5 peças. Envie sua logo, veja como fica na peça e receba em todo o Brasil.",
     ctaLabel: "Comprar pronta-entrega",
     ctaHref: "/loja?tipo=stock",
-    image: "/images/products/polo-pv-basica-modelo-2.webp",
+    ...hero(1),
     active: true,
   },
   {
     id: "padrao-2",
-    title: "Monte o pedido da sua empresa",
-    subtitle: "Vários modelos, cores e quantidades em um só orçamento, a partir de 30 peças.",
+    title: "Fábrica própria, do tecido à entrega",
+    subtitle: "Monte o pedido da sua empresa com vários modelos e receba um orçamento. A partir de 30 peças.",
     ctaLabel: "Montar meu pedido",
     ctaHref: "/orcamento",
-    image: "/images/products/camisa-operacional-brim-modelo-2.webp",
+    ...hero(2),
     active: true,
   },
   {
     id: "padrao-3",
-    title: "Veja a sua logo na peça antes de comprar",
-    subtitle: "Envie a logo, escolha onde aplicar e aprove o layout antes da produção.",
-    ctaLabel: "Personalizar agora",
-    ctaHref: "/loja",
-    image: "/images/products/dolma-chef-modelo-2.webp",
+    title: "Camisetas para eventos, igrejas e grupos",
+    subtitle: "A partir de 5 peças, grade do PP ao XGG. Retiros, corridas, confraternizações e ações de marca.",
+    ctaLabel: "Ver camisetas",
+    ctaHref: "/loja?categoria=camisetas",
+    ...hero(3),
     active: true,
   },
 ];

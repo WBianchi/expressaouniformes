@@ -18,6 +18,7 @@ type BannerRow = {
   cta_label: string;
   cta_href: string;
   image_url: string;
+  image_mobile_url: string;
   active: boolean;
 };
 
@@ -28,6 +29,7 @@ const toBanner = (r: BannerRow): Banner => ({
   ctaLabel: r.cta_label,
   ctaHref: r.cta_href,
   image: r.image_url,
+  imageMobile: r.image_mobile_url,
   active: r.active,
 });
 
@@ -36,7 +38,7 @@ export async function listBanners(): Promise<Banner[] | null> {
   if (!process.env.DATABASE_URL) return null;
   const sql = await db();
   const rows = (await sql.query(
-    "select id, title, subtitle, cta_label, cta_href, image_url, active from expressao.banners order by sort, created_at",
+    "select id, title, subtitle, cta_label, cta_href, image_url, image_mobile_url, active from expressao.banners order by sort, created_at",
   )) as BannerRow[];
   return rows.map(toBanner);
 }
@@ -52,7 +54,7 @@ export const getBanners = unstable_cache(
       return defaultBanners;
     }
   },
-  ["home-banners"],
+  ["home-banners-v2"],
   { tags: [MEDIA_TAG], revalidate: 3600 },
 );
 

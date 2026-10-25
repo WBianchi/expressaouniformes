@@ -7,14 +7,14 @@ import { useProductPhotos } from "@/components/store/MediaProvider";
 import { SafeImage, Swatches } from "./primitives";
 import s from "./ui.module.css";
 
-/** Card de produto: pronta-entrega com preço; sem estoque ou sob encomenda, por orçamento. */
+/** Card de produto: pronta-entrega com preço; sob cotação ou sob encomenda, por orçamento. */
 export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
   const { isFavorite, toggleFavorite } = useStore();
   const fav = isFavorite(product.slug);
   const photos = useProductPhotos()(product);
   const available = inStock(product);
   const href = `/produto/${product.slug}`;
-  const status = available ? "Pronta-entrega" : product.kind === "custom" ? "Sob encomenda" : "Sem estoque";
+  const status = available ? "Pronta-entrega" : product.kind === "custom" ? "Sob encomenda" : "Sob cotação";
   return (
     <article className={s.card} data-available={available || undefined}>
       <Link href={href} className={s.cardMedia} aria-label={product.name}>

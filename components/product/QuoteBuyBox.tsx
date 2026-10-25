@@ -12,7 +12,7 @@ import { StickyBar } from "./StickyBar";
 import s from "./Product.module.css";
 
 /** Itens sem estoque ou sob encomenda: entram no orçamento para empresas (30+ peças no pedido). */
-export function QuoteBuyBox({ product, positions, onPositions, logo, onLogo }: PersonalizeProps & { product: Product }) {
+export function QuoteBuyBox({ product, positions, onPositions, logos, onLogo }: PersonalizeProps & { product: Product }) {
   const { add, items, total } = useQuote();
   const [color, setColor] = useState(product.colors[0]);
   const [qty, setQty] = useState(CUSTOM_MIN_QTY);
@@ -31,7 +31,7 @@ export function QuoteBuyBox({ product, positions, onPositions, logo, onLogo }: P
       <ProductHead product={product} />
 
       <div className={s.quoteNotice}>
-        <b>{outOfStock ? "Sem estoque no momento" : "Sob encomenda"}</b>
+        <b>{outOfStock ? "Sob cotação" : "Sob encomenda"}</b>
         <p>
           {outOfStock ? "Este modelo não está disponível para compra online agora. " : ""}
           Inclua no seu orçamento para empresas: pedidos a partir de {CUSTOM_MIN_QTY} peças no total, podendo misturar modelos, cores e tamanhos.
@@ -56,7 +56,7 @@ export function QuoteBuyBox({ product, positions, onPositions, logo, onLogo }: P
         </div>
       </section>
 
-      <Personalize product={product} positions={positions} onPositions={onPositions} logo={logo} onLogo={onLogo} fees={false} step={3} />
+      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} fees={false} step={3} />
 
       <div className={s.actions} ref={actionsRef}>
         <button type="button" className="btn btn-primary btn-lg btn-block" onClick={addToQuote}>

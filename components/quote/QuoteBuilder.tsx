@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, CheckCircle2, MessageCircle, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { Check, CheckCircle2, Copy, MessageCircle, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { categories, getColor, getProduct, inStock, positionFees, products, whatsappLink, type Position } from "@/lib/catalog";
@@ -10,7 +10,7 @@ import { CUSTOM_MIN_QTY, STOCK_MIN_QTY, employeeOptions } from "@/lib/quote";
 import { emptyCompany, quoteRequestMessage, type QuoteCompany } from "@/lib/quote-message";
 import { LogoMockup } from "@/components/product/LogoMockup";
 import { LogoUpload } from "@/components/product/LogoUpload";
-import { useBrandLogo } from "@/components/product/useBrandLogo";
+import { logoThumbs, useBrandLogos } from "@/components/product/useBrandLogo";
 import { Stepper, Swatches } from "@/components/ui/primitives";
 import { useQuote } from "./useQuote";
 import s from "./Quote.module.css";
@@ -27,7 +27,7 @@ type Errors = Partial<Record<keyof QuoteCompany, string>>;
 
 const statusLabel = (slug: string) => {
   const p = getProduct(slug)!;
-  return p.kind === "custom" ? "Sob encomenda" : inStock(p) ? "Pronta-entrega" : "Sem estoque";
+  return p.kind === "custom" ? "Sob encomenda" : inStock(p) ? "Pronta-entrega" : "Sob cotação";
 };
 
 const maskPhone = (v: string) => {
@@ -39,7 +39,8 @@ const maskPhone = (v: string) => {
 
 export function QuoteBuilder({ initial }: { initial?: string }) {
   const { items, total, add, update, remove, clear } = useQuote();
-  const [logo, setLogo] = useBrandLogo();
+  const [logos, setLogo] = useBrandLogos();
+  const thumbs = logoThumbs(logos);
   const [cat, setCat] = useState<string>("todos");
   const [company, setCompany] = useState<QuoteCompany>(emptyCompany);
   const [errors, setErrors] = useState<Errors>({});
@@ -54,6 +55,10 @@ export function QuoteBuilder({ initial }: { initial?: string }) {
     const p = getProduct(initial);
     if (p) add({ slug: p.slug, color: p.colors[0], qty: CUSTOM_MIN_QTY, positions: availablePositions(p).slice(0, 1) }, { silent: true, ifAbsent: true });
   }, [initial, add]);
+
+  // posições usadas em algum item (sem itens, mostra a frente)
+  const usedPositions = (["frente", "costas", "manga"] as Position[]).filter((p) => items.some((i) => i.positions.includes(p)));
+  if (!usedPositions.length) usedPositions.push("frente");
 
   const list = useMemo(() => (cat === "todos" ? products : products.filter((p) => p.category === cat)), [cat]);
   const minOk = total >= CUSTOM_MIN_QTY;
@@ -87,7 +92,7 @@ export function QuoteBuilder({ initial }: { initial?: string }) {
       formRef.current?.querySelector<HTMLElement>("[aria-invalid]")?.focus();
       return;
     }
-    window.open(whatsappLink(quoteRequestMessage(items, company, logo?.name)), "_blank", "noopener,noreferrer");
+    window.open(whatsappLink(quoteRequestMessage(items, company, Object.fromEntries(Object.entries(logos).map(([p, l]) => [p, l.name])))), "_blank", "noopener,noreferrer");
     setSent(true);
   }
 
@@ -116,7 +121,7 @@ export function QuoteBuilder({ initial }: { initial?: string }) {
                 return (
                   <li key={i.id} className={s.item}>
                     <Link href={`/produto/${p.slug}`} className={s.itemImg} aria-label={p.name}>
-                      <LogoMockup product={p} view="front" positions={i.positions} logo={logo?.thumb} markers={false} />
+                      <LogoMockup product={p} view="front" positions={i.positions} logos={thumbs} markers={false} />
                     </Link>
                     <div className={s.itemBody}>
                       <div className={s.itemTop}>
@@ -194,9 +199,25 @@ export function QuoteBuilder({ initial }: { initial?: string }) {
             <h2 id="q-logo">
               <span className={s.num}>2</span> Sua logo
             </h2>
-            <span className={s.hint}>aparece na prévia de cada item</span>
+            <span className={s.hint}>uma arte para cada posição</span>
           </header>
-          <LogoUpload value={logo} onChange={setLogo} />
+          <div className={s.logos}>
+            {usedPositions.map((pos) => {
+              const others = usedPositions.filter((p) => p !== pos && logos[p] && logos[p]!.thumb !== logos[pos]?.thumb);
+              return (
+                <div key={pos} className={s.logoSlot}>
+                  <b>{positionFees[pos].label}</b>
+                  <LogoUpload value={logos[pos] ?? null} onChange={(v) => setLogo(pos, v)} label={`Logo da ${positionFees[pos].label.toLowerCase()}`} compact />
+                  {!logos[pos] &&
+                    others.map((p) => (
+                      <button key={p} type="button" className={s.copyBtn} onClick={() => setLogo(pos, logos[p]!)}>
+                        <Copy size={13} /> Usar a mesma da {positionFees[p].label.split(" ")[0].toLowerCase()}
+                      </button>
+                    ))}
+                </div>
+              );
+            })}
+          </div>
         </section>
 
         {/* 3. empresa */}

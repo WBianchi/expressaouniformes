@@ -43,7 +43,8 @@ const bannerSchema = z.object({
   subtitle: z.string().trim().max(180, "Texto muito longo (máx. 180)."),
   ctaLabel: z.string().trim().max(32, "Texto do botão muito longo (máx. 32)."),
   ctaHref: z.string().trim().max(300),
-  image: z.string().trim().refine(safeImage, "Envie uma imagem."),
+  image: z.string().trim().refine(safeImage, "Envie a imagem do banner."),
+  imageMobile: z.string().trim().refine((u) => !u || safeImage(u), "Imagem de celular inválida."),
   active: z.boolean(),
 });
 
@@ -53,16 +54,20 @@ export async function saveBanner(input: z.input<typeof bannerSchema>) {
     const b = bannerSchema.parse(input);
     const href = b.ctaHref ? safeHref(b.ctaHref) : "";
     if (b.id) {
-      const [old] = (await sql.query("select image_url from expressao.banners where id = $1", [b.id])) as { image_url: string }[];
+      const [old] = (await sql.query("select image_url, image_mobile_url from expressao.banners where id = $1", [b.id])) as {
+        image_url: string;
+        image_mobile_url: string;
+      }[];
       await sql.query(
-        "update expressao.banners set title=$2, subtitle=$3, cta_label=$4, cta_href=$5, image_url=$6, active=$7, updated_at=now() where id=$1",
-        [b.id, b.title, b.subtitle, b.ctaLabel, href, b.image, b.active],
+        "update expressao.banners set title=$2, subtitle=$3, cta_label=$4, cta_href=$5, image_url=$6, image_mobile_url=$7, active=$8, updated_at=now() where id=$1",
+        [b.id, b.title, b.subtitle, b.ctaLabel, href, b.image, b.imageMobile, b.active],
       );
       if (old && old.image_url !== b.image) await dropBlob(old.image_url);
+      if (old && old.image_mobile_url !== b.imageMobile) await dropBlob(old.image_mobile_url);
     } else {
       await sql.query(
-        "insert into expressao.banners (title, subtitle, cta_label, cta_href, image_url, active, sort) values ($1,$2,$3,$4,$5,$6, coalesce((select max(sort) from expressao.banners), 0) + 1)",
-        [b.title, b.subtitle, b.ctaLabel, href, b.image, b.active],
+        "insert into expressao.banners (title, subtitle, cta_label, cta_href, image_url, image_mobile_url, active, sort) values ($1,$2,$3,$4,$5,$6,$7, coalesce((select max(sort) from expressao.banners), 0) + 1)",
+        [b.title, b.subtitle, b.ctaLabel, href, b.image, b.imageMobile, b.active],
       );
     }
   });
@@ -71,8 +76,12 @@ export async function saveBanner(input: z.input<typeof bannerSchema>) {
 export async function deleteBanner(id: string) {
   return run(async () => {
     const sql = await db();
-    const rows = (await sql.query("delete from expressao.banners where id = $1 returning image_url", [z.string().uuid().parse(id)])) as { image_url: string }[];
+    const rows = (await sql.query("delete from expressao.banners where id = $1 returning image_url, image_mobile_url", [z.string().uuid().parse(id)])) as {
+      image_url: string;
+      image_mobile_url: string;
+    }[];
     await dropBlob(rows[0]?.image_url);
+    await dropBlob(rows[0]?.image_mobile_url);
   });
 }
 

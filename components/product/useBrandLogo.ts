@@ -1,22 +1,32 @@
 "use client";
-// Logo da empresa compartilhada por todo o site: enviada uma vez, aparece na prévia
-// de qualquer peça, no carrinho e no orçamento. Guarda só a miniatura no navegador.
+// Logos da empresa compartilhadas pelo site, uma por posição (frente, costas, manga):
+// enviadas uma vez, aparecem na prévia de qualquer peça, no carrinho e no orçamento.
+// Guarda só as miniaturas no navegador.
 import { useCallback, useMemo, useSyncExternalStore } from "react";
+import type { Position } from "@/lib/catalog";
 import type { LogoValue } from "./LogoUpload";
 
-const KEY = "eu-logo";
+export type LogoSet = Partial<Record<Position, NonNullable<LogoValue>>>;
+
+const KEY = "eu-logos";
+/** versão antiga: uma logo só, passa a valer para a frente */
+const LEGACY = "eu-logo";
 const EVENT = "eu-logo-change";
+const POSITIONS: Position[] = ["frente", "costas", "manga"];
 
 function read(): string | null {
   try {
-    return localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY);
+    if (raw) return raw;
+    const old = localStorage.getItem(LEGACY);
+    return old ? JSON.stringify({ frente: JSON.parse(old) }) : null;
   } catch {
     return null;
   }
 }
 
 function subscribe(cb: () => void) {
-  const onStorage = (e: StorageEvent) => e.key === KEY && cb();
+  const onStorage = (e: StorageEvent) => (e.key === KEY || e.key === LEGACY) && cb();
   window.addEventListener(EVENT, cb);
   window.addEventListener("storage", onStorage);
   return () => {
@@ -25,28 +35,40 @@ function subscribe(cb: () => void) {
   };
 }
 
-function parse(raw: string | null): LogoValue {
-  if (!raw) return null;
+const isLogo = (v: unknown): v is NonNullable<LogoValue> =>
+  !!v && typeof (v as { thumb?: unknown }).thumb === "string" && (v as { thumb: string }).thumb.startsWith("data:image/") && typeof (v as { name?: unknown }).name === "string";
+
+function parse(raw: string | null): LogoSet {
+  if (!raw) return {};
   try {
     const v = JSON.parse(raw);
-    return typeof v?.thumb === "string" && v.thumb.startsWith("data:image/") && typeof v.name === "string" ? v : null;
+    const out: LogoSet = {};
+    for (const p of POSITIONS) if (isLogo(v?.[p])) out[p] = v[p];
+    return out;
   } catch {
-    return null;
+    return {};
   }
 }
 
-export function useBrandLogo(): [LogoValue, (v: LogoValue) => void] {
+/** Miniaturas por posição, no formato que a prévia (LogoMockup) usa. */
+export const logoThumbs = (logos: LogoSet): Partial<Record<Position, string>> =>
+  Object.fromEntries(Object.entries(logos).map(([p, l]) => [p, l.thumb]));
+
+export function useBrandLogos(): [LogoSet, (position: Position, v: LogoValue) => void] {
   // a string crua é estável entre leituras; o objeto é derivado dela
   const raw = useSyncExternalStore(subscribe, read, () => null);
-  const set = useCallback((v: LogoValue) => {
+  const logos = useMemo(() => parse(raw), [raw]);
+  const set = useCallback((position: Position, v: LogoValue) => {
+    const next = { ...parse(read()) };
+    if (v) next[position] = v;
+    else delete next[position];
     try {
-      if (v) localStorage.setItem(KEY, JSON.stringify(v));
-      else localStorage.removeItem(KEY);
+      localStorage.setItem(KEY, JSON.stringify(next));
+      localStorage.removeItem(LEGACY);
     } catch {
-      /* armazenamento cheio ou bloqueado: a logo vale só nesta página */
+      /* armazenamento cheio ou bloqueado: as logos valem só nesta página */
     }
     window.dispatchEvent(new Event(EVENT));
   }, []);
-  const logo = useMemo(() => parse(raw), [raw]);
-  return [logo, set];
+  return [logos, set];
 }

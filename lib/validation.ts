@@ -4,6 +4,11 @@ import { colors, getProduct, inStock, type Size } from "./catalog.ts";
 const sizeKeys = ["PP", "P", "M", "G", "GG", "XG", "XGG"] as const satisfies readonly Size[];
 const count = z.number().int().min(0).max(9999);
 
+const logoSchema = z.object({
+  name: z.string().max(200),
+  thumb: z.string().max(300_000).refine((s) => s.startsWith("data:image/")),
+});
+
 export const cartLineSchema = z
   .object({
     id: z.string().min(1).max(64),
@@ -11,18 +16,14 @@ export const cartLineSchema = z
     color: z.string().refine((c) => colors.some((x) => x.id === c)),
     sizes: z.partialRecord(z.enum(sizeKeys), count),
     positions: z.array(z.enum(["frente", "costas", "manga"])).max(3),
-    logo: z
-      .object({
-        name: z.string().max(200),
-        thumb: z.string().max(300_000).refine((s) => s.startsWith("data:image/")),
-      })
-      .optional(),
+    logos: z.partialRecord(z.enum(["frente", "costas", "manga"]), logoSchema).optional(),
+    logo: logoSchema.optional(),
     notes: z.string().max(1000).optional(),
   })
   .superRefine((l, ctx) => {
     const p = getProduct(l.slug);
     if (!p || p.kind !== "stock") return ctx.addIssue({ code: "custom", message: "Produto indisponível." });
-    if (!inStock(p)) return ctx.addIssue({ code: "custom", message: `${p.name} está sem estoque no momento. Inclua no orçamento.` });
+    if (!inStock(p)) return ctx.addIssue({ code: "custom", message: `${p.name} é vendido sob cotação. Inclua no orçamento.` });
     if (!p.colors.includes(l.color)) ctx.addIssue({ code: "custom", message: "Cor indisponível." });
     const qty = Object.values(l.sizes).reduce<number>((a, b) => a + (b || 0), 0);
     if (qty < p.minQty) ctx.addIssue({ code: "custom", message: `Mínimo de ${p.minQty} peças.` });

@@ -5,7 +5,7 @@ import { availablePositions, logoSpots } from "@/lib/mockup";
 import { Gallery, type Slide } from "./Gallery";
 import { QuoteBuyBox } from "./QuoteBuyBox";
 import { StockBuyBox } from "./StockBuyBox";
-import { useBrandLogo } from "./useBrandLogo";
+import { logoThumbs, useBrandLogos } from "./useBrandLogo";
 import s from "./Product.module.css";
 
 /**
@@ -13,9 +13,9 @@ import s from "./Product.module.css";
  * cliente escolhe aparece na foto da peça, igual na compra online e no orçamento.
  */
 export function ProductTop({ product }: { product: Product }) {
-  const [logo, setLogo] = useBrandLogo();
+  const [logos, setLogo] = useBrandLogos();
   const [positions, setPositionsState] = useState<Position[]>(() => availablePositions(product).slice(0, 1));
-  const [view, setView] = useState<Slide>("photo-0");
+  const [view, setView] = useState<Slide>("front");
 
   // ao marcar uma posição, a galeria vira para o lado onde ela fica
   const setPositions = (next: Position[]) => {
@@ -25,17 +25,17 @@ export function ProductTop({ product }: { product: Product }) {
     setPositionsState(next);
   };
 
-  // ao enviar a logo, sai da foto com modelo e mostra a peça com a logo aplicada
-  const onLogo: typeof setLogo = (next) => {
-    const spot = next && positions[0] && logoSpots(product)[positions[0]];
+  // ao enviar a logo de uma posição, a galeria mostra o lado onde ela fica
+  const onLogo: typeof setLogo = (position, next) => {
+    const spot = next && logoSpots(product)[position];
     if (spot) setView(spot.view);
-    setLogo(next);
+    setLogo(position, next);
   };
 
-  const custom = { positions, onPositions: setPositions, logo, onLogo };
+  const custom = { positions, onPositions: setPositions, logos, onLogo };
   return (
     <div className={s.top}>
-      <Gallery product={product} positions={positions} logo={logo?.thumb} view={view} onViewChange={setView} />
+      <Gallery product={product} positions={positions} logos={logoThumbs(logos)} view={view} onViewChange={setView} />
       {inStock(product) ? <StockBuyBox product={product} {...custom} /> : <QuoteBuyBox product={product} {...custom} />}
     </div>
   );

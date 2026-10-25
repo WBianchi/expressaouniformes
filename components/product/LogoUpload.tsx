@@ -6,7 +6,19 @@ import s from "./Product.module.css";
 
 export type LogoValue = { name: string; thumb: string; size?: number } | null;
 
-export function LogoUpload({ value, onChange }: { value: LogoValue; onChange: (v: LogoValue) => void }) {
+export function LogoUpload({
+  value,
+  onChange,
+  label = "logo",
+  compact,
+}: {
+  value: LogoValue;
+  onChange: (v: LogoValue) => void;
+  /** nome do campo para leitores de tela, ex.: "Logo da frente" */
+  label?: string;
+  /** versão menor, usada dentro de cada posição */
+  compact?: boolean;
+}) {
   const input = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -40,7 +52,7 @@ export function LogoUpload({ value, onChange }: { value: LogoValue; onChange: (v
   };
 
   return (
-    <div className={s.upload}>
+    <div className={s.upload} data-compact={compact || undefined}>
       <input
         ref={input}
         type="file"
@@ -48,6 +60,7 @@ export function LogoUpload({ value, onChange }: { value: LogoValue; onChange: (v
         className="sr-only"
         tabIndex={-1}
         aria-hidden
+        aria-label={label}
         onChange={(e) => handle(e.target.files?.[0])}
       />
       {value ? (
@@ -62,8 +75,8 @@ export function LogoUpload({ value, onChange }: { value: LogoValue; onChange: (v
             {value.size ? <small>{formatBytes(value.size)} · enviaremos o layout para sua aprovação</small> : null}
           </div>
           <div className={s.uploadActions}>
-            <button type="button" className="icon-btn" onClick={() => input.current?.click()} aria-label="Trocar logo"><RefreshCw size={17} /></button>
-            <button type="button" className="icon-btn" onClick={() => onChange(null)} aria-label="Remover logo"><Trash2 size={17} /></button>
+            <button type="button" className="icon-btn" onClick={() => input.current?.click()} aria-label={`Trocar ${label.toLowerCase()}`}><RefreshCw size={17} /></button>
+            <button type="button" className="icon-btn" onClick={() => onChange(null)} aria-label={`Remover ${label.toLowerCase()}`}><Trash2 size={17} /></button>
           </div>
         </div>
       ) : (
@@ -84,7 +97,7 @@ export function LogoUpload({ value, onChange }: { value: LogoValue; onChange: (v
         >
           <span className={s.dropIcon}>{busy ? <Loader2 size={22} className={s.spin} /> : <ImageUp size={22} strokeWidth={1.75} />}</span>
           <span className={s.dropText}>
-            <b>{busy ? "Processando a imagem…" : drag ? "Solte para enviar" : "Arraste sua logo ou clique para enviar"}</b>
+            <b>{busy ? "Processando a imagem…" : drag ? "Solte para enviar" : compact ? "Enviar a logo desta posição" : "Arraste sua logo ou clique para enviar"}</b>
             <small id={hintId}>PNG, JPG, WebP ou SVG · até 10 MB. Preferência por fundo transparente.</small>
           </span>
         </button>

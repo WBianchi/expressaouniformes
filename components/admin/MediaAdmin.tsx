@@ -63,7 +63,7 @@ function useAction() {
 /* ---------------- Banners ---------------- */
 
 type Draft = Omit<Banner, "id"> & { id?: string };
-const emptyDraft: Draft = { title: "", subtitle: "", ctaLabel: "", ctaHref: "/loja?tipo=stock", image: "", active: true };
+const emptyDraft: Draft = { title: "", subtitle: "", ctaLabel: "", ctaHref: "/loja?tipo=stock", image: "", imageMobile: "", active: true };
 
 export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
   const { pending, error, setError, run } = useAction();
@@ -90,8 +90,9 @@ export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
         <div>
           <h3>Banners da home</h3>
           <p>
-            Os banners ativos passam sozinhos no topo da página inicial, na ordem abaixo. Use fotos de pessoas vestindo os uniformes,
-            na vertical ou quadradas (mínimo 1000 px). O fundo esfumaçado é gerado da própria foto.
+            Os banners ativos passam sozinhos no topo da página inicial, na ordem abaixo. Imagem do computador: horizontal, 2400 × 1000 px,
+            com as pessoas à direita (o texto fica à esquerda). Imagem do celular (opcional): vertical, 1080 × 1350 px, com as pessoas em
+            cima (o texto fica embaixo).
           </p>
         </div>
         <button type="button" className="button primary small" onClick={() => (setError(null), setDraft({ ...emptyDraft }))}>
@@ -174,12 +175,12 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
   const [customLink, setCustomLink] = useState(custom && !!d.ctaHref);
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((x) => ({ ...x, [k]: v }));
 
-  const onFile = async (file?: File) => {
+  const onFile = async (field: "image" | "imageMobile", file?: File) => {
     if (!file) return;
     setUploading(true);
     setError(null);
     try {
-      set("image", await uploadImage(file, "banners"));
+      set(field, await uploadImage(file, "banners"));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no envio da imagem.");
     } finally {
@@ -204,24 +205,43 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
             run(() => saveBanner(d), onClose);
           }}
         >
-          <label className={s.drop} data-has={!!d.image || undefined}>
-            {d.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.image} alt="Prévia do banner" />
-            ) : (
-              <span>
-                <ImagePlus size={28} />
-                Enviar foto
-              </span>
-            )}
-            {uploading && <span className={s.uploading}>Enviando…</span>}
-            <input type="file" accept={ACCEPT} onChange={(e) => onFile(e.target.files?.[0])} disabled={uploading} />
-            {d.image && (
-              <span className={s.change}>
-                <Upload size={14} /> Trocar foto
-              </span>
-            )}
-          </label>
+          <div className={s.images}>
+            {(
+              [
+                ["image", "Computador", "2400 × 1000 px", s.dropWide],
+                ["imageMobile", "Celular (opcional)", "1080 × 1350 px", s.dropTall],
+              ] as const
+            ).map(([field, label, size, cls]) => (
+              <div key={field} className={s.imageField}>
+                <span className={s.imageLabel}>
+                  {label} <small>{size}</small>
+                </span>
+                <label className={`${s.drop} ${cls}`} data-has={!!d[field] || undefined}>
+                  {d[field] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={d[field]} alt={`Prévia: ${label}`} />
+                  ) : (
+                    <span>
+                      <ImagePlus size={24} />
+                      Enviar imagem
+                    </span>
+                  )}
+                  {uploading && <span className={s.uploading}>Enviando…</span>}
+                  <input type="file" accept={ACCEPT} onChange={(e) => onFile(field, e.target.files?.[0])} disabled={uploading} />
+                  {d[field] && (
+                    <span className={s.change}>
+                      <Upload size={14} /> Trocar
+                    </span>
+                  )}
+                </label>
+                {field === "imageMobile" && d.imageMobile && (
+                  <button type="button" className={s.linkBtn} onClick={() => set("imageMobile", "")}>
+                    Usar a imagem do computador no celular
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
 
           <label className={s.field}>
             Título

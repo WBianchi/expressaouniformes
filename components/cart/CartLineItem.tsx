@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Check, ImagePlus, MessageSquareText, Sparkles, Trash2, TrendingDown, TriangleAlert } from "lucide-react";
 import { getColor, getProduct, money, positionFees, type Position, type Size } from "@/lib/catalog";
-import { type CartLine, lineQuantity, lineTotal, unitPrice, volumeDiscount, volumeTiers } from "@/lib/pricing";
+import { type CartLine, lineLogos, lineQuantity, lineTotal, unitPrice, volumeDiscount, volumeTiers } from "@/lib/pricing";
 import { useStore } from "@/components/store/StoreProvider";
 import { SafeImage, Stepper } from "@/components/ui/primitives";
 import { LOGO_ACCEPT, makeLogoThumb } from "./logoThumb";
@@ -21,6 +21,7 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
   const [notes, setNotes] = useState(line.notes ?? "");
   const [removing, setRemoving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const target = useRef<Position>("frente");
   const uid = useId();
 
   useEffect(() => setDraft(line.sizes), [line.sizes]);
@@ -49,12 +50,21 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
     updateLine(line.id, { positions });
   }
 
+  const logos = lineLogos(line);
+  const firstLogo = line.positions.map((p) => logos[p]).find(Boolean);
+
+  function pickLogo(pos: Position) {
+    target.current = pos;
+    fileRef.current?.click();
+  }
+
   async function onLogo(file?: File) {
     if (!file) return;
+    const pos = target.current;
     try {
       const logo = await makeLogoThumb(file);
-      updateLine(line.id, { logo });
-      toast.success("Logo atualizada");
+      updateLine(line.id, { logos: { ...lineLogos({ ...line, positions: allPositions }), [pos]: logo }, logo: undefined });
+      toast.success(`Logo da ${positionFees[pos].label.toLowerCase()} atualizada`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível usar esta imagem.");
     }
@@ -75,9 +85,9 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
     <article className={s.line} style={{ animationDelay: `${index * 70}ms` }} aria-labelledby={`${uid}-t`}>
       <Link href={`/produto/${product.slug}`} className={s.lineMedia} tabIndex={-1} aria-hidden>
         <SafeImage src={product.image} alt="" />
-        {line.logo && (
+        {firstLogo && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img className={s.lineLogoBadge} src={line.logo.thumb} alt="" />
+          <img className={s.lineLogoBadge} src={firstLogo.thumb} alt="" />
         )}
       </Link>
 
@@ -133,23 +143,31 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
         </fieldset>
 
         <div className={s.lineExtras}>
-          <div className={s.logoBox}>
-            {line.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={line.logo.thumb} alt={`Logo enviada: ${line.logo.name}`} className={s.logoThumb} />
-            ) : (
-              <span className={s.logoEmpty} aria-hidden>
-                <ImagePlus size={18} strokeWidth={1.75} />
-              </span>
-            )}
-            <div className={s.logoText}>
-              <strong>{line.logo ? line.logo.name : "Sem logo anexada"}</strong>
-              <span>{line.logo ? "Arte revisada pela nossa equipe" : "Você pode enviar agora ou depois"}</span>
-            </div>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => fileRef.current?.click()}>
-              {line.logo ? "Trocar" : "Enviar"}
-            </button>
-            <input ref={fileRef} type="file" accept={LOGO_ACCEPT} hidden onChange={(e) => onLogo(e.target.files?.[0])} />
+<div className={s.logoList}>
+            {line.positions.length === 0 && <p className={s.logoNone}>Sem posição marcada: as peças vão lisas.</p>}
+            {line.positions.map((pos) => {
+              const logo = logos[pos];
+              return (
+                <div key={pos} className={s.logoBox}>
+                  {logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logo.thumb} alt={`Logo da ${positionFees[pos].label.toLowerCase()}: ${logo.name}`} className={s.logoThumb} />
+                  ) : (
+                    <span className={s.logoEmpty} aria-hidden>
+                      <ImagePlus size={18} strokeWidth={1.75} />
+                    </span>
+                  )}
+                  <div className={s.logoText}>
+                    <strong>{positionFees[pos].label}</strong>
+                    <span>{logo ? logo.name : "Sem logo: envie agora ou depois"}</span>
+                  </div>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => pickLogo(pos)}>
+                    {logo ? "Trocar" : "Enviar"}
+                  </button>
+                </div>
+              );
+            })}
+            <input ref={fileRef} type="file" accept={LOGO_ACCEPT} hidden onChange={(e) => (onLogo(e.target.files?.[0]), (e.target.value = ""))} />
           </div>
 
           <details className={s.notes} open={!!line.notes || undefined}>

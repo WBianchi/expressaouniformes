@@ -1,13 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { categories, inStock, products } from "@/lib/catalog";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import { QuoteGate } from "@/components/custom/QuoteGate";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { SafeImage } from "@/components/ui/primitives";
-import { useProductPhotos } from "@/components/store/MediaProvider";
 import s from "./Home.module.css";
 
 export function TwoWays() {
@@ -48,10 +47,11 @@ export function TwoWays() {
 }
 
 export function CategoryGrid() {
-  const photosOf = useProductPhotos();
-  const cats = categories
-    .map((c) => ({ ...c, cover: products.find((p) => p.category === c.slug) }))
-    .filter((c) => c.cover);
+  const rail = useRef<HTMLUListElement>(null);
+  const scroll = (d: number) => {
+    const el = rail.current;
+    if (el) el.scrollBy({ left: d * el.clientWidth * 0.8, behavior: "smooth" });
+  };
   return (
     <section className={s.section} aria-labelledby="categorias">
       <div className="container">
@@ -59,18 +59,24 @@ export function CategoryGrid() {
           <h2 id="categorias" className={s.title}>
             Categorias
           </h2>
-          <Link href="/loja" className={s.more}>
-            Ver todos os produtos <ArrowRight size={15} />
-          </Link>
+          <div className={s.railNav}>
+            <Link href="/loja" className={s.more}>
+              Ver todos os produtos <ArrowRight size={15} />
+            </Link>
+            <button type="button" className={s.railBtn} onClick={() => scroll(-1)} aria-label="Categorias anteriores">
+              <ChevronLeft size={18} />
+            </button>
+            <button type="button" className={s.railBtn} onClick={() => scroll(1)} aria-label="Próximas categorias">
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
-        <ul className={s.cats}>
-          {cats.map((c) => (
+        <ul className={s.cats} ref={rail}>
+          {categories.map((c) => (
             <li key={c.slug}>
-              <Link href={`/loja?categoria=${c.slug}`} className={s.cat}>
-                <span className={s.catImg}>
-                  <SafeImage src={photosOf(c.cover!)[0]} alt="" />
-                </span>
-                <span>{c.name}</span>
+              {/* o nome da categoria já vem escrito na imagem */}
+              <Link href={`/loja?categoria=${c.slug}`} className={s.cat} aria-label={c.name}>
+                <SafeImage src={c.image} alt={c.name} />
               </Link>
             </li>
           ))}
@@ -94,7 +100,7 @@ export function ProductSection({ mode }: { mode: "stock" | "quote" }) {
             <p className={s.sub}>
               {mode === "stock"
                 ? `Em estoque para comprar online, a partir de ${STOCK_MIN_QTY} peças com a sua logo.`
-                : `Sem estoque ou sob encomenda: inclua no seu pedido para empresas, a partir de ${CUSTOM_MIN_QTY} peças.`}
+                : `Sob cotação ou sob encomenda: inclua no seu pedido para empresas, a partir de ${CUSTOM_MIN_QTY} peças.`}
             </p>
           </div>
           <Link href={mode === "stock" ? "/loja?tipo=stock" : "/orcamento"} className={s.more}>

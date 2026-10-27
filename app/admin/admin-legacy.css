@@ -4110,3 +4110,22 @@ footer {
 .order-drawer {
   overflow-y: auto;
 }
+.drawer-positions {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.drawer-mockups {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+.drawer-mockup {
+  position: relative;
+  width: 112px;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #eef1f5;
+}

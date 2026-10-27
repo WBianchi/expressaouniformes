@@ -15,8 +15,11 @@ export type QuoteCompany = {
 
 export const emptyCompany: QuoteCompany = { name: "", cnpj: "", contact: "", phone: "", email: "", city: "", employees: "", notes: "" };
 
-const where = (positions: Position[]) =>
-  positions.length ? `logo: ${positions.map((p) => positionFees[p].label.toLowerCase()).join(" + ")}` : "sem logo";
+// posição ajustada pelo cliente na prévia aparece marcada para o consultor conferir
+const where = (positions: Position[], placements: Partial<Record<Position, unknown>> = {}) =>
+  positions.length
+    ? `logo: ${positions.map((p) => positionFees[p].label.toLowerCase() + (placements[p] ? " (posição/tamanho ajustados no site)" : "")).join(" + ")}`
+    : "sem logo";
 
 function logoLines(items: { positions: Position[] }[], names: Partial<Record<Position, string>>) {
   const used = (["frente", "costas", "manga"] as Position[]).filter((p) => items.some((i) => i.positions.includes(p)));
@@ -29,7 +32,7 @@ function logoLines(items: { positions: Position[] }[], names: Partial<Record<Pos
 }
 
 export function quoteRequestMessage(
-  items: { slug: string; color: string; qty: number; positions: Position[] }[],
+  items: { slug: string; color: string; qty: number; positions: Position[]; placements?: Partial<Record<Position, unknown>> }[],
   c: QuoteCompany,
   /** nome do arquivo da logo de cada posição */
   logoNames: Partial<Record<Position, string>> = {},
@@ -48,7 +51,7 @@ export function quoteRequestMessage(
     `*Itens (${total} peças):*`,
     ...items.map((i) => {
       const p = getProduct(i.slug);
-      return `• ${i.qty}x ${p?.name ?? i.slug} · ${getColor(i.color)?.name ?? i.color} · ${where(i.positions)}`;
+      return `• ${i.qty}x ${p?.name ?? i.slug} · ${getColor(i.color)?.name ?? i.color} · ${where(i.positions, i.placements)}`;
     }),
     "",
     ...logoLines(items, logoNames),

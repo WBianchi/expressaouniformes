@@ -52,3 +52,21 @@
     animation: none;
   }
 }
+
+/* logo arrastável (posicionamento livre) */
+.spot[data-editable] {
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  outline: 1px dashed transparent;
+  outline-offset: 2px;
+  transition: outline-color var(--dur-fast) var(--ease);
+}
+.spot[data-editable]:hover,
+.spot[data-editable]:active {
+  outline-color: rgb(255 255 255 / 0.9);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.25);
+}
+.spot[data-editable]:active {
+  cursor: grabbing;
+}

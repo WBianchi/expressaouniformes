@@ -121,7 +121,7 @@ export function QuoteBuilder({ initial }: { initial?: string }) {
                 return (
                   <li key={i.id} className={s.item}>
                     <Link href={`/produto/${p.slug}`} className={s.itemImg} aria-label={p.name}>
-                      <LogoMockup product={p} view="front" positions={i.positions} logos={thumbs} markers={false} />
+                      <LogoMockup product={p} view="front" positions={i.positions} logos={thumbs} placements={i.placements} markers={false} />
                     </Link>
                     <div className={s.itemBody}>
                       <div className={s.itemTop}>

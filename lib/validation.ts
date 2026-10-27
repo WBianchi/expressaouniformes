@@ -18,6 +18,12 @@ export const cartLineSchema = z
     positions: z.array(z.enum(["frente", "costas", "manga"])).max(3),
     logos: z.partialRecord(z.enum(["frente", "costas", "manga"]), logoSchema).optional(),
     logo: logoSchema.optional(),
+    placements: z
+      .partialRecord(
+        z.enum(["frente", "costas", "manga"]),
+        z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100), s: z.number().min(0.5).max(2) }),
+      )
+      .optional(),
     notes: z.string().max(1000).optional(),
   })
   .superRefine((l, ctx) => {

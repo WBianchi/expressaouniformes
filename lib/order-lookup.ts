@@ -16,6 +16,7 @@ import {
   type OrderStatus,
   type PaymentMethod,
   type PaymentStatus,
+  type QuoteLine,
   type ShopOrderRecord,
 } from "./orders";
 
@@ -34,7 +35,16 @@ export type AdminOrder = {
     company?: string;
   };
   /** itens detalhados (com banco) ou resumo da descrição da cobrança (sem banco) */
-  items: { name: string; qty: number; color?: string }[];
+  items: {
+    name: string;
+    qty: number;
+    color?: string;
+    /** só pedidos do banco: dados para a prévia da logo no painel */
+    slug?: string;
+    positions?: QuoteLine["positions"];
+    logos?: QuoteLine["logos"];
+    placements?: QuoteLine["placements"];
+  }[];
   summary: string;
   shipping?: string;
   address?: string;
@@ -91,6 +101,10 @@ function fromRecord(r: ShopOrderRecord): AdminOrder {
       name: l.name,
       qty: l.qty,
       color: l.colorName,
+      slug: l.slug,
+      positions: l.positions,
+      logos: l.logos,
+      placements: l.placements,
     })),
     summary: r.quote.lines.map((l) => `${l.qty}x ${l.name}`).join(", "),
     shipping: r.quote.shipping.label,

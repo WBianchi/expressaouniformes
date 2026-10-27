@@ -3,7 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { inStock, type Position, type Product } from "@/lib/catalog";
-import type { View } from "@/lib/mockup";
+import type { Placement, Placements, View } from "@/lib/mockup";
 import { LogoMockup } from "./LogoMockup";
 import s from "./Gallery.module.css";
 
@@ -15,12 +15,17 @@ export function Gallery({
   product,
   positions = [],
   logos = {},
+  placements,
+  onPlace,
   view: controlled,
   onViewChange,
 }: {
   product: Product;
   positions?: Position[];
   logos?: Partial<Record<Position, string>>;
+  placements?: Placements;
+  /** arrastar a logo na foto principal */
+  onPlace?: (position: Position, placement: Placement) => void;
   view?: Slide;
   onViewChange?: (v: Slide) => void;
 }) {
@@ -41,8 +46,17 @@ export function Gallery({
   const badge =
     product.kind === "custom" ? "Sob encomenda" : available ? "Pronta-entrega" : "Sob cotação";
 
-  const render = (v: (typeof VIEWS)[number], priority?: boolean) => (
-    <LogoMockup product={product} view={v.id} positions={positions} logos={logos} priority={priority} markers={!!positions.length} />
+  const render = (v: (typeof VIEWS)[number], priority?: boolean, editable?: boolean) => (
+    <LogoMockup
+      product={product}
+      view={v.id}
+      positions={positions}
+      logos={logos}
+      placements={placements}
+      onPlace={editable ? onPlace : undefined}
+      priority={priority}
+      markers={!!positions.length}
+    />
   );
 
   return (
@@ -59,14 +73,14 @@ export function Gallery({
       >
         {VIEWS.map((v) => (
           <div key={v.id} className={s.slide} data-active={v.id === current.id || undefined} aria-hidden={v.id !== current.id}>
-            {render(v, v.id === VIEWS[0].id)}
+            {render(v, v.id === VIEWS[0].id, true)}
           </div>
         ))}
 
         <span className={s.badge} data-tone={available ? "ok" : product.kind === "custom" ? "brand" : "muted"}>
           {badge}
         </span>
-        {positions.some((p) => logos[p]) && <span className={s.previewTag}>Prévia com a sua logo</span>}
+        {positions.some((p) => logos[p]) && <span className={s.previewTag}>{onPlace ? "Arraste a logo para posicionar" : "Prévia com a sua logo"}</span>}
 
         <button type="button" className={s.toolBtn} onClick={() => setOpen(true)} aria-label="Ampliar imagem">
           <Expand size={17} />

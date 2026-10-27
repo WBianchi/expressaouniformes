@@ -34,7 +34,9 @@ import {
   X,
   Globe,
 } from "lucide-react";
-import { products, money, getColor } from "@/lib/catalog";
+import { products, money, getColor, getProduct, positionFees } from "@/lib/catalog";
+import { logoSpots, type View } from "@/lib/mockup";
+import { LogoMockup } from "@/components/product/LogoMockup";
 import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
 import { logout } from "@/app/admin/actions";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
@@ -819,12 +821,37 @@ export default function AdminDashboard({
             <h3>Itens</h3>
             {detail.order.items.length ? (
               <ul className="drawer-items">
-                {detail.order.items.map((i, k) => (
-                  <li key={k}>
-                    {i.qty}x {i.name}
-                    {i.color ? ` · ${i.color}` : ""}
-                  </li>
-                ))}
+                {detail.order.items.map((i, k) => {
+                  const product = i.slug ? getProduct(i.slug) : undefined;
+                  const positions = i.positions ?? [];
+                  const thumbs = Object.fromEntries(Object.entries(i.logos ?? {}).map(([p, l]) => [p, l?.thumb]));
+                  // uma prévia por lado da peça que tem logo
+                  const views = product
+                    ? (["front", "back", "side"] as View[]).filter((v) => positions.some((p) => logoSpots(product)[p]?.view === v))
+                    : [];
+                  return (
+                    <li key={k}>
+                      {i.qty}x {i.name}
+                      {i.color ? ` · ${i.color}` : ""}
+                      {positions.length > 0 && (
+                        <small className="drawer-positions">
+                          {positions
+                            .map((p) => positionFees[p].label + (i.placements?.[p] ? " (ajustada pelo cliente)" : "") + (i.logos?.[p] ? `: ${i.logos[p]!.name}` : ": sem logo"))
+                            .join(" · ")}
+                        </small>
+                      )}
+                      {product && views.length > 0 && (
+                        <span className="drawer-mockups">
+                          {views.map((v) => (
+                            <span key={v} className="drawer-mockup">
+                              <LogoMockup product={product} view={v} positions={positions} logos={thumbs} placements={i.placements} markers={false} />
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p>{detail.order.summary}</p>

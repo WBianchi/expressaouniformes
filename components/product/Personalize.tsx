@@ -1,7 +1,7 @@
 "use client";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Move, RotateCcw } from "lucide-react";
 import { money, positionFees, type Position, type Product } from "@/lib/catalog";
-import { availablePositions } from "@/lib/mockup";
+import { availablePositions, clampPlacement, logoSpots, SCALE_MAX, SCALE_MIN, type Placement, type Placements } from "@/lib/mockup";
 import { LogoUpload, type LogoValue } from "./LogoUpload";
 import type { LogoSet } from "./useBrandLogo";
 import s from "./Product.module.css";
@@ -11,6 +11,10 @@ export type PersonalizeProps = {
   onPositions: (v: Position[]) => void;
   logos: LogoSet;
   onLogo: (position: Position, v: LogoValue) => void;
+  /** posição/tamanho ajustados pelo cliente */
+  placements: Placements;
+  /** null = volta para a posição padrão */
+  onPlace: (position: Position, v: Placement | null) => void;
 };
 
 const hints: Record<Position, string> = {
@@ -29,6 +33,8 @@ export function Personalize({
   onPositions,
   logos,
   onLogo,
+  placements,
+  onPlace,
   fees,
   step,
 }: PersonalizeProps & { product: Product; fees: boolean; step?: number }) {
@@ -43,7 +49,7 @@ export function Personalize({
         {step && <span className={s.stepNum}>{step}</span>} Sua logo
         <span className={s.stepValue}>{sent ? `${sent} de ${positions.length} enviada${sent > 1 ? "s" : ""}` : "Opcional agora"}</span>
       </h2>
-      <p className={s.note}>Marque onde aplicar e envie a arte de cada posição. Pode ser a mesma logo ou uma diferente em cada lugar.</p>
+      <p className={s.note}>Marque onde aplicar e envie a arte de cada posição (pode ser a mesma ou diferente). Depois, arraste a logo na foto para colocá-la onde quiser e ajuste o tamanho.</p>
 
       <div className={s.positions} role="group" aria-label="Posições da logo">
         {available.map((pos) => {
@@ -64,6 +70,36 @@ export function Personalize({
               {on && (
                 <div className={s.posSlot}>
                   <LogoUpload value={logos[pos] ?? null} onChange={(v) => onLogo(pos, v)} label={`Logo da ${positionFees[pos].label.toLowerCase()}`} compact />
+                  {logos[pos] && (
+                    <div className={s.posAdjust}>
+                      <label className={s.posSize}>
+                        <span>Tamanho</span>
+                        <input
+                          type="range"
+                          min={SCALE_MIN}
+                          max={SCALE_MAX}
+                          step={0.05}
+                          value={placements[pos]?.s ?? 1}
+                          onChange={(e) => {
+                            const spot = logoSpots(product)[pos]!;
+                            const cur = placements[pos] ?? { x: spot.x, y: spot.y, s: 1 };
+                            onPlace(pos, clampPlacement({ ...cur, s: Number(e.target.value) }));
+                          }}
+                          aria-label={`Tamanho da logo da ${positionFees[pos].label.toLowerCase()}`}
+                        />
+                        <small>{Math.round((placements[pos]?.s ?? 1) * 100)}%</small>
+                      </label>
+                      {placements[pos] ? (
+                        <button type="button" className={s.posCopyBtn} onClick={() => onPlace(pos, null)}>
+                          <RotateCcw size={13} /> Posição padrão
+                        </button>
+                      ) : (
+                        <span className={s.posHint}>
+                          <Move size={13} /> Arraste na foto
+                        </span>
+                      )}
+                    </div>
+                  )}
                   {!logos[pos] && others.length > 0 && (
                     <div className={s.posCopy}>
                       {others.map((p) => (

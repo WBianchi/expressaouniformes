@@ -19,7 +19,7 @@ const maskCep = (v: string) => {
 };
 
 /** Compra online da linha pronta-entrega (a partir de 5 peças). */
-export function StockBuyBox({ product, positions, onPositions, logos, onLogo }: PersonalizeProps & { product: Product }) {
+export function StockBuyBox({ product, positions, onPositions, logos, onLogo, placements, onPlace }: PersonalizeProps & { product: Product }) {
   const router = useRouter();
   const { addToCart, openDrawer, cep: savedCep, setCep } = useStore();
   const [color, setColor] = useState(product.colors[0]);
@@ -67,6 +67,7 @@ export function StockBuyBox({ product, positions, onPositions, logos, onLogo }: 
       sizes: clean,
       positions,
       logos: Object.fromEntries(positions.flatMap((p) => (logos[p] ? [[p, { name: logos[p]!.name, thumb: logos[p]!.thumb }]] : []))),
+      placements: Object.fromEntries(positions.flatMap((p) => (placements[p] ? [[p, placements[p]!]] : []))),
       notes: notes.trim() || undefined,
     });
   }
@@ -133,7 +134,7 @@ export function StockBuyBox({ product, positions, onPositions, logos, onLogo }: 
         </p>
       </section>
 
-      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} fees step={3} />
+      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} placements={placements} onPlace={onPlace} fees step={3} />
 
       <details className={s.notesBox}>
         <summary>Adicionar observações</summary>

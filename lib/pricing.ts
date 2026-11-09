@@ -1,6 +1,6 @@
 // Regras de preço puras: usadas no cliente (exibição) e no servidor (cobrança).
 // O servidor sempre recalcula a partir do catálogo; nunca confiar em valores enviados pelo navegador.
-import { getProduct, positionFees, type Position, type Size } from "./catalog.ts";
+import { getProduct, positionFees, type Position, type Size, type Technique } from "./catalog.ts";
 import type { Placements } from "./mockup.ts";
 
 export type CartLine = {
@@ -11,6 +11,8 @@ export type CartLine = {
   positions: Position[];
   /** logo de cada posição: miniatura (dataURL ≤ ~150 KB) e nome do arquivo */
   logos?: Partial<Record<Position, { name: string; thumb: string }>>;
+  /** técnica de aplicação escolhida (silk, bordado, DTF, sublimação); vazio = decidir no layout */
+  technique?: Technique;
   /** posição/tamanho da logo ajustados pelo cliente na prévia (sem ajuste = posição padrão) */
   placements?: Placements;
   /** formato antigo (uma logo para todas as posições); lido só para carrinhos já salvos */

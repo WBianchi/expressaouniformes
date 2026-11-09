@@ -12,7 +12,7 @@ import { StickyBar } from "./StickyBar";
 import s from "./Product.module.css";
 
 /** Itens sem estoque ou sob encomenda: entram no orçamento para empresas (30+ peças no pedido). */
-export function QuoteBuyBox({ product, positions, onPositions, logos, onLogo, placements, onPlace }: PersonalizeProps & { product: Product }) {
+export function QuoteBuyBox({ product, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & { product: Product }) {
   const { add, items, total } = useQuote();
   const [color, setColor] = useState(product.colors[0]);
   const [qty, setQty] = useState(CUSTOM_MIN_QTY);
@@ -22,7 +22,7 @@ export function QuoteBuyBox({ product, positions, onPositions, logos, onLogo, pl
   const outOfStock = product.kind === "stock";
 
   const addToQuote = () =>
-    add({ slug: product.slug, color, qty, positions, placements: Object.fromEntries(positions.flatMap((p) => (placements[p] ? [[p, placements[p]!]] : []))) });
+    add({ slug: product.slug, color, qty, positions, technique: positions.length && technique ? technique : undefined, placements: Object.fromEntries(positions.flatMap((p) => (placements[p] ? [[p, placements[p]!]] : []))) });
   const wa = whatsappLink(
     `Olá! Quero um orçamento de ${qty} peças de ${product.name} (${colorName.toLowerCase()})${positions.length ? ` com logo (${positions.join(", ")})` : ""}.`,
   );
@@ -57,7 +57,7 @@ export function QuoteBuyBox({ product, positions, onPositions, logos, onLogo, pl
         </div>
       </section>
 
-      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} placements={placements} onPlace={onPlace} fees={false} step={3} />
+      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} placements={placements} onPlace={onPlace} technique={technique} onTechnique={onTechnique} fees={false} step={3} />
 
       <div className={s.actions} ref={actionsRef}>
         <button type="button" className="btn btn-primary btn-lg btn-block" onClick={addToQuote}>

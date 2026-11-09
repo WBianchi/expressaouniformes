@@ -4,7 +4,7 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { getProduct, type Position } from "@/lib/catalog";
+import { getProduct, type Position, type Technique } from "@/lib/catalog";
 import { isPlacement, type Placements } from "@/lib/mockup";
 
 export type QuoteItem = {
@@ -15,6 +15,8 @@ export type QuoteItem = {
   positions: Position[];
   /** posição/tamanho da logo ajustados pelo cliente na prévia */
   placements?: Placements;
+  /** técnica de aplicação da logo */
+  technique?: Technique;
 };
 
 const KEY = "eu-quote";
@@ -85,7 +87,7 @@ export function useQuote() {
     // mesmo modelo e cor: soma a quantidade em vez de duplicar a linha
     const same = cur.find((i) => i.slug === item.slug && i.color === item.color);
     const next = same
-      ? cur.map((i) => (i === same ? { ...i, qty: Math.min(100_000, i.qty + item.qty), positions: item.positions, placements: item.placements } : i))
+      ? cur.map((i) => (i === same ? { ...i, qty: Math.min(100_000, i.qty + item.qty), positions: item.positions, placements: item.placements, technique: item.technique } : i))
       : [...cur, { ...item, id: crypto.randomUUID() }];
     write(next);
     if (!opts.silent) toast.success(`${getProduct(item.slug)?.name} no seu orçamento`, { action: { label: "Ver orçamento", onClick: () => router.push("/orcamento") } });

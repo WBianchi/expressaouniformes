@@ -1,7 +1,8 @@
 "use client";
 import { Check, Copy, Move, RotateCcw } from "lucide-react";
-import { money, positionFees, type Position, type Product } from "@/lib/catalog";
-import { availablePositions, clampPlacement, logoSpots, SCALE_MAX, SCALE_MIN, type Placement, type Placements } from "@/lib/mockup";
+import { money, positionFees, type Position, type Product, type Technique } from "@/lib/catalog";
+import { artTechniques } from "@/lib/qualify";
+import { availablePositions, clampPlacement, logoSpots, maxScale, SCALE_MIN, type Placement, type Placements } from "@/lib/mockup";
 import { LogoUpload, type LogoValue } from "./LogoUpload";
 import type { LogoSet } from "./useBrandLogo";
 import s from "./Product.module.css";
@@ -15,7 +16,13 @@ export type PersonalizeProps = {
   placements: Placements;
   /** null = volta para a posição padrão */
   onPlace: (position: Position, v: Placement | null) => void;
+  /** técnica de aplicação da logo (silk, bordado, DTF, sublimação) */
+  technique: Technique | null;
+  onTechnique: (v: Technique | null) => void;
 };
+
+const techHint = (t: Technique) =>
+  artTechniques.find((a) => a.label === t)?.hint ?? "";
 
 const hints: Record<Position, string> = {
   frente: "até 10 × 10 cm",
@@ -35,6 +42,8 @@ export function Personalize({
   onLogo,
   placements,
   onPlace,
+  technique,
+  onTechnique,
   fees,
   step,
 }: PersonalizeProps & { product: Product; fees: boolean; step?: number }) {
@@ -77,13 +86,13 @@ export function Personalize({
                         <input
                           type="range"
                           min={SCALE_MIN}
-                          max={SCALE_MAX}
+                          max={maxScale(logoSpots(product)[pos]!)}
                           step={0.05}
                           value={placements[pos]?.s ?? 1}
                           onChange={(e) => {
                             const spot = logoSpots(product)[pos]!;
                             const cur = placements[pos] ?? { x: spot.x, y: spot.y, s: 1 };
-                            onPlace(pos, clampPlacement({ ...cur, s: Number(e.target.value) }));
+                            onPlace(pos, clampPlacement({ ...cur, s: Number(e.target.value) }, spot));
                           }}
                           aria-label={`Tamanho da logo da ${positionFees[pos].label.toLowerCase()}`}
                         />
@@ -116,6 +125,29 @@ export function Personalize({
         })}
       </div>
       {!positions.length && <p className={s.note}>Sem posição marcada, as peças vão lisas.</p>}
+
+      {positions.length > 0 && product.techniques.length > 0 && (
+        <div className={s.techBlock}>
+          <p className={s.fieldLabel}>
+            Como aplicar a logo <span className={s.techOptional}>pode decidir depois, na aprovação do layout</span>
+          </p>
+          <div className={s.techGrid} role="radiogroup" aria-label="Técnica de aplicação">
+            {product.techniques.map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="radio"
+                aria-checked={technique === t}
+                className={s.techCard}
+                onClick={() => onTechnique(technique === t ? null : t)}
+              >
+                <b>{t}</b>
+                <small>{techHint(t)}</small>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

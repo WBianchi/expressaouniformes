@@ -62,7 +62,8 @@ export function LogoMockup({
     const d = drag.current;
     if (!d || !onPlace) return;
     const p = point(e);
-    onPlace(d.pos, clampPlacement({ x: p.x + d.dx, y: p.y + d.dy, s: d.s }));
+    // a logo não sai da área da posição (ex.: a da manga fica só na manga)
+    onPlace(d.pos, clampPlacement({ x: p.x + d.dx, y: p.y + d.dy, s: d.s }, spots[d.pos]));
   };
   const end = () => (drag.current = null);
 

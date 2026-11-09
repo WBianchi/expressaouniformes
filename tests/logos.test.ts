@@ -66,3 +66,18 @@ test("checkout aceita posição ajustada e recusa valores fora do limite", () =>
   assert.equal(cartLineSchema.safeParse({ ...base, placements: { frente: { x: 40, y: 30, s: 9 } } }).success, false);
   assert.equal(isPlacement({ x: 50, y: 50, s: 1 }), true);
 });
+
+test("logo da manga não sai da manga ao arrastar", () => {
+  const spot = logoSpots({ category: "polos", slug: "polo-pv-basica" }).manga!;
+  const p = clampPlacement({ x: 90, y: 80, s: 1 }, spot);
+  const { x0, x1, y0, y1 } = spot.area;
+  assert.ok(p.x + spot.w / 2 <= x1 && p.x - spot.w / 2 >= x0);
+  assert.ok(p.y + spot.h / 2 <= y1 && p.y - spot.h / 2 >= y0);
+});
+
+test("logo da manga não cresce além da manga", () => {
+  const spot = logoSpots({ category: "alta-visibilidade", slug: "camiseta-alta-visibilidade" }).manga!;
+  const p = clampPlacement({ x: 49, y: 22, s: 2 }, spot);
+  assert.ok(spot.h * p.s <= spot.area.y1 - spot.area.y0 + 0.01);
+  assert.ok(p.s < 2);
+});

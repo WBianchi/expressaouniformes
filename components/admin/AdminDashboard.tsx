@@ -33,6 +33,8 @@ import {
   CheckCircle2,
   X,
   Globe,
+  Building2,
+  UserPlus,
 } from "lucide-react";
 import { products, money, getColor, getProduct, positionFees } from "@/lib/catalog";
 import { logoSpots, type View } from "@/lib/mockup";
@@ -40,16 +42,21 @@ import { LogoMockup } from "@/components/product/LogoMockup";
 import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
 import { logout } from "@/app/admin/actions";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
-import { BannersAdmin, ProductPhotosAdmin } from "./MediaAdmin";
+import { BannersAdmin, ClientLogosAdmin, ProductPhotosAdmin } from "./MediaAdmin";
+import { LeadsAdmin } from "./LeadsAdmin";
+import type { AdminLead } from "@/lib/lead-admin-types";
+import type { ClientLogo } from "@/lib/site-media";
 const navigation = [
   ["Visão geral", LayoutDashboard],
   ["Pedidos", ShoppingBag],
   ["Produtos", Shirt],
   ["Personalizações", Palette],
   ["Produção", Factory],
+  ["Leads", UserPlus],
   ["Clientes", Users],
   ["Tráfego", ChartNoAxesCombined],
   ["Banners", Image],
+  ["Logos de clientes", Building2],
   ["Avaliações", Star],
   ["Cupons", Ticket],
   ["Integrações", Plug],
@@ -197,6 +204,8 @@ export default function AdminDashboard({
   integrations,
   banners,
   photos,
+  leads,
+  clientLogos,
 }: {
   orders: AdminOrder[];
   source: OrdersResult["source"];
@@ -204,6 +213,8 @@ export default function AdminDashboard({
   integrations: Integrations;
   banners: Banner[] | null;
   photos: PhotoOverrides;
+  leads: AdminLead[] | null;
+  clientLogos: ClientLogo[] | null;
 }) {
   const rows = allOrders.map(toRow);
   const paid = allOrders.filter((o) => o.status === "pago");
@@ -649,6 +660,10 @@ export default function AdminDashboard({
               </div>
               {orderTable}
             </>
+          ) : active === "Leads" ? (
+            <LeadsAdmin leads={leads} />
+          ) : active === "Logos de clientes" ? (
+            <ClientLogosAdmin logos={clientLogos} />
           ) : active === "Banners" ? (
             <BannersAdmin banners={banners} />
           ) : active === "Produtos" ? (
@@ -838,6 +853,7 @@ export default function AdminDashboard({
                           {positions
                             .map((p) => positionFees[p].label + (i.placements?.[p] ? " (ajustada pelo cliente)" : "") + (i.logos?.[p] ? `: ${i.logos[p]!.name}` : ": sem logo"))
                             .join(" · ")}
+                          {` · Aplicação: ${i.technique ?? "a definir"}`}
                         </small>
                       )}
                       {product && views.length > 0 && (

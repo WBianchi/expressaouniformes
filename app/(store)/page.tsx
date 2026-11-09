@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { company } from "@/lib/catalog";
-import { CategoryGrid, ProductSection, TwoWays } from "@/components/home/HomeSections";
+import { CategoryGrid, ProductSection } from "@/components/home/HomeSections";
+import { ClientLogos, FactoryStrip, TwoPaths } from "@/components/home/FactorySections";
 import { HeroSlider } from "@/components/home/HeroSlider";
-import { getBanners } from "@/lib/site-media";
+import { getBanners, getClientLogos } from "@/lib/site-media";
 import { Faq } from "@/components/home/Faq";
 import { faqs } from "@/components/home/faqData";
 
@@ -44,15 +45,17 @@ const jsonLd = {
 };
 
 export default async function HomePage() {
-  const banners = await getBanners();
+  const [banners, clientLogos] = await Promise.all([getBanners(), getClientLogos()]);
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <HeroSlider banners={banners} />
-      <TwoWays />
+      <TwoPaths />
       <CategoryGrid />
       <ProductSection mode="stock" />
+      <FactoryStrip />
       <ProductSection mode="quote" />
+      <ClientLogos logos={clientLogos} />
       <Faq />
     </>
   );

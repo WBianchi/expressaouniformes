@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
-import { inStock, type Position, type Product } from "@/lib/catalog";
+import { useEffect, useState } from "react";
+import { inStock, type Position, type Product, type Technique } from "@/lib/catalog";
+import { toCatalogTechnique, type ArtTechnique } from "@/lib/qualify";
 import { availablePositions, logoSpots, type Placement, type Placements } from "@/lib/mockup";
 import { Gallery, type Slide } from "./Gallery";
 import { QuoteBuyBox } from "./QuoteBuyBox";
@@ -18,6 +19,13 @@ export function ProductTop({ product }: { product: Product }) {
   const [view, setView] = useState<Slide>("front");
   // posição/tamanho que o cliente ajustou em cada lugar (sem ajuste = posição padrão)
   const [placements, setPlacements] = useState<Placements>({});
+  const [technique, setTechnique] = useState<Technique | null>(null);
+
+  // vindo do questionário (?tecnica=bordado), já deixa a técnica marcada
+  useEffect(() => {
+    const t = toCatalogTechnique(new URLSearchParams(window.location.search).get("tecnica") as ArtTechnique | null);
+    if (t && product.techniques.includes(t)) setTechnique(t);
+  }, [product.techniques]);
 
   // ao marcar uma posição, a galeria vira para o lado onde ela fica
   const setPositions = (next: Position[]) => {
@@ -45,7 +53,7 @@ export function ProductTop({ product }: { product: Product }) {
     });
   };
 
-  const custom = { positions, onPositions: setPositions, logos, onLogo, placements, onPlace };
+  const custom = { positions, onPositions: setPositions, logos, onLogo, placements, onPlace, technique, onTechnique: setTechnique };
   return (
     <div className={s.top}>
       <Gallery

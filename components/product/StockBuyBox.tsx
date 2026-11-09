@@ -2,8 +2,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Loader2, MapPin, PackageCheck, ShoppingCart, Truck } from "lucide-react";
-import { getColor, money, positionFees, type Product, type Size } from "@/lib/catalog";
+import { CheckCircle2, Factory, Loader2, MapPin, MessageCircle, PackageCheck, ShoppingCart, Truck } from "lucide-react";
+import { getColor, money, positionFees, whatsappLink, type Product, type Size } from "@/lib/catalog";
+import { CUSTOM_MIN_QTY } from "@/lib/quote";
 import { maxInstallments, PIX_DISCOUNT, unitPrice, type ShippingOption, volumeDiscount, volumeTiers } from "@/lib/pricing";
 import { useStore } from "@/components/store/StoreProvider";
 import { fetchShippingQuote } from "@/lib/shipping-client";
@@ -19,7 +20,7 @@ const maskCep = (v: string) => {
 };
 
 /** Compra online da linha pronta-entrega (a partir de 5 peças). */
-export function StockBuyBox({ product, positions, onPositions, logos, onLogo, placements, onPlace }: PersonalizeProps & { product: Product }) {
+export function StockBuyBox({ product, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & { product: Product }) {
   const router = useRouter();
   const { addToCart, openDrawer, cep: savedCep, setCep } = useStore();
   const [color, setColor] = useState(product.colors[0]);
@@ -68,6 +69,7 @@ export function StockBuyBox({ product, positions, onPositions, logos, onLogo, pl
       positions,
       logos: Object.fromEntries(positions.flatMap((p) => (logos[p] ? [[p, { name: logos[p]!.name, thumb: logos[p]!.thumb }]] : []))),
       placements: Object.fromEntries(positions.flatMap((p) => (placements[p] ? [[p, placements[p]!]] : []))),
+      technique: positions.length && technique ? technique : undefined,
       notes: notes.trim() || undefined,
     });
   }
@@ -132,9 +134,26 @@ export function StockBuyBox({ product, positions, onPositions, logos, onLogo, pl
             </>
           )}
         </p>
+        {qty >= CUSTOM_MIN_QTY && (
+          <div className={s.factoryNudge}>
+            <Factory size={18} />
+            <div>
+              <b>{qty} peças: você tem condições de fábrica</b>
+              <p>Acima de {CUSTOM_MIN_QTY} peças um consultor faz o orçamento com preço de volume e pode personalizar tecido, gola e cores. Ou siga comprando por aqui.</p>
+              <a
+                href={whatsappLink(`Olá! Quero ${qty} peças de ${product.name} (${colorName.toLowerCase()}). Podem me passar as condições de fábrica?`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline btn-sm"
+              >
+                <MessageCircle size={15} /> Falar com um consultor
+              </a>
+            </div>
+          </div>
+        )}
       </section>
 
-      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} placements={placements} onPlace={onPlace} fees step={3} />
+      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} placements={placements} onPlace={onPlace} technique={technique} onTechnique={onTechnique} fees step={3} />
 
       <details className={s.notesBox}>
         <summary>Adicionar observações</summary>

@@ -1,16 +1,9 @@
-// Triagem do pedido de orçamento para empresas: só libera o consultor quando o
-// pedido atende ao mínimo de fabricação; abaixo disso, direciona para a loja.
+// Mínimos de pedido dos dois caminhos de compra.
+// • Pronta-entrega (site/simulador): a partir de STOCK_MIN_QTY peças.
+// • Fabricação (consultor): a partir de CUSTOM_MIN_QTY peças.
 
 export const CUSTOM_MIN_QTY = 30;
 export const STOCK_MIN_QTY = 5;
-
-export const quantityOptions = [
-  { id: "ate-29", label: "Menos de 30", min: 0 },
-  { id: "30-49", label: "30 a 49", min: 30 },
-  { id: "50-99", label: "50 a 99", min: 50 },
-  { id: "100-299", label: "100 a 299", min: 100 },
-  { id: "300+", label: "300 ou mais", min: 300 },
-] as const;
 
 export const employeeOptions = [
   { id: "ate-10", label: "Até 10" },
@@ -18,29 +11,3 @@ export const employeeOptions = [
   { id: "31-100", label: "31 a 100" },
   { id: "100+", label: "Mais de 100" },
 ] as const;
-
-export type QuoteAnswers = {
-  quantity: (typeof quantityOptions)[number]["id"] | null;
-  employees: (typeof employeeOptions)[number]["id"] | null;
-};
-
-export const emptyAnswers: QuoteAnswers = { quantity: null, employees: null };
-
-export const isComplete = (a: QuoteAnswers) => !!a.quantity && !!a.employees;
-
-/** Pedido atende ao mínimo de fabricação? */
-export function isEligible(a: QuoteAnswers) {
-  const q = quantityOptions.find((o) => o.id === a.quantity);
-  return !!q && q.min >= CUSTOM_MIN_QTY;
-}
-
-export function quoteMessage(a: QuoteAnswers) {
-  const q = quantityOptions.find((o) => o.id === a.quantity)?.label ?? "-";
-  const e = employeeOptions.find((o) => o.id === a.employees)?.label ?? "-";
-  return [
-    "Olá! Quero um orçamento de uniformes personalizados para a minha empresa.",
-    "",
-    `• Quantidade de peças: ${q}`,
-    `• Funcionários: ${e}`,
-  ].join("\n");
-}

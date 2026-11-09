@@ -167,3 +167,144 @@
   padding: 0;
   list-style: none;
 }
+
+/* dois caminhos */
+.wayTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.way[data-tone="factory"] {
+  border-color: var(--text);
+}
+.wayList {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+  color: var(--text-2);
+}
+.wayList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.wayList svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--success);
+}
+
+/* direto da fábrica */
+.factory {
+  background: var(--bg-soft);
+  border-block: 1px solid var(--line);
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.factoryGrid {
+  display: grid;
+  gap: 28px;
+  margin-top: 28px;
+}
+@media (min-width: 900px) {
+  .factoryGrid {
+    grid-template-columns: 1.3fr 1fr;
+    gap: 48px;
+  }
+}
+.factoryHead {
+  font-size: 18px;
+  font-weight: 700;
+}
+.factoryNote {
+  margin: 4px 0 14px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.techList {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 560px) {
+  .techList {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.techList li {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.techList b {
+  font-size: 15px;
+}
+.techList small {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chipList li {
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* empresas clientes */
+.clients {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.clients li {
+  display: grid;
+  place-items: center;
+  height: 88px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+.clients img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0.8;
+  transition:
+    filter var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+.clients li:hover img {
+  filter: none;
+  opacity: 1;
+}

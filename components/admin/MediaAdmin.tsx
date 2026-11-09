@@ -6,10 +6,15 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Pencil, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
+import type { ClientLogo } from "@/lib/site-media";
 import { products } from "@/lib/catalog";
 import {
+  addClientLogo,
   deleteBanner,
+  deleteClientLogo,
   reorderBanners,
+  reorderClientLogos,
+  toggleClientLogo,
   resetProductPhoto,
   saveBanner,
   setProductPhoto,
@@ -20,7 +25,7 @@ import s from "./MediaAdmin.module.css";
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
 const MAX_MB = 8;
 
-async function uploadImage(file: File, folder: "banners" | "produtos") {
+async function uploadImage(file: File, folder: "banners" | "produtos" | "clientes") {
   if (!ACCEPT.split(",").includes(file.type)) throw new Error("Use JPG, PNG, WebP ou AVIF.");
   if (file.size > MAX_MB * 1024 * 1024) throw new Error(`Imagem acima de ${MAX_MB} MB.`);
   const name = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
@@ -402,6 +407,139 @@ export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+/* ---------------- Logos de clientes ---------------- */
+
+export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
+  const { pending, error, setError, run } = useAction();
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+
+  if (!logos)
+    return (
+      <div className="admin-panel">
+        <p className={s.note}>Banco de dados não configurado.</p>
+      </div>
+    );
+
+  const onFile = async (file?: File) => {
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      setImage(await uploadImage(file, "clientes"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha no envio da imagem.");
+    } finally {
+      setUploading(false);
+    }
+  };
+  const move = (i: number, d: number) => {
+    const ids = logos.map((l) => l.id);
+    [ids[i], ids[i + d]] = [ids[i + d], ids[i]];
+    run(() => reorderClientLogos(ids));
+  };
+
+  return (
+    <div className="admin-panel">
+      <div className="panel-heading">
+        <div>
+          <h3>Empresas que vestem Expressão</h3>
+          <p>
+            Logos de clientes exibidas na home e nas landing pages, para dar confiança a quem visita. Use somente logos de empresas que autorizaram.
+            Prefira PNG com fundo transparente. Sem logos ativas, a seção não aparece no site.
+          </p>
+        </div>
+      </div>
+
+      <form
+        className={s.clientForm}
+        onSubmit={(e) => {
+          e.preventDefault();
+          run(
+            () => addClientLogo({ name, image }),
+            () => {
+              setName("");
+              setImage("");
+            },
+          );
+        }}
+      >
+        <button type="button" className={s.clientDrop} onClick={() => input.current?.click()} disabled={uploading}>
+          {image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={image} alt="Prévia da logo" />
+          ) : (
+            <span>
+              <ImagePlus size={20} /> {uploading ? "Enviando…" : "Enviar logo"}
+            </span>
+          )}
+        </button>
+        <input ref={input} type="file" accept={ACCEPT} hidden onChange={(e) => (onFile(e.target.files?.[0]), (e.target.value = ""))} />
+        <label className={s.field}>
+          Empresa
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="Ex.: Mercado Bom Preço" />
+        </label>
+        <button type="submit" className="button primary" disabled={pending || uploading || !image || name.trim().length < 2 || !authorized}>
+          <Plus size={15} /> Adicionar
+        </button>
+      </form>
+      <label className={s.check}>
+        <input type="checkbox" checked={authorized} onChange={(e) => setAuthorized(e.target.checked)} /> Confirmo que a empresa autorizou o uso da logo no site
+      </label>
+
+      {error && <p className={s.error}>{error}</p>}
+
+      <ul className={s.clientList} aria-busy={pending}>
+        {logos.map((l, i) => (
+          <li key={l.id} className={s.clientItem} data-off={!l.active || undefined}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={l.image} alt={l.name} />
+            <strong>{l.name}</strong>
+            <div className={s.bannerActions}>
+              <button type="button" className="icon-button" disabled={pending || i === 0} onClick={() => move(i, -1)} aria-label="Mover para a esquerda">
+                <ArrowUp size={16} />
+              </button>
+              <button type="button" className="icon-button" disabled={pending || i === logos.length - 1} onClick={() => move(i, 1)} aria-label="Mover para a direita">
+                <ArrowDown size={16} />
+              </button>
+              <button
+                type="button"
+                className="icon-button"
+                disabled={pending}
+                onClick={() => run(() => toggleClientLogo(l.id, !l.active))}
+                aria-label={l.active ? "Ocultar" : "Mostrar"}
+              >
+                {l.active ? <Eye size={16} /> : <EyeOff size={16} />}
+              </button>
+              {confirmDelete === l.id ? (
+                <button
+                  type="button"
+                  className={`button small ${s.danger}`}
+                  disabled={pending}
+                  onClick={() => run(() => deleteClientLogo(l.id), () => setConfirmDelete(null))}
+                  onBlur={() => setConfirmDelete(null)}
+                  autoFocus
+                >
+                  Confirmar
+                </button>
+              ) : (
+                <button type="button" className="icon-button" disabled={pending} onClick={() => setConfirmDelete(l.id)} aria-label="Excluir">
+                  <Trash2 size={16} />
+                </button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      {!logos.length && <p className={s.note}>Nenhuma logo cadastrada ainda.</p>}
     </div>
   );
 }

@@ -145,6 +145,9 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
         <div className={s.lineExtras}>
 <div className={s.logoList}>
             {line.positions.length === 0 && <p className={s.logoNone}>Sem posição marcada: as peças vão lisas.</p>}
+            {line.positions.length > 0 && (
+              <p className={s.logoNone}>Aplicação: {line.technique ?? "a definir na aprovação do layout"}</p>
+            )}
             {line.positions.map((pos) => {
               const logo = logos[pos];
               return (

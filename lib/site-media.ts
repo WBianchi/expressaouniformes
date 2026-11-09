@@ -79,3 +79,31 @@ export const getPhotoOverrides = unstable_cache(
   ["product-photos"],
   { tags: [MEDIA_TAG], revalidate: 3600 },
 );
+
+export type ClientLogo = { id: string; name: string; image: string; active: boolean };
+
+/** Todas as logos de clientes, na ordem (painel). */
+export async function listClientLogos(): Promise<ClientLogo[] | null> {
+  if (!process.env.DATABASE_URL) return null;
+  const sql = await db();
+  const rows = (await sql.query("select id, name, image_url, active from expressao.client_logos order by sort, created_at")) as {
+    id: string;
+    name: string;
+    image_url: string;
+    active: boolean;
+  }[];
+  return rows.map((r) => ({ id: r.id, name: r.name, image: r.image_url, active: r.active }));
+}
+
+/** Logos ativas para a vitrine "Empresas que confiam" (vazia = seção some). */
+export const getClientLogos = unstable_cache(
+  async (): Promise<ClientLogo[]> => {
+    try {
+      return ((await listClientLogos()) ?? []).filter((l) => l.active);
+    } catch {
+      return [];
+    }
+  },
+  ["client-logos"],
+  { tags: [MEDIA_TAG], revalidate: 3600 },
+);

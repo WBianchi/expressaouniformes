@@ -298,3 +298,71 @@
   align-items: center;
   gap: 6px;
 }
+
+/* logos de clientes */
+.clientForm {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 16px;
+}
+@media (max-width: 720px) {
+  .clientForm {
+    grid-template-columns: 1fr;
+  }
+}
+.clientDrop {
+  display: grid;
+  place-items: center;
+  height: 80px;
+  border: 2px dashed var(--admin-line, #d5dbe4);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--muted, #5b6573);
+  font-size: 13px;
+  font-weight: 600;
+}
+.clientDrop span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.clientDrop img {
+  max-width: 85%;
+  max-height: 64px;
+  object-fit: contain;
+}
+.clientList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.clientList[aria-busy="true"] {
+  opacity: 0.7;
+}
+.clientItem {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 12px;
+  border: 1px solid var(--admin-line, #e3e7ee);
+  border-radius: 14px;
+  background: #fff;
+  color: #10213a;
+  text-align: center;
+}
+.clientItem[data-off] {
+  opacity: 0.5;
+}
+.clientItem img {
+  height: 56px;
+  max-width: 100%;
+  object-fit: contain;
+}
+.clientItem strong {
+  font-size: 13px;
+}

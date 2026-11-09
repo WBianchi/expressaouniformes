@@ -32,7 +32,7 @@ function logoLines(items: { positions: Position[] }[], names: Partial<Record<Pos
 }
 
 export function quoteRequestMessage(
-  items: { slug: string; color: string; qty: number; positions: Position[]; placements?: Partial<Record<Position, unknown>> }[],
+  items: { slug: string; color: string; qty: number; positions: Position[]; placements?: Partial<Record<Position, unknown>>; technique?: string }[],
   c: QuoteCompany,
   /** nome do arquivo da logo de cada posição */
   logoNames: Partial<Record<Position, string>> = {},
@@ -51,7 +51,7 @@ export function quoteRequestMessage(
     `*Itens (${total} peças):*`,
     ...items.map((i) => {
       const p = getProduct(i.slug);
-      return `• ${i.qty}x ${p?.name ?? i.slug} · ${getColor(i.color)?.name ?? i.color} · ${where(i.positions, i.placements)}`;
+      return `• ${i.qty}x ${p?.name ?? i.slug} · ${getColor(i.color)?.name ?? i.color} · ${where(i.positions, i.placements)}${i.technique && i.positions.length ? ` · ${i.technique}` : ""}`;
     }),
     "",
     ...logoLines(items, logoNames),

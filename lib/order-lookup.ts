@@ -44,6 +44,7 @@ export type AdminOrder = {
     positions?: QuoteLine["positions"];
     logos?: QuoteLine["logos"];
     placements?: QuoteLine["placements"];
+    technique?: QuoteLine["technique"];
   }[];
   summary: string;
   shipping?: string;
@@ -105,6 +106,7 @@ function fromRecord(r: ShopOrderRecord): AdminOrder {
       positions: l.positions,
       logos: l.logos,
       placements: l.placements,
+      technique: l.technique,
     })),
     summary: r.quote.lines.map((l) => `${l.qty}x ${l.name}`).join(", "),
     shipping: r.quote.shipping.label,

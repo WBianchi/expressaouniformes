@@ -121,3 +121,46 @@ export async function resetProductPhoto(slug: string, slot: number) {
     await dropBlob(rows[0]?.url);
   });
 }
+
+/* ---------------- Logos de clientes (vitrine "Empresas que vestem Expressão") ---------------- */
+
+const clientLogoSchema = z.object({
+  name: z.string().trim().min(2, "Informe o nome da empresa.").max(80),
+  image: z.string().trim().refine(safeImage, "Envie a logo."),
+});
+
+export async function addClientLogo(input: z.input<typeof clientLogoSchema>) {
+  return run(async () => {
+    const sql = await db();
+    const l = clientLogoSchema.parse(input);
+    await sql.query(
+      "insert into expressao.client_logos (name, image_url, sort) values ($1, $2, coalesce((select max(sort) from expressao.client_logos), 0) + 1)",
+      [l.name, l.image],
+    );
+  });
+}
+
+export async function toggleClientLogo(id: string, active: boolean) {
+  return run(async () => {
+    const sql = await db();
+    await sql.query("update expressao.client_logos set active = $2 where id = $1", [z.string().uuid().parse(id), active]);
+  });
+}
+
+export async function deleteClientLogo(id: string) {
+  return run(async () => {
+    const sql = await db();
+    const rows = (await sql.query("delete from expressao.client_logos where id = $1 returning image_url", [z.string().uuid().parse(id)])) as {
+      image_url: string;
+    }[];
+    await dropBlob(rows[0]?.image_url);
+  });
+}
+
+export async function reorderClientLogos(ids: string[]) {
+  return run(async () => {
+    const sql = await db();
+    const list = z.array(z.string().uuid()).max(200).parse(ids);
+    await sql.transaction(list.map((id, i) => sql.query("update expressao.client_logos set sort = $2 where id = $1", [id, i + 1])));
+  });
+}

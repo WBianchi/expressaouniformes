@@ -166,6 +166,7 @@ export type QuoteLine = {
   logos?: Partial<Record<Position, { name: string; thumb: string }>>;
   /** posição/tamanho ajustados pelo cliente (centro em % da foto, escala) */
   placements?: CartLine["placements"];
+  technique?: CartLine["technique"];
   notes?: string;
 };
 
@@ -234,6 +235,7 @@ export function computeQuote(input: {
         total: lineTotal(l),
         logos: lineLogos(l),
         placements: l.placements,
+        technique: l.technique,
         notes: l.notes,
       })),
       items: t.items,

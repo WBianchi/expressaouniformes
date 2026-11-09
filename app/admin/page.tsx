@@ -6,7 +6,8 @@ import { asaasMode } from "@/lib/asaas";
 import { frenetConfigured } from "@/lib/frenet";
 import { listOrders } from "@/lib/order-lookup";
 import { hasDatabase } from "@/lib/orders";
-import { listBanners, listPhotoOverrides } from "@/lib/site-media";
+import { listBanners, listClientLogos, listPhotoOverrides } from "@/lib/site-media";
+import { listLeads } from "@/lib/leads";
 
 export const metadata = {
   title: "Painel da fábrica",
@@ -15,10 +16,12 @@ export const metadata = {
 
 export default async function Page() {
   if (!(await isAdmin())) return <AdminLogin configured={adminConfigured()} />;
-  const [result, banners, photos] = await Promise.all([
+  const [result, banners, photos, leads, clientLogos] = await Promise.all([
     listOrders(),
     listBanners().catch(() => null),
     listPhotoOverrides().catch(() => ({})),
+    listLeads().catch(() => null),
+    listClientLogos().catch(() => null),
   ]);
   return (
     <AdminDashboard
@@ -27,6 +30,8 @@ export default async function Page() {
       error={result.error}
       banners={banners}
       photos={photos}
+      leads={leads}
+      clientLogos={clientLogos}
       integrations={{
         asaas: asaasMode(),
         frenet: frenetConfigured(),

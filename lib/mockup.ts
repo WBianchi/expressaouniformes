@@ -4,72 +4,79 @@ import type { Position, Product } from "./catalog.ts";
 
 /** "side" é só foto (vista lateral), sem área de logo */
 export type View = "front" | "back" | "side";
-export type Spot = { view: View; x: number; y: number; w: number; h: number; rot?: number };
+/** Retângulo (em % da foto) onde a logo pode ficar: o arrastar e o tamanho não passam daqui. */
+export type Area = { x0: number; x1: number; y0: number; y1: number };
+export type Spot = { view: View; x: number; y: number; w: number; h: number; rot?: number; area: Area };
 
-const BACK: Spot = { view: "back", x: 50, y: 33, w: 30, h: 26 };
+const area = (x0: number, x1: number, y0: number, y1: number): Area => ({ x0, x1, y0, y1 });
+/** peito/frente das peças de cima */
+const CHEST = area(26, 74, 20, 62);
+
+const BACK: Spot = { view: "back", x: 50, y: 33, w: 30, h: 26, area: area(24, 76, 14, 70) };
 
 /** Manga: aparece na vista lateral, sobre a parte de cima da manga. */
-const sleeve = (x: number, y: number): Spot => ({ view: "side", x, y, w: 7, h: 7 });
+// a área é a própria manga na foto lateral (medida em cada produto): a logo não sai dela
+const sleeve = (x: number, y: number, a: Area = area(40, 60, 18, 40)): Spot => ({ view: "side", x, y, w: 7, h: 7, area: a });
 const SLEEVE = sleeve(50, 28);
 
 // posição da manga em cada foto lateral (medida na imagem de cada produto)
 const sleeveBySlug: Record<string, Spot> = {
-  "polo-pv-basica": sleeve(53, 29),
-  "polo-piquet-basica": sleeve(53, 30),
-  "polo-dry-fit-basica": sleeve(52, 29),
-  "polo-piquet-feminina": sleeve(46.5, 24.5),
-  "polo-com-friso": sleeve(50, 29),
-  "polo-bicolor": sleeve(50, 29),
-  "polo-gola-personalizada": sleeve(50, 28),
-  "polo-manga-longa": sleeve(46, 27),
-  "camisa-operacional-brim": sleeve(53, 31),
-  "camiseta-algodao-basica": sleeve(47.5, 30),
-  "camiseta-dry-fit": sleeve(49, 30),
-  "camiseta-alta-visibilidade": sleeve(49, 22.5),
-  "polo-alta-visibilidade": sleeve(48.5, 25),
-  "dolma-chef": sleeve(46.5, 26),
-  "jaleco-gabardine": sleeve(48, 25),
-  "moletom-canguru": sleeve(47, 32),
+  "polo-pv-basica": sleeve(53, 29, area(45.5, 59.5, 18.5, 40.5)),
+  "polo-piquet-basica": sleeve(53, 30, area(45.5, 60.5, 19.5, 40.5)),
+  "polo-dry-fit-basica": sleeve(52, 29, area(43.5, 60.5, 18.5, 39.5)),
+  "polo-piquet-feminina": sleeve(46.5, 24.5, area(39.5, 53.5, 17.5, 31.5)),
+  "polo-com-friso": sleeve(50, 29, area(42.5, 57.5, 18.5, 39.5)),
+  "polo-bicolor": sleeve(50, 29, area(40.5, 58.5, 19.5, 38.5)),
+  "polo-gola-personalizada": sleeve(50, 28, area(40.5, 58.5, 17.5, 37.5)),
+  "polo-manga-longa": sleeve(46, 27, area(37.5, 53.5, 17.5, 43.5)),
+  "camisa-operacional-brim": sleeve(53, 31, area(44.5, 60.5, 19.5, 44.5)),
+  "camiseta-algodao-basica": sleeve(47.5, 30, area(38.5, 56.5, 19.5, 42.5)),
+  "camiseta-dry-fit": sleeve(49, 30, area(40.5, 58.5, 19.5, 42.5)),
+  "camiseta-alta-visibilidade": sleeve(49, 22.5, area(40.5, 57.5, 17.5, 28)),
+  "polo-alta-visibilidade": sleeve(49.5, 25, area(40.5, 59.5, 18.5, 32)),
+  "dolma-chef": sleeve(46.5, 26, area(38.5, 54.5, 16.5, 43.5)),
+  "jaleco-gabardine": sleeve(48, 25, area(40.5, 55.5, 15.5, 43.5)),
+  "moletom-canguru": sleeve(47, 32, area(38.5, 54.5, 22.5, 48.5)),
 };
 
 const byCategory: Record<string, Partial<Record<Position, Spot>>> = {
   polos: {
-    frente: { view: "front", x: 63, y: 34, w: 11, h: 9 },
+    frente: { view: "front", x: 63, y: 34, w: 11, h: 9, area: CHEST },
     costas: BACK,
     manga: SLEEVE,
   },
   camisetas: {
-    frente: { view: "front", x: 61, y: 31, w: 11, h: 9 },
+    frente: { view: "front", x: 61, y: 31, w: 11, h: 9, area: CHEST },
     costas: BACK,
     manga: SLEEVE,
   },
   calcas: {
-    frente: { view: "front", x: 38, y: 27, w: 8, h: 6 },
-    costas: { view: "back", x: 50, y: 17, w: 16, h: 7 },
+    frente: { view: "front", x: 38, y: 27, w: 8, h: 6, area: area(22, 78, 12, 55) },
+    costas: { view: "back", x: 50, y: 17, w: 16, h: 7, area: area(25, 75, 8, 40) },
   },
   jalecos: {
-    frente: { view: "front", x: 62, y: 33, w: 10, h: 8 },
+    frente: { view: "front", x: 62, y: 33, w: 10, h: 8, area: CHEST },
     costas: BACK,
     manga: SLEEVE,
   },
   moletons: {
-    frente: { view: "front", x: 50, y: 42, w: 24, h: 14 },
+    frente: { view: "front", x: 50, y: 42, w: 24, h: 14, area: area(25, 75, 24, 64) },
     costas: BACK,
     manga: SLEEVE,
   },
   operacional: {
-    frente: { view: "front", x: 64, y: 34, w: 10, h: 8 },
+    frente: { view: "front", x: 64, y: 34, w: 10, h: 8, area: CHEST },
     costas: BACK,
     manga: SLEEVE,
   },
   alimenticia: {
-    frente: { view: "front", x: 63, y: 32, w: 10, h: 8 },
+    frente: { view: "front", x: 63, y: 32, w: 10, h: 8, area: CHEST },
     costas: BACK,
     manga: SLEEVE,
   },
   "alta-visibilidade": {
-    frente: { view: "front", x: 62, y: 31, w: 11, h: 8 },
-    costas: { view: "back", x: 50, y: 27, w: 30, h: 16 },
+    frente: { view: "front", x: 62, y: 31, w: 11, h: 8, area: CHEST },
+    costas: { view: "back", x: 50, y: 27, w: 30, h: 16, area: area(26, 74, 14, 44) },
     manga: SLEEVE,
   },
 };
@@ -101,8 +108,23 @@ export const SCALE_MAX = 2;
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 const round = (n: number) => Math.round(n * 10) / 10;
 
-export function clampPlacement(p: Placement): Placement {
-  return { x: round(clamp(p.x, 3, 97)), y: round(clamp(p.y, 3, 97)), s: Math.round(clamp(p.s, SCALE_MIN, SCALE_MAX) * 100) / 100 };
+/** Maior escala em que a logo ainda cabe na área permitida. */
+export function maxScale(spot: Pick<Spot, "w" | "h" | "area">) {
+  const { x0, x1, y0, y1 } = spot.area;
+  return Math.max(SCALE_MIN, Math.min(SCALE_MAX, (x1 - x0) / spot.w, (y1 - y0) / spot.h));
+}
+
+/**
+ * Mantém a logo dentro da área da posição (ex.: a da manga não sai da manga),
+ * limitando o tamanho e o centro. Sem `spot`, só mantém dentro da foto.
+ */
+export function clampPlacement(p: Placement, spot?: Pick<Spot, "w" | "h" | "area">): Placement {
+  if (!spot) return { x: round(clamp(p.x, 3, 97)), y: round(clamp(p.y, 3, 97)), s: Math.round(clamp(p.s, SCALE_MIN, SCALE_MAX) * 100) / 100 };
+  const s = Math.floor(clamp(p.s, SCALE_MIN, maxScale(spot)) * 100) / 100;
+  const hw = (spot.w * s) / 2;
+  const hh = (spot.h * s) / 2;
+  const { x0, x1, y0, y1 } = spot.area;
+  return { x: round(clamp(p.x, x0 + hw, x1 - hw)), y: round(clamp(p.y, y0 + hh, y1 - hh)), s };
 }
 
 /** Área da logo com o ajuste do cliente aplicado (sem ajuste, a posição padrão). */

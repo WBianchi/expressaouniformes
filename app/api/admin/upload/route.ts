@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       request,
       onBeforeGenerateToken: async (pathname) => {
         if (!(await isAdmin())) throw new Error("Não autorizado.");
-        if (!/^(banners|produtos)\//.test(pathname)) throw new Error("Destino inválido.");
+        if (!/^(banners|produtos|clientes)\//.test(pathname)) throw new Error("Destino inválido.");
         return {
           allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/avif"],
           maximumSizeInBytes: 8 * 1024 * 1024,

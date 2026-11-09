@@ -18,6 +18,7 @@ export const cartLineSchema = z
     positions: z.array(z.enum(["frente", "costas", "manga"])).max(3),
     logos: z.partialRecord(z.enum(["frente", "costas", "manga"]), logoSchema).optional(),
     logo: logoSchema.optional(),
+    technique: z.enum(["DTF", "Silk", "Bordado", "Sublimação"]).optional(),
     placements: z
       .partialRecord(
         z.enum(["frente", "costas", "manga"]),
@@ -30,6 +31,7 @@ export const cartLineSchema = z
     const p = getProduct(l.slug);
     if (!p || p.kind !== "stock") return ctx.addIssue({ code: "custom", message: "Produto indisponível." });
     if (!inStock(p)) return ctx.addIssue({ code: "custom", message: `${p.name} é vendido sob cotação. Inclua no orçamento.` });
+    if (l.technique && !p.techniques.includes(l.technique)) ctx.addIssue({ code: "custom", message: `${l.technique} não disponível para ${p.name}.` });
     if (!p.colors.includes(l.color)) ctx.addIssue({ code: "custom", message: "Cor indisponível." });
     const qty = Object.values(l.sizes).reduce<number>((a, b) => a + (b || 0), 0);
     if (qty < p.minQty) ctx.addIssue({ code: "custom", message: `Mínimo de ${p.minQty} peças.` });

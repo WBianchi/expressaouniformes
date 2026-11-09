@@ -7,7 +7,7 @@ import { CategoryIcon, SafeImage } from "@/components/ui/primitives";
 import s from "./MegaMenu.module.css";
 
 import { useProductPhotos } from "@/components/store/MediaProvider";
-const featured = getProduct("polo-pv-basica") ?? stockProducts[0];
+const featured = getProduct("camiseta-malha-pv") ?? stockProducts[0];
 const countBy = (slug: string) => products.filter((p) => p.category === slug).length;
 
 /** Painel do mega menu "Produtos": categorias com prévia em imagem, modos de compra, destaque e banner. */

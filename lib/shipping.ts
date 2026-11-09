@@ -22,6 +22,7 @@ export const PICKUP: ShippingOption = {
 const PACK: Record<string, [weight: number, height: number]> = {
   polos: [0.25, 3],
   camisetas: [0.18, 2],
+  camisas: [0.22, 2],
   calcas: [0.45, 4],
   jalecos: [0.4, 4],
   moletons: [0.6, 6],

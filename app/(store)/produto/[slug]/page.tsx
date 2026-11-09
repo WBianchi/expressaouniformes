@@ -6,7 +6,7 @@ import { company, getCategory, getProduct, inStock, products } from "@/lib/catal
 import { ProductCard } from "@/components/ui/ProductCard";
 import { SectionHeader } from "@/components/ui/primitives";
 import { ProductTop } from "@/components/product/ProductTop";
-import { ProductTabs } from "@/components/product/ProductTabs";
+import { ProductSpecs } from "@/components/product/ProductSpecs";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 import { RevealRoot } from "@/components/product/motion";
 import s from "@/components/product/Product.module.css";
@@ -83,7 +83,7 @@ export default async function ProductPage({ params }: Props) {
 
         <ProductTop product={product} />
 
-        <ProductTabs product={product} />
+        <ProductSpecs product={product} />
       </div>
 
       {related.length + fill.length > 0 && (

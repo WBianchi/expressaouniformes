@@ -13,7 +13,7 @@ test("poucas peças vão para o site; 30 ou mais, para a fabricação", () => {
 });
 
 test("com logo, precisa escolher a técnica", () => {
-  const a = { ...emptyQualify("polo-pv-basica"), qty: "10-29" as const, custom: true };
+  const a = { ...emptyQualify("camiseta-malha-pv"), qty: "10-29" as const, custom: true };
   assert.equal(isQualified(a), false);
   assert.equal(isQualified({ ...a, technique: "bordado" }), true);
   assert.equal(isQualified({ ...a, custom: false }), true);
@@ -26,8 +26,8 @@ test("técnica do questionário vira a técnica do simulador", () => {
 
 test("mensagem da fabricação traz produto, quantidade, arte e opções da peça", () => {
   const m = qualifyMessage(
-    { qty: "100-299", product: "polo-pv-basica", custom: true, technique: "bordado", fabric: ["gola", "botoes"] },
-    "Polo PV Básica",
+    { qty: "100-299", product: "camiseta-malha-pv", custom: true, technique: "bordado", fabric: ["gola", "botoes"] },
+    "Camiseta Malha PV Manga Curta",
     { name: "Ana", company: "ACME" },
   );
   assert.match(m, /Ana \(ACME\)/);
@@ -37,8 +37,19 @@ test("mensagem da fabricação traz produto, quantidade, arte e opções da peç
 });
 
 test("contato exige nome e WhatsApp com DDD", () => {
-  const base = { product: "polo-pv-basica", qty: "10-29", route: "loja", custom: false };
+  const base = { product: "camiseta-malha-pv", qty: "10-29", route: "loja", custom: false };
   assert.equal(leadSchema.safeParse({ ...base, name: "Ana", phone: "(11) 98888-7777" }).success, true);
   assert.equal(leadSchema.safeParse({ ...base, name: "Ana", phone: "9888" }).success, false);
   assert.equal(leadSchema.safeParse({ ...base, name: "", phone: "11988887777" }).success, false);
+});
+
+import { productFaq } from "../lib/product-faq.ts";
+import { getProduct } from "../lib/catalog.ts";
+
+test("perguntas do produto usam os dados do catálogo", () => {
+  const faq = productFaq(getProduct("calca-brim-elastico-total")!);
+  assert.ok(faq.some((f) => /Brim pesado, 100% algodão/.test(f.a)));
+  assert.ok(faq.some((f) => /5 peças/.test(f.a)));
+  const fab = productFaq(getProduct("jaleco-guarda-po")!);
+  assert.ok(fab[0].a.includes("30 peças") && !fab[0].a.includes("pronta-entrega"));
 });

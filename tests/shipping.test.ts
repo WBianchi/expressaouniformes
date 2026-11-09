@@ -29,12 +29,12 @@ test("frete grátis na opção mais barata a partir de R$ 799", () => {
 });
 
 test("volumes por categoria e quantidade", () => {
-  const items = frenetItems([{ slug: "polo-pv-basica", sizes: { M: 6, G: 4 } }]);
+  const items = frenetItems([{ slug: "camiseta-malha-pv", sizes: { M: 6, G: 4 } }]);
   assert.equal(items[0].Quantity, 10);
-  assert.equal(items[0].Weight, 0.25);
+  assert.equal(items[0].Weight, 0.18);
 });
 
-const line: CartLine = { id: "a", slug: "polo-pv-basica", color: "marinho", sizes: { M: 10 }, positions: ["frente"] };
+const line: CartLine = { id: "a", slug: "camiseta-malha-pv", color: "marinho", sizes: { M: 10 }, positions: ["frente"] };
 
 test("checkout usa a opção cotada no servidor e recusa id desconhecido", () => {
   const options = mapFrenetServices(services, 300);
@@ -50,6 +50,6 @@ test("descrição da cobrança guarda os itens e o painel lê de volta", () => {
   assert.ok(desc.length <= 500);
   const parsed = parseDescription(desc);
   assert.equal(parsed.items[0].qty, 10);
-  assert.match(parsed.items[0].name, /Polo/);
+  assert.match(parsed.items[0].name, /Camiseta/);
   assert.equal(parsed.shipping, "Retirar na fábrica");
 });

@@ -114,7 +114,7 @@ export function sampleOrder(): Order {
     total: 1089.6,
     items: [
       { slug: "polo-piquet-basica", name: "Polo Piquet Básica", qty: 20, color: "marinho" },
-      { slug: "camiseta-algodao-basica", name: "Camiseta Algodão Básica", qty: 10, color: "branco" },
+      { slug: "camiseta-malha-pv", name: "Camiseta Malha PV Manga Curta", qty: 10, color: "branco" },
     ],
     payment: { method: "pix", status: "pago" },
     layout: { status: "enviado", comments: [] },

@@ -166,11 +166,12 @@ const JOBS = [
   // Categorias (arte sem texto + nome composto com Sora)
   category("polos", "Polos", "a neatly presented navy blue piqué polo shirt on an invisible ghost mannequin, front view, slightly angled."),
   category("camisetas", "Camisetas", "a stack of three neatly folded crew-neck cotton t-shirts in white, cyan and royal blue, with one white t-shirt on an invisible ghost mannequin standing behind them."),
-  category("calcas", "Calças", "a pair of navy blue cotton drill professional work trousers, neatly folded in half and standing upright, showing twill texture and triple stitching."),
-  category("jalecos", "Jalecos", "an elegant white tailored gabardine lab coat on an invisible ghost mannequin with a stethoscope draped around the collar, front view."),
+  category("calcas", "Calças e Bermudas", "a pair of navy blue cotton drill professional work trousers, neatly folded in half and standing upright, showing twill texture and triple stitching."),
+  category("jalecos", "Jalecos e Saúde", "an elegant white tailored gabardine lab coat on an invisible ghost mannequin with a stethoscope draped around the collar, front view."),
   category("moletons", "Moletons", "a heather grey and black pullover hoodie on an invisible ghost mannequin, kangaroo pocket and drawcords visible, cozy fleece texture."),
   category("operacional", "Uniforme Operacional", "a navy blue short-sleeve work shirt with button-flap chest pockets on an invisible ghost mannequin, with a white safety helmet and work gloves placed at its base."),
-  category("alimenticia", "Área Alimentícia", "a white double-breasted chef jacket (dólmã) on an invisible ghost mannequin, with a black chef apron folded beside it."),
+  category("alimenticia", "Aventais", "a black oxford bib apron with neck strap, waist ties and one wide front pocket on an invisible ghost mannequin, with a short black tabard apron (bata) folded beside it."),
+  category("camisas", "Camisas Sociais", "a light blue men's tricoline cotton dress shirt with button front on an invisible ghost mannequin, front view, with a folded navy women's dress shirt beside it."),
   category("alta-visibilidade", "Alta Visibilidade", "a fluorescent lime-yellow high-visibility safety t-shirt with silver retroreflective stripes on an invisible ghost mannequin, glowing reflective tape catching the light."),
 
   // Banners hero

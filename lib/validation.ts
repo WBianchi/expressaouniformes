@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { colors, getProduct, inStock, type Size } from "./catalog.ts";
 
-const sizeKeys = ["PP", "P", "M", "G", "GG", "XG", "XGG"] as const satisfies readonly Size[];
+const sizeKeys = ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"] as const satisfies readonly Size[];
 const count = z.number().int().min(0).max(9999);
 
 const logoSchema = z.object({

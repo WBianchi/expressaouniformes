@@ -1,6 +1,6 @@
 // Onde a logo aparece na foto do produto (prévia ilustrativa sobre as fotos reais).
 // Coordenadas em % da foto quadrada: centro (x, y), largura máxima da logo (w) e rotação.
-import type { Position, Product } from "./catalog.ts";
+import { getProduct, type Position, type Product } from "./catalog.ts";
 
 /** "side" é só foto (vista lateral), sem área de logo */
 export type View = "front" | "back" | "side";
@@ -19,25 +19,9 @@ const BACK: Spot = { view: "back", x: 50, y: 33, w: 30, h: 26, area: area(24, 76
 const sleeve = (x: number, y: number, a: Area = area(40, 60, 18, 40)): Spot => ({ view: "side", x, y, w: 7, h: 7, area: a });
 const SLEEVE = sleeve(50, 28);
 
-// posição da manga em cada foto lateral (medida na imagem de cada produto)
-const sleeveBySlug: Record<string, Spot> = {
-  "polo-pv-basica": sleeve(53, 29, area(45.5, 59.5, 18.5, 40.5)),
-  "polo-piquet-basica": sleeve(53, 30, area(45.5, 60.5, 19.5, 40.5)),
-  "polo-dry-fit-basica": sleeve(52, 29, area(43.5, 60.5, 18.5, 39.5)),
-  "polo-piquet-feminina": sleeve(46.5, 24.5, area(39.5, 53.5, 17.5, 31.5)),
-  "polo-com-friso": sleeve(50, 29, area(42.5, 57.5, 18.5, 39.5)),
-  "polo-bicolor": sleeve(50, 29, area(40.5, 58.5, 19.5, 38.5)),
-  "polo-gola-personalizada": sleeve(50, 28, area(40.5, 58.5, 17.5, 37.5)),
-  "polo-manga-longa": sleeve(46, 27, area(37.5, 53.5, 17.5, 43.5)),
-  "camisa-operacional-brim": sleeve(53, 31, area(44.5, 60.5, 19.5, 44.5)),
-  "camiseta-algodao-basica": sleeve(47.5, 30, area(38.5, 56.5, 19.5, 42.5)),
-  "camiseta-dry-fit": sleeve(49, 30, area(40.5, 58.5, 19.5, 42.5)),
-  "camiseta-alta-visibilidade": sleeve(49, 22.5, area(40.5, 57.5, 17.5, 28)),
-  "polo-alta-visibilidade": sleeve(49.5, 25, area(40.5, 59.5, 18.5, 32)),
-  "dolma-chef": sleeve(46.5, 26, area(38.5, 54.5, 16.5, 43.5)),
-  "jaleco-gabardine": sleeve(48, 25, area(40.5, 55.5, 15.5, 43.5)),
-  "moletom-canguru": sleeve(47, 32, area(38.5, 54.5, 22.5, 48.5)),
-};
+// Ajuste fino por produto, medido nas fotos de cada peça (frente, costas e manga na
+// vista lateral). O que não estiver aqui usa o padrão da categoria.
+const spotsBySlug: Record<string, Partial<Record<Position, Spot>>> = {};
 
 const byCategory: Record<string, Partial<Record<Position, Spot>>> = {
   polos: {
@@ -74,6 +58,11 @@ const byCategory: Record<string, Partial<Record<Position, Spot>>> = {
     costas: BACK,
     manga: SLEEVE,
   },
+  camisas: {
+    frente: { view: "front", x: 62, y: 32, w: 9, h: 7, area: CHEST },
+    costas: BACK,
+    manga: SLEEVE,
+  },
   "alta-visibilidade": {
     frente: { view: "front", x: 62, y: 31, w: 11, h: 8, area: CHEST },
     costas: { view: "back", x: 50, y: 27, w: 30, h: 16, area: area(26, 74, 14, 44) },
@@ -81,14 +70,14 @@ const byCategory: Record<string, Partial<Record<Position, Spot>>> = {
   },
 };
 
-/** Onde cada posição aparece na foto da peça. */
+/** Onde cada posição aparece na foto da peça (sem as posições que a peça não tem). */
 export function logoSpots(p: Pick<Product, "category"> & { slug?: string }): Partial<Record<Position, Spot>> {
-  const spots = byCategory[p.category] ?? byCategory.camisetas;
-  const side = p.slug ? sleeveBySlug[p.slug] : undefined;
-  return side && spots.manga ? { ...spots, manga: side } : spots;
+  const spots = { ...(byCategory[p.category] ?? byCategory.camisetas), ...(p.slug ? spotsBySlug[p.slug] : undefined) };
+  for (const pos of (p.slug && getProduct(p.slug)?.noPositions) || []) delete spots[pos];
+  return spots;
 }
 
-export const availablePositions = (p: Pick<Product, "category">) =>
+export const availablePositions = (p: Pick<Product, "category"> & { slug?: string }) =>
   (["frente", "costas", "manga"] as Position[]).filter((pos) => !!logoSpots(p)[pos]);
 
 /** Vista que mostra melhor as posições escolhidas: frente, a menos que nenhuma esteja nela. */

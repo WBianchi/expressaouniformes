@@ -20,7 +20,7 @@ import type { CartLine } from "../lib/pricing.ts";
 
 const line = (patch: Partial<CartLine> = {}): CartLine => ({
   id: "a",
-  slug: "polo-pv-basica",
+  slug: "camiseta-malha-pv",
   color: "marinho",
   sizes: { M: 5, G: 5 },
   positions: ["frente"],
@@ -50,12 +50,12 @@ test("recalcula o pedido no servidor: Pix com 5%, parcelas e frete", () => {
   const pix = computeQuote({ lines: [line()], cep: "01310-100", shippingId: "pac", method: "pix" });
   assert.ok(pix.ok);
   if (!pix.ok) return;
-  assert.equal(pix.quote.subtotal, 448);
+  assert.equal(pix.quote.subtotal, 318);
   assert.equal(pix.quote.chargeTotal, Math.round(pix.quote.total * 0.95 * 100) / 100);
   assert.ok(pix.quote.pixDiscount > 0);
 
   const card = computeQuote({ lines: [line()], cep: "01310-100", shippingId: "retirada", method: "cartao", installments: 6 });
-  assert.ok(card.ok && card.quote.installments === 6 && card.quote.chargeTotal === 448);
+  assert.ok(card.ok && card.quote.installments === 6 && card.quote.chargeTotal === 318);
 
   const tooMany = computeQuote({ lines: [line()], cep: "01310-100", shippingId: "pac", method: "cartao", installments: 12 });
   assert.ok(!tooMany.ok);
@@ -63,7 +63,7 @@ test("recalcula o pedido no servidor: Pix com 5%, parcelas e frete", () => {
   assert.ok(!computeQuote({ lines: [line()], cep: "123", shippingId: "pac", method: "pix" }).ok);
   assert.ok(!computeQuote({ lines: [line()], cep: "01310-100", shippingId: "pac", method: "pix", coupon: "XPTO" }).ok);
   const cup = computeQuote({ lines: [line()], cep: "01310-100", shippingId: "retirada", method: "boleto", coupon: "bemvindo10" });
-  assert.ok(cup.ok && cup.quote.discount === 44.8 && cup.quote.chargeTotal === 403.2);
+  assert.ok(cup.ok && cup.quote.discount === 31.8 && cup.quote.chargeTotal === 286.2);
 });
 
 test("esquema do checkout rejeita CPF inválido e aceita pedido válido", () => {
@@ -110,7 +110,7 @@ test("id do pedido e formato salvo em eu-orders", () => {
     quote: pub,
     payment: { id: "pay_1", method: "pix", status: "pendente", invoiceUrl: "https://example.com" },
   });
-  assert.deepEqual(stored.items, [{ slug: "polo-pv-basica", name: "Polo PV Básica", qty: 10, color: "marinho" }]);
+  assert.deepEqual(stored.items, [{ slug: "camiseta-malha-pv", name: "Camiseta Malha PV Manga Curta", qty: 10, color: "marinho" }]);
   assert.equal(stored.layout?.status, "aguardando");
   assert.equal(stored.total, q.quote.chargeTotal);
 });

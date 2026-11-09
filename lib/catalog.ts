@@ -1,9 +1,10 @@
-// Catálogo demonstrativo. Fonte única para loja, busca, páginas e preços.
-// Dois modos de venda: "stock" (pronta-entrega + logo, compra online) e "custom"
-// (sob encomenda: entra no orçamento para empresas, a partir de 30 peças).
+// Catálogo oficial da Expressão Uniformes (PDF "CATALOGO EXPRESSAO", 2026).
+// Fonte única para loja, landing pages, busca, páginas e preços.
+// Dois modos de venda: "stock" (pronta-entrega + logo, compra no site, a partir de 5 peças)
+// e "custom" (fabricação: entra no orçamento com consultor, a partir de 30 peças).
 
 export type SaleKind = "stock" | "custom";
-export type Size = "PP" | "P" | "M" | "G" | "GG" | "XG" | "XGG";
+export type Size = "PP" | "P" | "M" | "G" | "GG" | "XG" | "XGG" | "G3" | "G4" | "G5" | "G6" | "G7" | "G8";
 export type Technique = "DTF" | "Silk" | "Bordado" | "Sublimação";
 export type Position = "frente" | "costas" | "manga";
 
@@ -18,243 +19,428 @@ export type Category = {
   image: string;
 };
 
+export type Highlight = { title: string; text: string };
+
 export type Product = {
   slug: string;
   name: string;
   kind: SaleKind;
   category: string; // Category.slug
+  /** modelo/gola, como no catálogo (ex.: "Gola careca ou gola V") */
+  subtitle: string;
   /** preço unitário da peça lisa, em reais (somente stock) */
   price: number;
   compareAt?: number;
   minQty: number;
+  /** cores disponíveis para fabricação (a primeira é a das fotos) */
   colors: string[]; // Color.id
+  /** grade vendida no site (somente stock) */
   sizes: Size[];
+  /** grade de fabricação, como no catálogo */
+  sizeChart: string[];
+  /** tecido (ex.: "Malha PV") */
   fabric: string;
+  /** composição (ex.: "67% poliéster + 33% viscose") */
+  composition: string;
+  /** observação do tecido no catálogo (ex.: "Variação de tecido disponível") */
+  fabricNote: string;
   short: string;
   description: string;
   features: string[];
+  highlights: Highlight[];
   techniques: Technique[];
+  /** posições de logo que não se aplicam à peça (ex.: avental frontal não tem costas) */
+  noPositions?: Position[];
   badge?: string;
   rating: number;
   reviews: number;
   /** peças em estoque (stock); 0 = sem estoque, só por orçamento */
   stock?: number;
+  /** a peça sozinha, de frente (simulador da logo) */
   image: string;
-  /** vista de costas, mesmo enquadramento da frontal (prévia da logo nas costas) */
+  /** a peça sozinha, de costas */
   back: string;
-  /** vista lateral, mesmo enquadramento da frontal */
+  /** a peça sozinha, de lado */
   side: string;
-  gallery: string[];
-  /** fotos de vitrine com modelos (pessoas diferentes); o simulador usa image/back */
+  /** modelo vestindo a peça: frente e costas */
   photos: string[];
-  /** custom: opções de acabamento destacadas */
-  options?: string[];
+  /** galeria completa da landing page: modelo frente, modelo costas, peça frente, costas e lado */
+  gallery: string[];
 };
 
+const c = (id: string, name: string, hex: string): Color => ({ id, name, hex });
+
 export const colors: Color[] = [
-  { id: "marinho", name: "Azul-marinho", hex: "#1b2a4a" },
-  { id: "preto", name: "Preto", hex: "#17191e" },
-  { id: "branco", name: "Branco", hex: "#f6f6f3" },
-  { id: "mescla", name: "Cinza mescla", hex: "#a3a8ae" },
-  { id: "chumbo", name: "Chumbo", hex: "#4a4f57" },
-  { id: "royal", name: "Azul royal", hex: "#1f4fb5" },
-  { id: "celeste", name: "Azul celeste", hex: "#8ec5ec" },
-  { id: "vermelho", name: "Vermelho", hex: "#c8102e" },
-  { id: "verde", name: "Verde bandeira", hex: "#137a3a" },
-  { id: "amarelo", name: "Amarelo ouro", hex: "#f2b500" },
-  { id: "laranja", name: "Laranja", hex: "#f26a1b" },
-  { id: "limao", name: "Verde limão", hex: "#c6e22a" },
+  c("branco", "Branco", "#f7f7f5"),
+  c("preto", "Preto", "#17181c"),
+  c("marinho", "Marinho", "#1c2a4a"),
+  c("marinho-noite", "Marinho noite", "#141c33"),
+  c("noite", "Noite", "#1a1f3a"),
+  c("royal", "Azul royal", "#1f4fb5"),
+  c("azul-bb", "Azul BB", "#a9cbe8"),
+  c("rosa-bb", "Rosa BB", "#f4c6d3"),
+  c("bege", "Bege", "#d9c7a7"),
+  c("prata", "Prata", "#bfc3c7"),
+  c("lilas", "Lilás", "#b9a3d6"),
+  c("verde-agua", "Verde água", "#7fd1c3"),
+  c("amarelo-ouro", "Amarelo ouro", "#f2b500"),
+  c("celeste", "Celeste", "#6fa8dc"),
+  c("chumbo", "Cinza chumbo", "#4a4f57"),
+  c("grafite", "Grafite", "#3a3d42"),
+  c("mescla", "Mescla", "#a3a8ae"),
+  c("turquesa", "Turquesa", "#1aa7b8"),
+  c("jade", "Jade", "#16a085"),
+  c("laranja", "Laranja", "#f26a1b"),
+  c("roxo", "Roxo", "#5b2a86"),
+  c("petroleo", "Petróleo", "#1f4e5a"),
+  c("marrom", "Marrom", "#6b4226"),
+  c("fluorescente", "Amarelo fluorescente", "#d7f02a"),
+  c("vinho", "Vinho", "#6e1a2e"),
+  c("vermelho", "Vermelho", "#c8102e"),
+  c("verde-bandeira", "Verde bandeira", "#137a3a"),
+  c("verde-musgo", "Verde musgo", "#4b5d2e"),
+  c("amarelo", "Amarelo", "#f6d02f"),
+  c("areia", "Areia", "#d8c9a3"),
+  c("pink", "Pink", "#e8417f"),
+  c("cinza-prata", "Cinza prata", "#c8cbcf"),
+  c("caqui", "Caqui", "#b5a47a"),
+  c("amarelo-canario", "Amarelo canário", "#ffd400"),
+  c("verde-petrobras", "Verde Petrobras", "#0a7d3b"),
+  c("verde-hospitalar", "Verde hospitalar", "#2e8b7a"),
+  c("azul-motorista", "Azul motorista", "#2a4d8f"),
+  c("cinza-claro", "Cinza claro", "#b8bcc2"),
+  c("gelo", "Gelo", "#e9ecee"),
+  c("marrom-fossil", "Marrom fóssil", "#6b5a4e"),
+  c("vermelho-licor", "Vermelho licor", "#8e1b2f"),
+  c("laranja-juice", "Laranja juice", "#ff7a1a"),
+  c("dark-blue", "Dark blue", "#18233d"),
+  c("verde-amazonas", "Verde Amazonas", "#1e6b4f"),
+  c("cinza-titanium", "Cinza titanium", "#8a9097"),
+  c("off-white", "Off white", "#f3efe6"),
+  c("maisena", "Maisena", "#f3e7c9"),
+  c("lunar", "Lunar", "#d6d9de"),
+  c("uva", "Uva", "#6b3a6e"),
+  c("silver", "Silver", "#c3c7cc"),
+  c("ceu", "Céu", "#a7d3f0"),
+  c("lime", "Lime", "#c9e06a"),
+  c("acqua", "Acqua", "#8fd6d0"),
+  c("placido", "Plácido", "#8fa7c4"),
+  c("parisian", "Parisian", "#3b5b8c"),
+  c("hortensia", "Hortênsia", "#7b8fd1"),
+  c("cobalto", "Cobalto", "#1f3f9b"),
+  c("solar", "Solar", "#ffcf3f"),
+  c("abobora", "Abóbora", "#e8742a"),
+  c("cereja", "Cereja", "#9b1b30"),
+  c("ocre", "Ocre", "#c48a2c"),
+  c("denin", "Denin", "#3a5a80"),
+  c("militar", "Militar", "#4f5a3a"),
+  c("mescla-off", "Mescla off", "#c9c5bd"),
+  c("purist-blue", "Purist blue", "#2f6fd6"),
+  c("neo-mint", "Neo mint", "#9fe3c4"),
+  c("chiclete", "Chiclete", "#f39ac0"),
+  c("rosa-quartzo", "Rosa quartzo", "#e8b8c4"),
+  c("safari", "Safari", "#c9b38a"),
 ];
+
+// cores de fabricação por tecido, como no catálogo
+const PV = ["branco", "azul-bb", "rosa-bb", "bege", "prata", "lilas", "verde-agua", "amarelo-ouro", "celeste", "chumbo", "grafite", "mescla", "preto", "turquesa", "jade", "marinho", "noite", "laranja", "roxo", "petroleo", "marrom", "royal", "fluorescente", "vinho", "vermelho", "verde-bandeira", "verde-musgo"];
+const PIQUET = ["branco", "mescla", "amarelo", "areia", "azul-bb", "rosa-bb", "chumbo", "grafite", "preto", "marinho", "laranja", "pink", "turquesa", "royal", "verde-bandeira", "verde-musgo", "vermelho", "vinho", "roxo", "noite", "cinza-prata"];
+const BRIM = ["branco", "bege", "fluorescente", "caqui", "verde-bandeira", "amarelo-ouro", "amarelo-canario", "laranja", "vermelho", "marrom", "verde-agua", "verde-petrobras", "verde-hospitalar", "royal", "azul-motorista", "marinho", "marinho-noite", "cinza-claro", "chumbo", "petroleo", "preto"];
+const OXFORD = ["branco", "gelo", "marrom-fossil", "preto", "verde-bandeira", "vermelho-licor", "amarelo-canario", "laranja-juice", "dark-blue", "marinho-noite", "royal", "verde-amazonas", "cinza-titanium", "grafite", "chumbo", "verde-hospitalar"];
+const TRICOLINE = ["branco", "off-white", "maisena", "lunar", "rosa-bb", "uva", "lilas", "silver", "ceu", "lime", "acqua", "grafite", "placido", "parisian", "hortensia", "cobalto", "solar", "abobora", "cereja", "noite", "bege", "ocre", "verde-bandeira", "denin", "militar", "preto"];
+const MOLETOM = ["preto", "grafite", "mescla", "mescla-off", "branco", "off-white", "marinho", "royal", "purist-blue", "verde-musgo", "verde-bandeira", "neo-mint", "vinho", "vermelho", "pink", "chiclete", "rosa-quartzo", "lilas", "laranja", "amarelo-ouro", "safari"];
+/** a cor das fotos vem primeiro */
+const first = (id: string, list: string[]) => [id, ...list.filter((x) => x !== id)];
 
 export const categories: Category[] = [
-  { slug: "polos", name: "Polos", icon: "Shirt", description: "Apresentação impecável para o dia a dia da empresa.", image: "/images/categories/polos.webp" },
-  { slug: "camisetas", name: "Camisetas", icon: "Shirt", description: "Básicas versáteis para equipes, eventos e igrejas.", image: "/images/categories/camisetas.webp" },
-  { slug: "calcas", name: "Calças", icon: "Ruler", description: "Brim e sarja resistentes para a rotina operacional.", image: "/images/categories/calcas.webp" },
-  { slug: "jalecos", name: "Jalecos", icon: "Stethoscope", description: "Elegância e conforto para saúde e estética.", image: "/images/categories/jalecos.webp" },
-  { slug: "moletons", name: "Moletons", icon: "CloudSun", description: "Conforto térmico com a identidade da sua marca.", image: "/images/categories/moletons.webp" },
-  { slug: "operacional", name: "Uniforme Operacional", icon: "HardHat", description: "Durabilidade para indústria, logística e campo.", image: "/images/categories/operacional.webp" },
-  { slug: "alimenticia", name: "Área Alimentícia", icon: "ChefHat", description: "Dólmãs e peças para cozinhas e atendimento.", image: "/images/categories/alimenticia.webp" },
-  { slug: "alta-visibilidade", name: "Alta Visibilidade", icon: "TriangleAlert", description: "Faixas refletivas e cores de segurança.", image: "/images/categories/alta-visibilidade.webp" },
+  { slug: "camisetas", name: "Camisetas", icon: "Shirt", description: "Malha PV leve e resistente, manga curta, manga longa e baby look.", image: "/images/categories/camisetas.webp" },
+  { slug: "polos", name: "Polos", icon: "Shirt", description: "Piquet com gola polo e 2 botões, masculina e feminina.", image: "/images/categories/polos.webp" },
+  { slug: "camisas", name: "Camisas Sociais", icon: "Shirt", description: "Tricoline 100% algodão para recepção, atendimento e escritório.", image: "/images/categories/camisas.webp" },
+  { slug: "operacional", name: "Uniforme Operacional", icon: "HardHat", description: "Brim e oxford para indústria, oficina, limpeza e serviços gerais.", image: "/images/categories/operacional.webp" },
+  { slug: "calcas", name: "Calças e Bermudas", icon: "Ruler", description: "Brim, jeans e oxford, com elástico total ou meio cós.", image: "/images/categories/calcas.webp" },
+  { slug: "jalecos", name: "Jalecos e Saúde", icon: "Stethoscope", description: "Jalecos tradicionais e privativos para saúde e estética.", image: "/images/categories/jalecos.webp" },
+  { slug: "moletons", name: "Moletons", icon: "CloudSun", description: "Blusa moletom e canguru com capuz para os dias frios.", image: "/images/categories/moletons.webp" },
+  { slug: "alimenticia", name: "Aventais", icon: "ChefHat", description: "Aventais bata e frontal para cozinha, limpeza e atendimento.", image: "/images/categories/alimenticia.webp" },
+  { slug: "alta-visibilidade", name: "Alta Visibilidade", icon: "TriangleAlert", description: "Colete com faixas refletivas para transporte e logística.", image: "/images/categories/alta-visibilidade.webp" },
 ];
 
-const ADULT: Size[] = ["P", "M", "G", "GG", "XG"];
+const PADRAO = ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"];
+const ATE_XGG = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
+const SOCIAL = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+const JEANS = ["40", "42", "44", "46", "48", "50", "52", "54", "56", "58"];
+const UNICO = ["Tamanho único"];
+
 const img = (slug: string) => `/images/products/${slug}.webp`;
 const back = (slug: string) => `/images/products/${slug}-costas.webp`;
 const side = (slug: string) => `/images/products/${slug}-lado.webp`;
 const photos = (slug: string) => [1, 2].map((n) => `/images/products/${slug}-modelo-${n}.webp`);
 
-const base: Omit<Product, "photos" | "side">[] = [
-  // ---------- pronta-entrega ----------
-  {
-    slug: "polo-pv-basica", name: "Polo PV Básica", kind: "stock", category: "polos",
-    price: 37.9, compareAt: 44.9, minQty: 5,
-    colors: ["marinho", "preto", "mescla", "branco", "royal", "vermelho"], sizes: ADULT,
-    fabric: "Poliéster + viscose", short: "Leve, confortável e ideal para uso corporativo.",
-    description: "A polo que equilibra custo e apresentação. Malha PV com toque macio, gola e punho em ribana e caimento clássico que valoriza a sua marca bordada ou estampada.",
-    features: ["Malha PV 67% poliéster / 33% viscose", "Gola e punho em ribana", "Não amarrota com facilidade", "Ideal para bordado no peito"],
-    techniques: ["Bordado", "DTF", "Silk"], badge: "Mais vendida", rating: 4.8, reviews: 214, stock: 1240,
-    image: img("polo-pv-basica"), back: back("polo-pv-basica"), gallery: [img("polo-pv-basica"), back("polo-pv-basica")],
-  },
-  {
-    slug: "polo-piquet-basica", name: "Polo Piquet Básica", kind: "stock", category: "polos",
-    price: 44.9, minQty: 5,
-    colors: ["marinho", "preto", "mescla", "branco", "royal", "vermelho"], sizes: ADULT,
-    fabric: "Piquet 100% algodão", short: "Visual mais elegante para o dia a dia da empresa.",
-    description: "Trama piquet encorpada, com textura que transmite qualidade. A escolha certa para atendimento, recepção e equipes comerciais.",
-    features: ["Piquet 100% algodão penteado", "Gola polo com 3 botões", "Barra com fenda lateral", "Excelente acabamento para bordado"],
-    techniques: ["Bordado", "DTF"], badge: "Premium", rating: 4.9, reviews: 178, stock: 860,
-    image: img("polo-piquet-basica"), back: back("polo-piquet-basica"), gallery: [img("polo-piquet-basica"), back("polo-piquet-basica")],
-  },
-  {
-    slug: "polo-dry-fit-basica", name: "Polo Dry Fit Básica", kind: "stock", category: "polos",
-    price: 42.9, minQty: 5,
-    colors: ["marinho", "preto", "mescla", "branco", "royal"], sizes: ADULT,
-    fabric: "Poliamida dry fit", short: "Secagem rápida e alta respirabilidade.",
-    description: "Tecnologia que afasta o suor e seca rápido. Perfeita para equipes externas, eventos esportivos e climas quentes.",
-    features: ["Tecido com proteção UV 30+", "Secagem rápida", "Antiodor", "Leve e respirável"],
-    techniques: ["DTF", "Sublimação", "Bordado"], rating: 4.7, reviews: 96, stock: 0,
-    image: img("polo-dry-fit-basica"), back: back("polo-dry-fit-basica"), gallery: [img("polo-dry-fit-basica"), back("polo-dry-fit-basica")],
-  },
-  {
-    slug: "polo-piquet-feminina", name: "Polo Piquet Feminina", kind: "stock", category: "polos",
-    price: 44.9, minQty: 5,
-    colors: ["marinho", "preto", "mescla", "branco", "royal"], sizes: ["PP", "P", "M", "G", "GG"],
-    fabric: "Piquet com elastano", short: "Modelagem feminina com ótimo caimento.",
-    description: "Recortes acinturados e toque de elastano para conforto o dia inteiro, sem perder a elegância corporativa.",
-    features: ["Modelagem acinturada", "Piquet com 4% elastano", "Manga com punho ajustado", "Gola com 2 botões"],
-    techniques: ["Bordado", "DTF"], badge: "Novo", rating: 4.9, reviews: 64, stock: 0,
-    image: img("polo-piquet-feminina"), back: back("polo-piquet-feminina"), gallery: [img("polo-piquet-feminina"), back("polo-piquet-feminina")],
-  },
-  {
-    slug: "camiseta-algodao-basica", name: "Camiseta Algodão Básica", kind: "stock", category: "camisetas",
-    price: 24.9, compareAt: 29.9, minQty: 5,
-    colors: ["branco", "preto", "marinho", "mescla", "royal", "vermelho", "amarelo", "verde"], sizes: ["PP", ...ADULT, "XGG"],
-    fabric: "Malha 100% algodão fio 30.1", short: "A queridinha de eventos, igrejas e equipes.",
-    description: "Malha penteada fio 30.1, macia e com ótima recepção de estampa. Grade completa do PP ao XGG para vestir todo mundo.",
-    features: ["100% algodão penteado fio 30.1", "Gola careca em ribana", "Costura dupla reforçada", "Ótima para DTF e silk"],
-    techniques: ["DTF", "Silk"], badge: "Melhor preço", rating: 4.8, reviews: 532, stock: 3200,
-    image: img("camiseta-algodao-basica"), back: back("camiseta-algodao-basica"), gallery: [img("camiseta-algodao-basica"), back("camiseta-algodao-basica")],
-  },
-  {
-    slug: "camiseta-dry-fit", name: "Camiseta Dry Fit", kind: "stock", category: "camisetas",
-    price: 29.9, minQty: 5,
-    colors: ["branco", "preto", "marinho", "royal", "limao", "laranja"], sizes: ADULT,
-    fabric: "Poliéster dry fit", short: "Para corridas, eventos esportivos e ações ao ar livre.",
-    description: "Leve e respirável, com toque gelado. Aceita sublimação total e DTF com cores vivas.",
-    features: ["100% poliéster com tecnologia dry", "Proteção UV", "Não desbota", "Ideal para sublimação"],
-    techniques: ["Sublimação", "DTF"], rating: 4.7, reviews: 143, stock: 0,
-    image: img("camiseta-dry-fit"), back: back("camiseta-dry-fit"), gallery: [img("camiseta-dry-fit"), back("camiseta-dry-fit")],
-  },
-  {
-    slug: "calca-brim-profissional", name: "Calça Brim Profissional", kind: "stock", category: "calcas",
-    price: 69.9, minQty: 5,
-    colors: ["marinho", "preto", "chumbo"], sizes: ["P", "M", "G", "GG", "XG", "XGG"],
-    fabric: "Brim 100% algodão 8,5 oz", short: "Resistência para a rotina mais pesada.",
-    description: "Brim pesado com costuras triplas, cós com elástico lateral e bolsos reforçados. Feita para durar.",
-    features: ["Brim 8,5 oz", "Elástico lateral no cós", "Bolsos faca e traseiro", "Costura tripla"],
-    techniques: ["Bordado", "Silk"], rating: 4.6, reviews: 88, stock: 0,
-    image: img("calca-brim-profissional"), back: back("calca-brim-profissional"), gallery: [img("calca-brim-profissional"), back("calca-brim-profissional")],
-  },
-  {
-    slug: "jaleco-gabardine", name: "Jaleco Gabardine", kind: "stock", category: "jalecos",
-    price: 89.9, minQty: 5,
-    colors: ["branco", "marinho", "celeste"], sizes: ["PP", "P", "M", "G", "GG"],
-    fabric: "Gabardine com elastano", short: "Elegância para clínicas, salões e laboratórios.",
-    description: "Gabardine encorpado que não amassa, com modelagem acinturada e bolsos funcionais. Bordamos nome e logo.",
-    features: ["Gabardine com 3% elastano", "Manga longa com punho", "3 bolsos", "Botões de pressão"],
-    techniques: ["Bordado"], badge: "Saúde", rating: 4.9, reviews: 121, stock: 0,
-    image: img("jaleco-gabardine"), back: back("jaleco-gabardine"), gallery: [img("jaleco-gabardine"), back("jaleco-gabardine")],
-  },
-  {
-    slug: "moletom-canguru", name: "Moletom Canguru", kind: "stock", category: "moletons",
-    price: 99.9, minQty: 5,
-    colors: ["preto", "marinho", "mescla", "chumbo"], sizes: ADULT,
-    fabric: "Moletom 3 cabos flanelado", short: "Conforto térmico com a sua marca em destaque.",
-    description: "Moletom felpado por dentro, capuz forrado e bolso canguru. Perfeito para equipes, turmas e confraternizações.",
-    features: ["Moletom 3 cabos 50/50", "Interior flanelado", "Capuz com cordão", "Punho e barra em ribana"],
-    techniques: ["Bordado", "DTF", "Silk"], rating: 4.8, reviews: 77, stock: 0,
-    image: img("moletom-canguru"), back: back("moletom-canguru"), gallery: [img("moletom-canguru"), back("moletom-canguru")],
-  },
-  {
-    slug: "camisa-operacional-brim", name: "Camisa Operacional Brim", kind: "stock", category: "operacional",
-    price: 64.9, minQty: 5,
-    colors: ["marinho", "chumbo", "royal"], sizes: ["P", "M", "G", "GG", "XG", "XGG"],
-    fabric: "Brim leve 100% algodão", short: "Robusta, prática e pronta para o campo.",
-    description: "Camisa profissional com bolsos com lapela, reforço nos ombros e opção de faixa refletiva aplicada.",
-    features: ["Brim leve 7 oz", "2 bolsos com lapela", "Porta-caneta", "Aceita faixa refletiva"],
-    techniques: ["Bordado", "Silk"], rating: 4.6, reviews: 52, stock: 0,
-    image: img("camisa-operacional-brim"), back: back("camisa-operacional-brim"), gallery: [img("camisa-operacional-brim"), back("camisa-operacional-brim")],
-  },
-  {
-    slug: "dolma-chef", name: "Dólmã Chef", kind: "stock", category: "alimenticia",
-    price: 79.9, minQty: 5,
-    colors: ["branco", "preto"], sizes: ["PP", "P", "M", "G", "GG"],
-    fabric: "Oxford com elastano", short: "Presença profissional para cozinha e atendimento.",
-    description: "Dólmã transpassado com botões de pressão, tecido de fácil lavagem e bolso porta-termômetro.",
-    features: ["Oxford com elastano", "Fechamento transpassado", "Bolso porta-termômetro", "Fácil lavagem"],
-    techniques: ["Bordado"], rating: 4.8, reviews: 69, stock: 0,
-    image: img("dolma-chef"), back: back("dolma-chef"), gallery: [img("dolma-chef"), back("dolma-chef")],
-  },
-  {
-    slug: "camiseta-alta-visibilidade", name: "Camiseta Alta Visibilidade", kind: "stock", category: "alta-visibilidade",
-    price: 39.9, minQty: 5,
-    colors: ["limao", "laranja"], sizes: ADULT,
-    fabric: "Poliéster fluorescente", short: "Segurança com faixas refletivas de 5 cm.",
-    description: "Tecido fluorescente com faixas refletivas costuradas. Indicada para obras, logística e trânsito.",
-    features: ["Faixas refletivas 5 cm", "Cores de alta visibilidade", "Tecido respirável", "Costura reforçada"],
-    techniques: ["Silk", "DTF"], badge: "Segurança", rating: 4.7, reviews: 41, stock: 0,
-    image: img("camiseta-alta-visibilidade"), back: back("camiseta-alta-visibilidade"), gallery: [img("camiseta-alta-visibilidade"), back("camiseta-alta-visibilidade")],
-  },
+type Base = Omit<Product, "image" | "back" | "side" | "photos" | "gallery" | "rating" | "reviews" | "features" | "short"> & { short?: string };
 
-  // ---------- sob encomenda (orçamento, 30+ peças) ----------
+const COSTURA: Highlight = { title: "Costura reforçada", text: "Maior durabilidade e acabamento profissional." };
+const GRAMATURA: Highlight = { title: "Alta gramatura", text: "Elevada gramatura do tecido." };
+const DURABILIDADE: Highlight = { title: "Alta durabilidade", text: "Resistente ao uso contínuo e desgaste diário." };
+const FECHAMENTO: Highlight = { title: "Fechamento prático", text: "Botões frontais que facilitam o uso e garantem ajuste seguro." };
+const COBERTURA: Highlight = { title: "Cobertura total", text: "Comprimento alongado que amplia a proteção no dia a dia." };
+const BOLSOS3: Highlight = { title: "Até 3 bolsos funcionais", text: "Mais praticidade para transportar itens essenciais durante a rotina." };
+const PUNHO: Highlight = { title: "Punho com abotoamento", text: "Acabamento clássico que valoriza a apresentação e o ajuste da peça." };
+const SOFISTICADO: Highlight = { title: "Altamente sofisticado", text: "Caimento alinhado que transmite mais profissionalismo e sofisticação." };
+const REFORCO: Highlight = { title: "Reforço extra", text: "Opção de camada adicional no joelho para maior resistência ao desgaste." };
+const BOLSOS_EXTRA: Highlight = { title: "Bolsos extra", text: "Bolsos laterais adicionais para melhor organização e acesso rápido aos itens essenciais." };
+const MOBILIDADE: Highlight = { title: "Mobilidade garantida", text: "Liberdade de movimento durante toda a jornada." };
+
+const ARTE: Technique[] = ["Bordado", "Silk", "DTF"];
+const ARTE_SUB: Technique[] = ["Silk", "DTF", "Bordado", "Sublimação"];
+
+const base: Base[] = [
+  // ---------- camisetas ----------
   {
-    slug: "polo-com-friso", name: "Polo com Friso", kind: "custom", category: "polos",
-    price: 0, minQty: 30, colors: ["marinho", "preto", "branco", "royal", "chumbo"], sizes: ADULT,
-    fabric: "Piquet, PV ou dry fit", short: "Combinação de cores com frisos e gola diferenciada.",
-    description: "Frisos na gola e no punho com as cores da sua marca. Escolha tecido, botões e acabamentos.",
-    features: ["Frisos na gola e mangas", "Cores da sua identidade", "Escolha do tecido", "Bordado incluso no projeto"],
-    techniques: ["Bordado", "DTF", "Silk"], rating: 4.9, reviews: 38,
-    options: ["Friso", "Gola", "Punho", "Botões"], image: img("polo-com-friso"), back: back("polo-com-friso"), gallery: [img("polo-com-friso"), back("polo-com-friso")],
+    slug: "camiseta-malha-pv", name: "Camiseta Malha PV Manga Curta", kind: "stock", category: "camisetas", subtitle: "Gola careca ou gola V",
+    price: 24.9, compareAt: 29.9, minQty: 5, stock: 1500,
+    colors: first("preto", PV), sizes: ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"], sizeChart: PADRAO,
+    fabric: "Malha PV", composition: "67% poliéster + 33% viscose", fabricNote: "Variação de tecido disponível",
+    description: "Leve e refrescante, com alto conforto térmico e excelente resistência. Baixa propensão a amassar, mantendo um visual alinhado ao longo do dia. Ideal para dias mais quentes.",
+    highlights: [COSTURA], techniques: ARTE_SUB, badge: "Pronta-entrega",
   },
   {
-    slug: "polo-bicolor", name: "Polo Bicolor", kind: "custom", category: "polos",
-    price: 0, minQty: 30, colors: ["mescla", "marinho", "preto", "branco"], sizes: ADULT,
-    fabric: "Piquet ou PV", short: "Recortes com cores personalizadas.",
-    description: "Recortes laterais e nos ombros em duas cores para um visual moderno e exclusivo.",
-    features: ["Recortes em duas cores", "Modelagem exclusiva", "Combinação livre de cores", "Bordado e silk"],
-    techniques: ["Bordado", "Silk"], rating: 4.8, reviews: 22,
-    options: ["Recortes", "Cores", "Gola"], image: img("polo-bicolor"), back: back("polo-bicolor"), gallery: [img("polo-bicolor"), back("polo-bicolor")],
+    slug: "camiseta-malha-pv-manga-longa", name: "Camiseta Malha PV Manga Longa", kind: "stock", category: "camisetas", subtitle: "Gola careca ou gola V",
+    price: 32.9, minQty: 5, stock: 800,
+    colors: first("bege", PV), sizes: ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"], sizeChart: PADRAO,
+    fabric: "Malha PV", composition: "67% poliéster + 33% viscose", fabricNote: "Variação de tecido disponível",
+    description: "Confortável e resistente para o uso diário. Ideal para dias mais amenos, mantendo liberdade de movimento e ótimo caimento.",
+    highlights: [{ title: "Proteção estendida", text: "Mangas longas que oferecem maior cobertura e conforto." }], techniques: ARTE_SUB, badge: "Pronta-entrega",
   },
   {
-    slug: "polo-gola-personalizada", name: "Polo Gola Personalizada", kind: "custom", category: "polos",
-    price: 0, minQty: 30, colors: ["preto", "marinho", "branco", "vermelho"], sizes: ADULT,
-    fabric: "Piquet premium", short: "Escolha a cor da gola, punho e botões.",
-    description: "Gola e punho em cor de contraste, botões personalizados e etiqueta com a sua marca.",
-    features: ["Gola e punho contrastantes", "Botões personalizados", "Etiqueta própria", "Piquet premium"],
-    techniques: ["Bordado"], rating: 4.9, reviews: 31,
-    options: ["Gola", "Punho", "Botões", "Etiqueta"], image: img("polo-gola-personalizada"), back: back("polo-gola-personalizada"), gallery: [img("polo-gola-personalizada"), back("polo-gola-personalizada")],
+    slug: "camiseta-baby-look", name: "Camiseta Baby Look", kind: "custom", category: "camisetas", subtitle: "Gola careca ou gola V",
+    price: 0, minQty: 30, colors: first("preto", PV), sizes: [], sizeChart: PADRAO,
+    fabric: "Malha PV", composition: "67% poliéster + 33% viscose", fabricNote: "Variação de tecido disponível",
+    description: "Modelagem ajustada, leve e confortável. Resistente, não amassa fácil e mantém bom caimento no uso diário.",
+    highlights: [COSTURA], techniques: ARTE_SUB,
+  },
+  // ---------- polos ----------
+  {
+    slug: "polo-masculina-piquet", name: "Polo Masculina Piquet", kind: "custom", category: "polos", subtitle: "Gola polo + 2 botões",
+    price: 0, minQty: 30, colors: first("marinho", PIQUET), sizes: [], sizeChart: PADRAO,
+    fabric: "Malha piquet", composition: "50% poliéster + 50% algodão", fabricNote: "Variação de tecido disponível",
+    description: "Visual mais alinhado e profissional. Em piquet, oferece maior estrutura, durabilidade e excelente caimento, ideal para ambientes profissionais e sociais.",
+    highlights: [GRAMATURA], techniques: ARTE,
   },
   {
-    slug: "polo-manga-longa", name: "Polo Manga Longa", kind: "custom", category: "operacional",
-    price: 0, minQty: 30, colors: ["marinho", "chumbo", "preto"], sizes: ADULT,
-    fabric: "Piquet ou dry fit UV", short: "Ideal para ambientes externos e operacionais.",
-    description: "Manga longa com punho, opção de faixa refletiva e proteção UV para equipes de campo.",
-    features: ["Manga longa com punho", "Opção de faixa refletiva", "Proteção UV", "Reforço nos cotovelos"],
-    techniques: ["Bordado", "Silk"], rating: 4.7, reviews: 18,
-    options: ["Refletivo", "Punho", "Tecido"], image: img("polo-manga-longa"), back: back("polo-manga-longa"), gallery: [img("polo-manga-longa"), back("polo-manga-longa")],
+    slug: "polo-feminina-piquet", name: "Polo Feminina Piquet", kind: "custom", category: "polos", subtitle: "Gola polo + 2 botões",
+    price: 0, minQty: 30, colors: first("marinho", PIQUET), sizes: [], sizeChart: PADRAO,
+    fabric: "Malha piquet", composition: "50% poliéster + 50% algodão", fabricNote: "Variação de tecido disponível",
+    description: "Ajuste ao corpo com visual elegante. Em piquet, garante estrutura, conforto e durabilidade para o dia a dia.",
+    highlights: [GRAMATURA], techniques: ARTE,
+  },
+  // ---------- camisas sociais ----------
+  {
+    slug: "camisa-social-masculina", name: "Camisa Social Masculina Manga Curta", kind: "custom", category: "camisas", subtitle: "Botões + opção de bolsos",
+    price: 0, minQty: 30, colors: first("ceu", TRICOLINE), sizes: [], sizeChart: SOCIAL,
+    fabric: "Tecido tricoline", composition: "100% algodão", fabricNote: "Variação de tecido disponível",
+    description: "Visual premium e acabamento alinhado. Confortável e ideal para ambientes profissionais e atendimento.",
+    highlights: [SOFISTICADO], techniques: ["Bordado", "DTF"],
   },
   {
-    slug: "polo-alta-visibilidade", name: "Polo Alta Visibilidade", kind: "custom", category: "alta-visibilidade",
-    price: 0, minQty: 30, colors: ["limao", "laranja", "chumbo"], sizes: ADULT,
-    fabric: "Dry fit fluorescente", short: "Tecidos e cores específicos para sua operação.",
-    description: "Polo bicolor fluorescente com faixas refletivas, conforme normas de segurança da sua operação.",
-    features: ["Faixas refletivas", "Bicolor fluorescente", "Conforme NR aplicável", "Tecido respirável"],
-    techniques: ["Silk", "Bordado"], rating: 4.8, reviews: 15,
-    options: ["Refletivo", "Recortes", "Cores"], image: img("polo-alta-visibilidade"), back: back("polo-alta-visibilidade"), gallery: [img("polo-alta-visibilidade"), back("polo-alta-visibilidade")],
+    slug: "camisa-social-masculina-manga-longa", name: "Camisa Social Masculina Manga Longa", kind: "custom", category: "camisas", subtitle: "Botões + opção de bolsos",
+    price: 0, minQty: 30, colors: first("cobalto", TRICOLINE), sizes: [], sizeChart: SOCIAL,
+    fabric: "Tecido tricoline", composition: "100% algodão", fabricNote: "Variação de tecido disponível",
+    description: "Caimento alinhado e visual profissional. Ideal para empresas, recepção, atendimento e ambientes corporativos.",
+    highlights: [PUNHO], techniques: ["Bordado", "DTF"],
+  },
+  {
+    slug: "camisa-social-feminina", name: "Camisa Social Feminina Manga Curta", kind: "custom", category: "camisas", subtitle: "Botões + opção de bolsos",
+    price: 0, minQty: 30, colors: first("noite", TRICOLINE), sizes: [], sizeChart: SOCIAL,
+    fabric: "Tecido tricoline", composition: "100% algodão", fabricNote: "Variação de tecido disponível",
+    description: "Visual premium e acabamento alinhado. Confortável e ideal para ambientes profissionais e atendimento.",
+    highlights: [SOFISTICADO], techniques: ["Bordado", "DTF"],
+  },
+  {
+    slug: "camisa-social-feminina-manga-longa", name: "Camisa Social Feminina Manga Longa", kind: "custom", category: "camisas", subtitle: "Botões + opção de bolsos",
+    price: 0, minQty: 30, colors: first("noite", TRICOLINE), sizes: [], sizeChart: SOCIAL,
+    fabric: "Tecido tricoline", composition: "100% algodão", fabricNote: "Variação de tecido disponível",
+    description: "Visual premium e acabamento alinhado. Confortável e ideal para ambientes profissionais e atendimento.",
+    highlights: [PUNHO], techniques: ["Bordado", "DTF"],
+  },
+  // ---------- operacional ----------
+  {
+    slug: "jaleco-gola-italiana", name: "Jaleco Gola Italiana Manga Curta", kind: "custom", category: "operacional", subtitle: "Gola italiana + 1 bolso",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Ideal para indústrias, oficinas e serviços gerais, oferece alta respirabilidade, durabilidade e proteção contra sujeiras e abrasões leves.",
+    highlights: [DURABILIDADE], techniques: ARTE,
+  },
+  {
+    slug: "jaleco-gola-italiana-manga-longa", name: "Jaleco Gola Italiana Manga Longa", kind: "custom", category: "operacional", subtitle: "Gola italiana + 1 bolso",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "A definição de resistência, conforto e durabilidade. Ideal para indústrias, oficinas e serviços gerais, com maior taxa de proteção.",
+    highlights: [DURABILIDADE], techniques: ARTE,
+  },
+  {
+    slug: "jaleco-com-botoes", name: "Jaleco com Botões Manga Curta", kind: "custom", category: "operacional", subtitle: "Gola padrão + abertura",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Leve, resistente e confortável. Fechamento frontal por botões, com ótimo caimento e praticidade para a rotina profissional.",
+    highlights: [FECHAMENTO], techniques: ARTE,
+  },
+  {
+    slug: "jaleco-com-botoes-manga-longa", name: "Jaleco com Botões Manga Longa", kind: "custom", category: "operacional", subtitle: "Gola padrão + 1 abertura",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Feito para oferecer resistência e praticidade diariamente. O fechamento por botões proporciona um bom visual e facilita o vestir.",
+    highlights: [FECHAMENTO], techniques: ARTE,
+  },
+  {
+    slug: "jaleco-guarda-po", name: "Jaleco Guarda-Pó Manga Curta", kind: "custom", category: "operacional", subtitle: "Tamanho maior + abertura",
+    price: 0, minQty: 30, colors: first("preto", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Com maior comprimento para máxima cobertura. Resistente e confortável, ideal para proteção no uso profissional.",
+    highlights: [COBERTURA], techniques: ARTE,
+  },
+  {
+    slug: "jaleco-guarda-po-manga-longa", name: "Jaleco Guarda-Pó Manga Longa", kind: "custom", category: "operacional", subtitle: "Tamanho maior + abertura",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Com maior comprimento para máxima cobertura. Resistente e confortável, ideal para proteção no uso profissional.",
+    highlights: [COBERTURA], techniques: ARTE,
+  },
+  {
+    slug: "jaleco-limpeza", name: "Jaleco para Limpeza", kind: "custom", category: "operacional", subtitle: "Bolsos adicionais",
+    price: 0, minQty: 30, colors: first("marinho-noite", OXFORD), sizes: [], sizeChart: ATE_XGG,
+    fabric: "Oxford", composition: "100% poliéster", fabricNote: "Variação de cores disponíveis",
+    description: "Peça leve, ideal para equipes de limpeza e serviços gerais, oferecendo praticidade e caimento. Ideal para a rotina de trabalho.",
+    highlights: [{ title: "Disponível em 2 cores", text: "Opções de cores para atender diferentes identidades da empresa." }], techniques: ARTE,
+  },
+  // ---------- calças e bermudas ----------
+  {
+    slug: "calca-brim-elastico-total", name: "Calça de Brim Elástico Total", kind: "stock", category: "calcas", subtitle: "4 bolsos + cordão",
+    price: 69.9, minQty: 5, stock: 600,
+    colors: first("chumbo", BRIM), sizes: ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"], sizeChart: PADRAO,
+    fabric: "Brim pesado", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Confortável e resistente para a rotina diária. Proporciona ótimo ajuste e liberdade de movimento.",
+    highlights: [REFORCO, BOLSOS_EXTRA], techniques: ARTE, noPositions: ["manga"], badge: "Pronta-entrega",
+  },
+  {
+    slug: "calca-meio-cos", name: "Calça Meio Cós", kind: "custom", category: "calcas", subtitle: "4 bolsos + passante + zíper",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim pesado", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Cós estruturado com elástico atrás, passantes para cinto e fechamento em zíper. Une visual profissional com conforto no ajuste.",
+    highlights: [REFORCO, BOLSOS_EXTRA], techniques: ARTE, noPositions: ["manga"],
+  },
+  {
+    slug: "calca-jeans", name: "Calça Jeans", kind: "custom", category: "calcas", subtitle: "4 bolsos + botão + zíper",
+    price: 0, minQty: 30, colors: ["marinho"], sizes: [], sizeChart: JEANS,
+    fabric: "Jeans", composition: "98% algodão + 2% elastano", fabricNote: "Cor marinho",
+    description: "Versátil, com visual moderno e confortável para o dia a dia. Une resistência, praticidade e ótimo ajuste no uso profissional.",
+    highlights: [{ title: "Tecido reforçado", text: "Jeans resistente ao desgaste diário, com excelente durabilidade." }], techniques: ["Bordado", "DTF"], noPositions: ["manga"],
+  },
+  {
+    slug: "calca-oxford", name: "Calça Oxford", kind: "custom", category: "calcas", subtitle: "4 bolsos + cordão",
+    price: 0, minQty: 30, colors: first("marinho-noite", OXFORD), sizes: [], sizeChart: PADRAO,
+    fabric: "Oxford", composition: "100% poliéster", fabricNote: "Disponível também em gabardine",
+    description: "Visual social e elegante, ideal para ambientes profissionais. Disponível também na opção gabardine, mais leve e confortável para o uso diário.",
+    highlights: [{ title: "Visual refinado", text: "Modelagem social com ótimo caimento e acabamento alinhado." }], techniques: ["Bordado", "DTF"], noPositions: ["manga"],
+  },
+  {
+    slug: "bermuda-elastico-total", name: "Bermuda Elástico Total", kind: "custom", category: "calcas", subtitle: "4 bolsos + elástico",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Confortável e prática para o dia a dia. Modelagem leve que garante liberdade de movimento.",
+    highlights: [{ title: "Ajuste flexível", text: "Cintura com elástico total para mais conforto e adaptação ao corpo." }], techniques: ARTE, noPositions: ["manga"],
+  },
+  {
+    slug: "bermuda-meio-cos", name: "Bermuda Meio Cós", kind: "custom", category: "calcas", subtitle: "4 bolsos + passante + zíper",
+    price: 0, minQty: 30, colors: first("chumbo", BRIM), sizes: [], sizeChart: PADRAO,
+    fabric: "Brim leve", composition: "100% algodão", fabricNote: "Variação de composição disponível",
+    description: "Cós estruturado com elástico atrás, passantes para cinto e fechamento em zíper. Une visual profissional com conforto no ajuste.",
+    highlights: [{ title: "Passante na cintura", text: "Proporciona melhor ajuste ao corpo sem abrir mão do visual alinhado." }], techniques: ARTE, noPositions: ["manga"],
+  },
+  // ---------- jalecos e saúde ----------
+  {
+    slug: "jaleco-tradicional", name: "Jaleco Tradicional Manga Curta", kind: "custom", category: "jalecos", subtitle: "Bolsos + corda para amarrar",
+    price: 0, minQty: 30, colors: first("branco", OXFORD), sizes: [], sizeChart: ATE_XGG,
+    fabric: "Oxford", composition: "100% poliéster", fabricNote: "Variação de cores disponíveis",
+    description: "Design clássico. Confeccionado para oferecer conforto, proteção e excelente apresentação em ambientes de cuidado e saúde.",
+    highlights: [BOLSOS3], techniques: ["Bordado", "DTF"],
+  },
+  {
+    slug: "jaleco-tradicional-manga-longa", name: "Jaleco Tradicional Manga Longa", kind: "custom", category: "jalecos", subtitle: "Bolsos + corda para amarrar",
+    price: 0, minQty: 30, colors: first("branco", OXFORD), sizes: [], sizeChart: ATE_XGG,
+    fabric: "Oxford", composition: "100% poliéster", fabricNote: "Variação de cores disponíveis",
+    description: "Design clássico. Confeccionado para oferecer conforto, proteção e excelente apresentação em ambientes de cuidado e saúde.",
+    highlights: [BOLSOS3], techniques: ["Bordado", "DTF"],
+  },
+  {
+    slug: "jaleco-privativo", name: "Jaleco Privativo (Scrub)", kind: "custom", category: "jalecos", subtitle: "Scrubs + 2 bolsos",
+    price: 0, minQty: 30, colors: first("marinho-noite", OXFORD), sizes: [], sizeChart: [...ATE_XGG, "G3"],
+    fabric: "Oxford", composition: "100% poliéster", fabricNote: "Variação de cores disponíveis",
+    description: "Modelo leve, confortável e respirável, ideal para médicos e profissionais da saúde. Desenvolvido para garantir liberdade de movimento durante longas jornadas.",
+    highlights: [{ title: "Mobilidade garantida", text: "Design funcional que oferece conforto, mobilidade e praticidade no dia a dia." }], techniques: ["Bordado", "DTF"],
+  },
+  // ---------- moletons ----------
+  {
+    slug: "blusa-moletom", name: "Blusa Moletom", kind: "custom", category: "moletons", subtitle: "Com punho e gola",
+    price: 0, minQty: 30, colors: first("branco", MOLETOM), sizes: [], sizeChart: PADRAO,
+    fabric: "Moletom", composition: "50% poliéster + 50% algodão", fabricNote: "Variação de cores disponíveis",
+    description: "Confortável e resistente, ideal para dias frios e uso diário. Ótimo caimento e sensação aconchegante.",
+    highlights: [{ title: "Conforto térmico", text: "Mantém o corpo aquecido com toque macio e agradável." }], techniques: ["Silk", "DTF", "Bordado"],
+  },
+  {
+    slug: "moletom-canguru", name: "Moletom Canguru", kind: "custom", category: "moletons", subtitle: "Com punho + capuz + bolso",
+    price: 0, minQty: 30, colors: first("marinho", MOLETOM), sizes: [], sizeChart: PADRAO,
+    fabric: "Moletom", composition: "50% poliéster + 50% algodão", fabricNote: "Variação de cores disponíveis",
+    description: "Confortável e resistente para os dias mais frios. Conta com capuz e bolso frontal, unindo proteção térmica e praticidade.",
+    highlights: [
+      { title: "Incluso capuz", text: "Capuz para maior proteção contra o frio." },
+      { title: "Bolso canguru", text: "Bolso frontal amplo para mais praticidade no dia a dia." },
+    ],
+    techniques: ["Silk", "DTF", "Bordado"],
+  },
+  // ---------- aventais ----------
+  {
+    slug: "avental-bata", name: "Avental Bata", kind: "custom", category: "alimenticia", subtitle: "2 bolsos + cordas",
+    price: 0, minQty: 30, colors: first("preto", OXFORD), sizes: [], sizeChart: UNICO,
+    fabric: "Oxford", composition: "100% poliéster", fabricNote: "Variação de cores disponíveis",
+    description: "Modelo de avental curto e confortável. Oferece boa cobertura e praticidade para a rotina profissional.",
+    highlights: [MOBILIDADE], techniques: ARTE, noPositions: ["manga"],
+  },
+  {
+    slug: "avental-frontal", name: "Avental Frontal", kind: "custom", category: "alimenticia", subtitle: "Bolso largo + cordas",
+    price: 0, minQty: 30, colors: first("preto", OXFORD), sizes: [], sizeChart: UNICO,
+    fabric: "Oxford", composition: "100% poliéster", fabricNote: "Variação de cores disponíveis",
+    description: "Maior cobertura, oferecendo mais proteção e um visual mais elegante. Ideal para rotinas que exigem praticidade e apresentação.",
+    highlights: [{ title: "Bolso central", text: "Mais espaço para armazenar itens essenciais com praticidade." }], techniques: ARTE, noPositions: ["costas", "manga"],
+  },
+  // ---------- alta visibilidade ----------
+  {
+    slug: "colete-padrao", name: "Colete Padrão Refletivo", kind: "custom", category: "alta-visibilidade", subtitle: "Bolsos + zíper + faixa refletiva",
+    price: 0, minQty: 30, colors: first("fluorescente", OXFORD.map((x) => (x === "amarelo-canario" ? "fluorescente" : x))), sizes: [], sizeChart: UNICO,
+    fabric: "Poliéster", composition: "100% poliéster", fabricNote: "Variação de cores disponíveis",
+    description: "Leve e funcional para operações de transporte, estoque e logística. Proporciona conforto e maior visibilidade durante o trabalho.",
+    highlights: [{ title: "Faixas refletivas", text: "Aumentam a visibilidade do usuário em ambientes com pouca iluminação." }], techniques: ["DTF", "Silk"], noPositions: ["manga"],
   },
 ];
 
-export const products: Product[] = base.map((p) => ({ ...p, side: side(p.slug), gallery: [...p.gallery, side(p.slug)], photos: photos(p.slug) }));
+/** Ficha técnica em lista (vitrine, busca, landing page). */
+const featuresOf = (p: Base) => [
+  `${p.fabric} (${p.composition})`,
+  p.subtitle,
+  ...p.highlights.map((h) => h.title),
+  `Tamanhos ${p.sizeChart.length > 1 ? `${p.sizeChart[0]} ao ${p.sizeChart[p.sizeChart.length - 1]}` : p.sizeChart[0].toLowerCase()}`,
+];
+
+export const products: Product[] = base.map((p) => ({
+  ...p,
+  short: p.short ?? `${p.subtitle}. ${p.fabric}, ${p.composition}.`,
+  features: featuresOf(p),
+  rating: 0,
+  reviews: 0,
+  image: img(p.slug),
+  back: back(p.slug),
+  side: side(p.slug),
+  photos: photos(p.slug),
+  gallery: [...photos(p.slug), img(p.slug), back(p.slug), side(p.slug)],
+}));
 
 export const stockProducts = products.filter((p) => p.kind === "stock");
 export const customProducts = products.filter((p) => p.kind === "custom");
@@ -270,15 +456,6 @@ export const positionFees: Record<Position, { label: string; fee: number }> = {
   frente: { label: "Frente (peito)", fee: 6.9 },
   costas: { label: "Costas", fee: 8.9 },
   manga: { label: "Manga", fee: 4.9 },
-};
-
-/** Opções do antigo configurador (mantidas para pedidos já salvos). */
-export const customOptions = {
-  fabrics: ["Piquet", "PV", "Dry fit", "Algodão", "Brim", "Gabardine"],
-  collars: ["Polo tradicional", "Polo com friso", "Gola careca", "Gola V", "Gola padre"],
-  cuffs: ["Sem punho", "Punho liso", "Punho com friso"],
-  sleeves: ["Curta", "Longa", "Raglan"],
-  extras: ["Faixa refletiva", "Bolso", "Botões personalizados", "Etiqueta própria", "Recorte bicolor"],
 };
 
 export const company = {

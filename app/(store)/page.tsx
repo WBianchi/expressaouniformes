@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: company.name,
     title: "Expressão Uniformes | Uniformes com a logo da sua empresa",
     description: "Pronta-entrega a partir de 5 peças com a sua logo e orçamento para empresas a partir de 30 peças.",
-    images: [{ url: "/images/products/polo-pv-basica.webp", alt: "Polo personalizada Expressão Uniformes" }],
+    images: [{ url: "/images/products/camiseta-malha-pv-modelo-1.webp", alt: "Camiseta personalizada Expressão Uniformes" }],
   },
 };
 

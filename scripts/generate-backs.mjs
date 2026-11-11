@@ -33,7 +33,8 @@ const BACK =
 const SIDE =
   "Show the SIDE VIEW (left profile, rotated 90 degrees) of this exact same garment: same fabric, same color, same collar, buttons and trims, same lighting, " +
   "same seamless light grey background, same camera distance and same size in the frame, perfectly centered, invisible ghost mannequin (no person, no hanger). " +
-  "Realistic 3D volume of a worn garment seen from the side: the left sleeve facing the camera, side seam visible, collar in profile. " +
+  "Realistic 3D volume of a worn garment seen from the side: for tops, the left sleeve facing the camera, side seam visible, collar in profile; " +
+  "for pants and shorts, the outer side seam and side pocket facing the camera, waistband in profile; for aprons and vests, the body in profile with straps visible. " +
   "Completely plain: no print, no embroidery, no logo, no text, no labels or tags. Premium e-commerce packshot, catalog consistency.";
 
 const PROMPT = VIEW === "lado" ? SIDE : BACK;

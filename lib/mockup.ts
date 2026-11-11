@@ -21,7 +21,11 @@ const SLEEVE = sleeve(50, 28);
 
 // Ajuste fino por produto, medido nas fotos de cada peça (frente, costas e manga na
 // vista lateral). O que não estiver aqui usa o padrão da categoria.
-const spotsBySlug: Record<string, Partial<Record<Position, Spot>>> = {};
+const spotsBySlug: Record<string, Partial<Record<Position, Spot>>> = {
+  // o peitilho é estreito: a logo fica centralizada nele
+  "avental-frontal": { frente: { view: "front", x: 50, y: 33, w: 9, h: 7, area: area(42, 58, 22, 44) } },
+  "avental-bata": { frente: { view: "front", x: 59, y: 34, w: 10, h: 8, area: area(35, 65, 25, 60) } },
+};
 
 const byCategory: Record<string, Partial<Record<Position, Spot>>> = {
   polos: {

@@ -569,27 +569,27 @@
       "id": "cat-alimenticia",
       "file": "/images/categories/alimenticia.webp",
       "base": "/images/categories/_base/alimenticia.webp",
-      "title": "Área Alimentícia",
+      "title": "Aventais",
       "model": "gpt-image-2.5-sunburst",
       "quality": "high",
       "requestedSize": "1024x1280",
       "finalSize": "800x1000",
-      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area with a soft realistic drop shadow and gentle rim light; the whole product (including any accessories) must fit inside the top 60% of the card — its lowest point must stay above 62% of the card height, with nothing below it. The BOTTOM 38% of the card must be calm, completely empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a white double-breasted chef jacket (dólmã) on an invisible ghost mannequin, with a black chef apron folded beside it.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area with a soft realistic drop shadow and gentle rim light; the whole product (including any accessories) must fit inside the top 60% of the card — its lowest point must stay above 62% of the card height, with nothing below it. The BOTTOM 38% of the card must be calm, completely empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a black oxford bib apron with neck strap, waist ties and one wide front pocket on an invisible ghost mannequin, with a short black tabard apron (bata) folded beside it.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
       "usage": {
-        "input_tokens": 314,
+        "input_tokens": 323,
         "input_tokens_details": {
           "image_tokens": 0,
-          "text_tokens": 314
+          "text_tokens": 323
         },
         "output_tokens": 1510,
         "output_tokens_details": {
           "image_tokens": 1510,
           "text_tokens": 0
         },
-        "total_tokens": 1824
+        "total_tokens": 1833
       },
       "estimatedCostUsd": 0.0469,
-      "generatedAt": "2026-10-09T20:50:46.396Z"
+      "generatedAt": "2026-11-10T23:30:43.936Z"
     },
     "cat-alta-visibilidade": {
       "id": "cat-alta-visibilidade",
@@ -1336,6 +1336,32 @@
       },
       "estimatedCostUsd": 0.0399,
       "generatedAt": "2026-10-09T20:54:50.850Z"
+    },
+    "cat-camisas": {
+      "id": "cat-camisas",
+      "file": "/images/categories/camisas.webp",
+      "base": "/images/categories/_base/camisas.webp",
+      "title": "Camisas Sociais",
+      "model": "gpt-image-2.5-sunburst",
+      "quality": "high",
+      "requestedSize": "1024x1280",
+      "finalSize": "800x1000",
+      "prompt": "Vertical 4:5 brand card artwork. Background: smooth diagonal gradient from deep navy #0b2545 (top) to royal blue #1d5fd1 (bottom), with a very subtle geometric pattern of thin diagonal lines and small dots in cyan #13b5d6 at low opacity, and a thin elegant gold #e8ac2c curved accent line. The product floats in the UPPER-CENTER area with a soft realistic drop shadow and gentle rim light; the whole product (including any accessories) must fit inside the top 60% of the card — its lowest point must stay above 62% of the card height, with nothing below it. The BOTTOM 38% of the card must be calm, completely empty gradient background (reserved for a title added later). Premium, consistent series look.\n\nProduct: a light blue men's tricoline cotton dress shirt with button front on an invisible ghost mannequin, front view, with a folded navy women's dress shirt beside it.\n\nBrand art direction: premium Brazilian uniform manufacturer. Palette navy #0b2545, blue #1d5fd1, cyan #13b5d6 and warm gold #e8ac2c accents. Soft diffused studio lighting, crisp fabric texture, realistic stitching, clean and modern, professional commercial photography, high dynamic range, sharp focus.\n\nAbsolutely no text, no letters, no numbers, no words, no watermarks, no brand logos or trademarks of any existing company anywhere in the image, no visible labels or hang tags.",
+      "usage": {
+        "input_tokens": 317,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 317
+        },
+        "output_tokens": 1510,
+        "output_tokens_details": {
+          "image_tokens": 1510,
+          "text_tokens": 0
+        },
+        "total_tokens": 1827
+      },
+      "estimatedCostUsd": 0.0469,
+      "generatedAt": "2026-11-10T23:30:44.489Z"
     }
   }
 }

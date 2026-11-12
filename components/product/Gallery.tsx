@@ -25,6 +25,7 @@ export function Gallery({
   view: controlled,
   onViewChange,
   color,
+  models = false,
 }: {
   product: Product;
   positions?: Position[];
@@ -36,12 +37,14 @@ export function Gallery({
   onViewChange?: (v: Slide) => void;
   /** cor escolhida (id): a foto da peça muda de cor */
   color?: string;
+  /** inclui as fotos da pessoa vestindo (na página do produto elas já estão na galeria de cima) */
+  models?: boolean;
 }) {
   const VIEWS: { id: Slide; label: string }[] = [
     { id: "front", label: "Frente" },
     { id: "back", label: "Costas" },
     { id: "side", label: "Lado" },
-    ...product.photos.slice(0, 2).map((_, i) => ({ id: `modelo-${i + 1}` as Slide, label: i ? "Vestindo, costas" : "Vestindo" })),
+    ...(models ? product.photos : []).slice(0, 2).map((_, i) => ({ id: `modelo-${i + 1}` as Slide, label: i ? "Vestindo, costas" : "Vestindo" })),
   ];
   const tint = tintFor(product, color);
   const [own, setOwn] = useState<Slide>(VIEWS[0].id);

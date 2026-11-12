@@ -1,7 +1,9 @@
 "use client";
 // Logos da empresa compartilhadas pelo site, uma por posição (frente, costas, manga):
 // enviadas uma vez, aparecem na prévia de qualquer peça, no carrinho e no orçamento.
-// Guarda só as miniaturas no navegador.
+// Guarda só as miniaturas no navegador, por até 3 dias: depois disso (ou sem data,
+// de versões antigas) a prévia volta limpa, para um arquivo de teste não ficar
+// aparecendo nas peças para sempre.
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import type { Position } from "@/lib/catalog";
 import type { LogoValue } from "./LogoUpload";
@@ -12,10 +14,15 @@ const KEY = "eu-logos";
 /** versão antiga: uma logo só, passa a valer para a frente */
 const LEGACY = "eu-logo";
 const EVENT = "eu-logo-change";
+/** quando a logo foi enviada (ms) */
+const AT = "eu-logos-at";
+const TTL = 3 * 24 * 60 * 60 * 1000;
 const POSITIONS: Position[] = ["frente", "costas", "manga"];
 
 function read(): string | null {
   try {
+    const at = Number(localStorage.getItem(AT));
+    if (!at || Date.now() - at > TTL) return null;
     const raw = localStorage.getItem(KEY);
     if (raw) return raw;
     const old = localStorage.getItem(LEGACY);
@@ -64,6 +71,7 @@ export function useBrandLogos(): [LogoSet, (position: Position, v: LogoValue) =>
     else delete next[position];
     try {
       localStorage.setItem(KEY, JSON.stringify(next));
+      localStorage.setItem(AT, String(Date.now()));
       localStorage.removeItem(LEGACY);
     } catch {
       /* armazenamento cheio ou bloqueado: as logos valem só nesta página */

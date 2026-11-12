@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { getColor } from "@/lib/catalog";
+import { getColor, tintFor } from "@/lib/catalog";
 import { Swatches } from "@/components/ui/primitives";
 import s from "./Landing.module.css";
 
@@ -11,7 +11,7 @@ const ColorCtx = createContext<LpColor | null>(null);
 /** Cor escolhida na página: o seletor troca e a galeria pinta a foto da peça. */
 export function LpColorProvider({ colors, children }: { colors: string[]; children: ReactNode }) {
   const [color, setColor] = useState(colors[0]);
-  const tint = color === colors[0] ? null : (getColor(color)?.hex ?? null);
+  const tint = tintFor({ colors }, color);
   return <ColorCtx.Provider value={{ color, setColor, tint }}>{children}</ColorCtx.Provider>;
 }
 export const useLpColor = () => useContext(ColorCtx);
@@ -23,7 +23,8 @@ export function LpVariants({ colors, sizes }: { colors: string[]; sizes: string[
   const color = ctx?.color ?? own;
   const setColor = ctx?.setColor ?? setOwn;
   const [all, setAll] = useState(false);
-  const shown = all ? colors : colors.slice(0, 14);
+  // a cor escolhida (inclusive lá embaixo, na compra) sempre aparece marcada
+  const shown = all || !colors.slice(0, 14).includes(color) ? colors : colors.slice(0, 14);
   return (
     <div className={s.variants}>
       <div>

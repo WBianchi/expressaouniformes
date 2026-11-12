@@ -99,10 +99,20 @@ function prepare(src: string): Promise<Prepared> {
   return p;
 }
 
+// ruído determinístico (mesmo granulado sempre, sem "chiar" ao trocar de cor)
+const hash = (x: number, y: number, seed: number) => {
+  let v = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(seed, 1442695041)) >>> 0;
+  v = Math.imul(v ^ (v >>> 13), 1274126177) >>> 0;
+  return ((v ^ (v >>> 16)) & 0xffff) / 65535 - 0.5;
+};
+/** Malha mesclada: grão fino + fiapos curtos na vertical, como os fios de dois tons. */
+const heather = (x: number, y: number) => 20 * (0.45 * hash(x, y, 1) + 0.35 * hash(x, (y / 3) | 0, 2) + 0.2 * hash((x / 2) | 0, (y / 6) | 0, 3));
+
 const results = new Map<string, Promise<string>>();
-/** Foto da peça na cor `hex` (URL de objeto, guardada em cache). */
-export function recolor(src: string, hex: string): Promise<string> {
-  const key = `${src}|${hex}`;
+/** Foto da peça na cor `tint` ("#rrggbb", ou "#rrggbb:mescla" para malha mesclada), em cache. */
+export function recolor(src: string, tint: string): Promise<string> {
+  const key = `${src}|${tint}`;
+  const [hex, pattern] = tint.split(":");
   let r = results.get(key);
   if (!r) {
     r = prepare(src).then((P) => {
@@ -121,7 +131,7 @@ export function recolor(src: string, hex: string): Promise<string> {
         const keep = Math.min(1, Math.max(0, Math.abs(dL) - 45) / 10 + Math.max(0, dab - 30) / 15);
         const a = mi * (1 - keep);
         if (a <= 0.01) continue;
-        const Lo = Math.max(2, Math.min(99, tL + dL * gain));
+        const Lo = Math.max(2, Math.min(99, tL + dL * gain + (pattern === "mescla" ? heather(i % P.w, (i / P.w) | 0) : 0)));
         const cs = Math.max(0.6, Math.min(1, 1 - Math.abs(Lo - tL) / 120));
         labToRgb(Lo, ta * cs, tb * cs, px, 0);
         const j = i * 4;

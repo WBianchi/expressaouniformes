@@ -70,6 +70,7 @@ export function Swatches({
             style={{ "--sw": c.hex } as React.CSSProperties}
             data-active={value === id || undefined}
             data-light={["branco", "amarelo", "limao", "celeste"].includes(id) || undefined}
+            data-pattern={c.pattern}
             title={c.name}
             {...(onChange
               ? { type: "button" as const, role: "radio", "aria-checked": value === id, "aria-label": c.name, onClick: () => onChange(id) }

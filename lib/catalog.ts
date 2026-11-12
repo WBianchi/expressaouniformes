@@ -8,7 +8,7 @@ export type Size = "PP" | "P" | "M" | "G" | "GG" | "XG" | "XGG" | "G3" | "G4" | 
 export type Technique = "DTF" | "Silk" | "Bordado" | "Sublimação";
 export type Position = "frente" | "costas" | "manga";
 
-export type Color = { id: string; name: string; hex: string };
+export type Color = { id: string; name: string; hex: string; /** tecido mesclado (fios de dois tons): textura na bolinha e na foto */ pattern?: "mescla" };
 
 export type Category = {
   slug: string;
@@ -68,7 +68,7 @@ export type Product = {
   gallery: string[];
 };
 
-const c = (id: string, name: string, hex: string): Color => ({ id, name, hex });
+const c = (id: string, name: string, hex: string, pattern?: Color["pattern"]): Color => ({ id, name, hex, ...(pattern ? { pattern } : {}) });
 
 export const colors: Color[] = [
   c("branco", "Branco", "#f7f7f5"),
@@ -87,7 +87,7 @@ export const colors: Color[] = [
   c("celeste", "Celeste", "#6fa8dc"),
   c("chumbo", "Cinza chumbo", "#4a4f57"),
   c("grafite", "Grafite", "#3a3d42"),
-  c("mescla", "Mescla", "#a3a8ae"),
+  c("mescla", "Cinza mescla", "#9fa1a2", "mescla"),
   c("turquesa", "Turquesa", "#1aa7b8"),
   c("jade", "Jade", "#16a085"),
   c("laranja", "Laranja", "#f26a1b"),
@@ -134,7 +134,7 @@ export const colors: Color[] = [
   c("ocre", "Ocre", "#c48a2c"),
   c("denin", "Denin", "#3a5a80"),
   c("militar", "Militar", "#4f5a3a"),
-  c("mescla-off", "Mescla off", "#c9c5bd"),
+  c("mescla-off", "Mescla off", "#c9c5bd", "mescla"),
   c("purist-blue", "Purist blue", "#2f6fd6"),
   c("neo-mint", "Neo mint", "#9fe3c4"),
   c("chiclete", "Chiclete", "#f39ac0"),
@@ -143,7 +143,8 @@ export const colors: Color[] = [
 ];
 
 // cores de fabricação por tecido, como no catálogo
-const PV = ["branco", "azul-bb", "rosa-bb", "bege", "prata", "lilas", "verde-agua", "amarelo-ouro", "celeste", "chumbo", "grafite", "mescla", "preto", "turquesa", "jade", "marinho", "noite", "laranja", "roxo", "petroleo", "marrom", "royal", "fluorescente", "vinho", "vermelho", "verde-bandeira", "verde-musgo"];
+// cinza mescla é a cor mais vendida nas camisetas (Neilson, 12/11): vem logo depois da cor da foto
+const PV = ["mescla", "branco", "preto", "azul-bb", "rosa-bb", "bege", "prata", "lilas", "verde-agua", "amarelo-ouro", "celeste", "chumbo", "grafite", "turquesa", "jade", "marinho", "noite", "laranja", "roxo", "petroleo", "marrom", "royal", "fluorescente", "vinho", "vermelho", "verde-bandeira", "verde-musgo"];
 const PIQUET = ["branco", "mescla", "amarelo", "areia", "azul-bb", "rosa-bb", "chumbo", "grafite", "preto", "marinho", "laranja", "pink", "turquesa", "royal", "verde-bandeira", "verde-musgo", "vermelho", "vinho", "roxo", "noite", "cinza-prata"];
 const BRIM = ["branco", "bege", "fluorescente", "caqui", "verde-bandeira", "amarelo-ouro", "amarelo-canario", "laranja", "vermelho", "marrom", "verde-agua", "verde-petrobras", "verde-hospitalar", "royal", "azul-motorista", "marinho", "marinho-noite", "cinza-claro", "chumbo", "petroleo", "preto"];
 const OXFORD = ["branco", "gelo", "marrom-fossil", "preto", "verde-bandeira", "vermelho-licor", "amarelo-canario", "laranja-juice", "dark-blue", "marinho-noite", "royal", "verde-amazonas", "cinza-titanium", "grafite", "chumbo", "verde-hospitalar"];
@@ -475,5 +476,7 @@ export const money = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 
 /** Cor (hex) para pintar a foto da peça; nula quando é a própria cor fotografada (a primeira). */
-export const tintFor = (p: Pick<Product, "colors">, colorId: string | undefined): string | null =>
-  !colorId || colorId === p.colors[0] ? null : (getColor(colorId)?.hex ?? null);
+export const tintFor = (p: Pick<Product, "colors">, colorId: string | undefined): string | null => {
+  const c = !colorId || colorId === p.colors[0] ? undefined : getColor(colorId);
+  return c ? (c.pattern ? `${c.hex}:${c.pattern}` : c.hex) : null;
+};

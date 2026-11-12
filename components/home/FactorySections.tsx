@@ -40,7 +40,7 @@ export function TwoPaths({ product, compact }: { product?: string; compact?: boo
                 <Check size={15} /> Pague online e acompanhe o prazo de entrega, sem esperar vendedor
               </li>
             </ul>
-            <Link href={product ? `/produto/${product}` : "/loja?tipo=stock"} className="btn btn-primary">
+            <Link href={product ? `/produto/${product}#personalizar` : "/loja?tipo=stock"} className="btn btn-primary">
               Abrir o simulador <ArrowRight size={17} />
             </Link>
           </article>

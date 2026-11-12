@@ -21,7 +21,7 @@ const maskCep = (v: string) => {
 };
 
 /** Compra online da linha pronta-entrega (a partir de 5 peças). */
-export function StockBuyBox({ product, color, onColor: setColor, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
+export function StockBuyBox({ product, color, onColor: setColor, showHead = true, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
   const router = useRouter();
   const { addToCart, openDrawer, cep: savedCep, setCep } = useStore();
   const [sizes, setSizes] = useState<Partial<Record<Size, number>>>({});
@@ -94,7 +94,7 @@ export function StockBuyBox({ product, color, onColor: setColor, positions, onPo
 
   return (
     <div className={s.buy}>
-      <ProductHead product={product} />
+      {showHead && <ProductHead product={product} />}
 
       <div className={s.priceBlock}>
         <Price value={product.price} compareAt={product.compareAt} prefix="Peça lisa a partir de" size="lg" />

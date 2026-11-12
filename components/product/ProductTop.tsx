@@ -5,27 +5,32 @@ import { toCatalogTechnique, type ArtTechnique } from "@/lib/qualify";
 import { availablePositions, logoSpots, type Placement, type Placements } from "@/lib/mockup";
 import { Gallery, type Slide } from "./Gallery";
 
-export type ColorProps = { color: string; onColor: (id: string) => void };
+export type ColorProps = { color: string; onColor: (id: string) => void; /** título do produto no topo da caixa */ showHead?: boolean };
 import { QuoteBuyBox } from "./QuoteBuyBox";
 import { StockBuyBox } from "./StockBuyBox";
 import { logoThumbs, useBrandLogos } from "./useBrandLogo";
+import { useLpColor } from "@/components/lp/LpParts";
 import s from "./Product.module.css";
 
 /**
  * Galeria + caixa de compra. As duas compartilham a logo e as posições: o que o
  * cliente escolhe aparece na foto da peça, igual na compra online e no orçamento.
  */
-export function ProductTop({ product }: { product: Product }) {
+export function ProductTop({ product, embedded = false }: { product: Product; /** dentro da página do produto: sem título repetido, cor compartilhada com o topo */ embedded?: boolean }) {
+  const shared = useLpColor();
   const [logos, setLogo] = useBrandLogos();
   const [positions, setPositionsState] = useState<Position[]>(() => availablePositions(product).slice(0, 1));
   const [view, setView] = useState<Slide>("front");
   // posição/tamanho que o cliente ajustou em cada lugar (sem ajuste = posição padrão)
   const [placements, setPlacements] = useState<Placements>({});
   const [technique, setTechnique] = useState<Technique | null>(null);
-  const [color, setColorState] = useState(product.colors[0]);
-  // ao trocar a cor, mostra a peça (a foto da pessoa vestindo não muda de cor)
+  const [own, setOwn] = useState(product.colors[0]);
+  // a cor escolhida no topo da página vale também aqui (e vice-versa)
+  const color = shared?.color ?? own;
   const setColor = (id: string) => {
-    setColorState(id);
+    if (shared) shared.setColor(id);
+    else setOwn(id);
+    // a foto da pessoa vestindo não muda de cor: mostra a peça
     setView((v) => (v === "front" || v === "back" || v === "side" ? v : "front"));
   };
 
@@ -61,7 +66,7 @@ export function ProductTop({ product }: { product: Product }) {
     });
   };
 
-  const custom = { color, onColor: setColor, positions, onPositions: setPositions, logos, onLogo, placements, onPlace, technique, onTechnique: setTechnique };
+  const custom = { color, onColor: setColor, showHead: !embedded, positions, onPositions: setPositions, logos, onLogo, placements, onPlace, technique, onTechnique: setTechnique };
   return (
     <div className={s.top}>
       <Gallery

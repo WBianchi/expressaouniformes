@@ -422,9 +422,19 @@
     display: none;
   }
 }
-/* página do produto: galeria + compra completa no mesmo cartão */
-.productTop {
+/* "Personalize e compre": simulador da logo + compra completa */
+.personalize {
   scroll-margin-top: calc(var(--header-h) + 16px);
+}
+.sectionTitle {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.sectionLead {
+  margin: 4px 0 20px;
+  font-size: 14px;
+  color: var(--text-2);
 }
 /* no celular a página do produto já tem a barra de compra embaixo */
 @media (max-width: 899px) {

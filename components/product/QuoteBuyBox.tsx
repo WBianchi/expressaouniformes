@@ -13,7 +13,7 @@ import s from "./Product.module.css";
 import type { ColorProps } from "./ProductTop";
 
 /** Itens sem estoque ou sob encomenda: entram no orçamento para empresas (30+ peças no pedido). */
-export function QuoteBuyBox({ product, color, onColor: setColor, showHead = true, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
+export function QuoteBuyBox({ product, color, onColor: setColor, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
   const { add, items, total } = useQuote();
   const [qty, setQty] = useState(CUSTOM_MIN_QTY);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -29,7 +29,7 @@ export function QuoteBuyBox({ product, color, onColor: setColor, showHead = true
 
   return (
     <div className={s.buy}>
-      {showHead && <ProductHead product={product} />}
+      <ProductHead product={product} />
 
       <div className={s.quoteNotice}>
         <b>{outOfStock ? "Sob cotação" : "Sob encomenda"}</b>

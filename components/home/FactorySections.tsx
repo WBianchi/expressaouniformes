@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Check, Factory, ShoppingBag } from "lucide-react";
+import { getProduct, inStock } from "@/lib/catalog";
 import { artTechniques, fabricOptions } from "@/lib/qualify";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import type { ClientLogo } from "@/lib/site-media";
@@ -13,6 +14,9 @@ const techniques = artTechniques.filter((t) => t.id !== "nao-sei");
 /** Os dois caminhos de compra, bem separados: poucas peças no site × fabricação com consultor. */
 export function TwoPaths({ product, compact }: { product?: string; compact?: boolean }) {
   const [quoteOpen, setQuoteOpen] = useState(false);
+  // simulador só existe para pronta-entrega; nas peças de fabricação, os modelos prontos
+  const stock = product ? getProduct(product) : undefined;
+  const simulator = stock && inStock(stock) ? `/produto/${stock.slug}/simulador` : "/loja?tipo=stock";
   return (
     <section className={s.section} aria-labelledby="dois-caminhos">
       <div className="container">
@@ -40,7 +44,7 @@ export function TwoPaths({ product, compact }: { product?: string; compact?: boo
                 <Check size={15} /> Pague online e acompanhe o prazo de entrega, sem esperar vendedor
               </li>
             </ul>
-            <Link href={product ? `/produto/${product}#personalizar` : "/loja?tipo=stock"} className="btn btn-primary">
+            <Link href={simulator} className="btn btn-primary">
               Abrir o simulador <ArrowRight size={17} />
             </Link>
           </article>

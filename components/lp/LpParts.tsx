@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { getColor, tintFor } from "@/lib/catalog";
 import { Swatches } from "@/components/ui/primitives";
 import s from "./Landing.module.css";
@@ -15,6 +15,14 @@ export function LpColorProvider({ colors, children }: { colors: string[]; childr
   return <ColorCtx.Provider value={{ color, setColor, tint }}>{children}</ColorCtx.Provider>;
 }
 export const useLpColor = () => useContext(ColorCtx);
+
+/** Link que leva junto a cor escolhida na página (?cor=), p. ex. para o simulador. */
+export function ColorLink({ href, ...rest }: Omit<ComponentProps<typeof Link>, "href"> & { href: string }) {
+  const ctx = useLpColor();
+  // âncoras da própria página e a cor da foto (padrão) não precisam do parâmetro
+  const to = ctx?.tint && !href.startsWith("#") ? `${href}${href.includes("?") ? "&" : "?"}cor=${encodeURIComponent(ctx.color)}` : href;
+  return <Link href={to} {...rest} />;
+}
 
 /** Seletor de cor (como o "Cor: Branco" dos marketplaces) e grade de tamanhos. */
 export function LpVariants({ colors, sizes }: { colors: string[]; sizes: string[] }) {
@@ -51,7 +59,7 @@ export function LpVariants({ colors, sizes }: { colors: string[]; sizes: string[
 }
 
 /** Barra fixa no topo ao rolar (abas da página, preço e ação), como nos marketplaces. */
-export function LpStickyBar({ name, price, cta, desktopOnly }: { name: string; price: string; cta: { label: string; href: string }; desktopOnly?: boolean }) {
+export function LpStickyBar({ name, price, cta }: { name: string; price: string; cta: { label: string; href: string } }) {
   const [show, setShow] = useState(false);
   const [top, setTop] = useState(0);
   useEffect(() => {
@@ -69,7 +77,7 @@ export function LpStickyBar({ name, price, cta, desktopOnly }: { name: string; p
     };
   }, []);
   return (
-    <div className={s.sticky} data-show={show || undefined} data-desktop-only={desktopOnly || undefined} aria-hidden={!show} style={{ top }}>
+    <div className={s.sticky} data-show={show || undefined} aria-hidden={!show} style={{ top }}>
       <div className={`container ${s.stickyInner}`}>
         <nav className={s.stickyTabs} aria-label="Seções da página">
           <a href="#descricao" tabIndex={show ? 0 : -1}>
@@ -81,9 +89,9 @@ export function LpStickyBar({ name, price, cta, desktopOnly }: { name: string; p
         </nav>
         <span className={s.stickyName}>{name}</span>
         <span className={s.stickyPrice}>{price}</span>
-        <Link href={cta.href} className="btn btn-primary" tabIndex={show ? 0 : -1}>
+        <ColorLink href={cta.href} className="btn btn-primary" tabIndex={show ? 0 : -1}>
           {cta.label}
-        </Link>
+        </ColorLink>
       </div>
     </div>
   );

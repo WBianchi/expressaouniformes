@@ -8,11 +8,10 @@ import { getClientLogos, getPhotoOverrides } from "@/lib/site-media";
 import { QualifyFlow } from "@/components/qualify/QualifyFlow";
 import { ClientLogos, FactoryStrip, TwoPaths } from "@/components/home/FactorySections";
 import { LpGallery } from "@/components/lp/LpGallery";
-import { LpColorProvider, LpStickyBar, LpVariants } from "@/components/lp/LpParts";
+import { ColorLink, LpColorProvider, LpStickyBar, LpVariants } from "@/components/lp/LpParts";
 import { ProductFaq } from "@/components/lp/ProductFaq";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { productRef, ProductSpecs, specRows } from "./ProductSpecs";
-import { ProductTop } from "./ProductTop";
 import { RecentlyViewed } from "./RecentlyViewed";
 import s from "@/components/lp/Landing.module.css";
 
@@ -22,8 +21,8 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://expressaouniformes.ver
  * Página do produto no formato de marketplace (Magalu), a mesma para todos os produtos:
  * vale para /produto/[slug] (vitrine do site) e /lp/[slug] (anúncios).
  * Topo: galeria com miniaturas, informações e cartão de preço com o questionário.
- * Logo abaixo, "Personalize e compre": simulador da logo, tamanhos e carrinho
- * (ou o orçamento, nas peças de fabricação). Depois relacionados, ficha técnica e perguntas.
+ * Depois relacionados, ficha técnica e perguntas. O simulador da logo e a compra ficam
+ * numa página separada (/produto/[slug]/simulador), só para a pronta-entrega.
  */
 export async function ProductLanding({ product, source }: { product: Product; source: string }) {
   const category = getCategory(product.category);
@@ -89,19 +88,18 @@ export async function ProductLanding({ product, source }: { product: Product; so
     ],
   };
 
-  // pronta-entrega: vai para o simulador e a compra; fabricação: questionário de qualificação
-  const cta = available ? { label: "Personalizar e comprar", href: "#personalizar" } : { label: "Solicitar orçamento", href: "#lp-qualifica" };
+  // pronta-entrega: abre o simulador (página separada) na cor escolhida; fabricação: questionário
+  const cta = available ? { label: "Simular e comprar", href: `/produto/${product.slug}/simulador` } : { label: "Solicitar orçamento", href: "#lp-qualifica" };
 
   return (
     <div className={s.page}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <LpStickyBar
-        name={product.name}
-        price={available ? `a partir de ${money(product.price * (1 - PIX_DISCOUNT))} no Pix` : `Sob cotação · a partir de ${CUSTOM_MIN_QTY} peças`}
-        cta={cta}
-        desktopOnly
-      />
       <LpColorProvider colors={product.colors}>
+        <LpStickyBar
+          name={product.name}
+          price={available ? `a partir de ${money(product.price * (1 - PIX_DISCOUNT))} no Pix` : `Sob cotação · a partir de ${CUSTOM_MIN_QTY} peças`}
+          cta={cta}
+        />
         <div className="container">
           <nav className={s.crumbs} aria-label="Você está em">
             <Link href="/">Início</Link>
@@ -171,9 +169,9 @@ export async function ProductLanding({ product, source }: { product: Product; so
                 </p>
               )}
               <div className={s.ctas}>
-                <a href={cta.href} className={`btn btn-lg ${s.buyBtn}`}>
+                <ColorLink href={cta.href} className={`btn btn-lg ${s.buyBtn}`}>
                   {available ? <ShoppingBag size={18} /> : <ClipboardList size={18} />} {cta.label}
-                </a>
+                </ColorLink>
                 <a
                   href={whatsappLink(`Olá! Tenho interesse em ${product.name} (${productRef(product)}). Pode me ajudar?`)}
                   target="_blank"
@@ -190,19 +188,6 @@ export async function ProductLanding({ product, source }: { product: Product; so
               </div>
             </aside>
           </div>
-
-          {/* simulador da logo + compra (ou orçamento), na mesma cor escolhida no topo */}
-          <section className={`${s.card} ${s.personalize}`} id="personalizar" aria-labelledby="personalizar-titulo">
-            <h2 id="personalizar-titulo" className={s.sectionTitle}>
-              {available ? "Personalize e compre" : "Monte seu orçamento"}
-            </h2>
-            <p className={s.sectionLead}>
-              {available
-                ? `Escolha a cor, envie a sua logo e veja como fica na peça. Pedido a partir de ${STOCK_MIN_QTY} peças, com grade mista de tamanhos.`
-                : `Escolha a cor, envie a sua logo e veja como fica na peça. Fabricação a partir de ${CUSTOM_MIN_QTY} peças; um consultor confirma os detalhes.`}
-            </p>
-            <ProductTop product={product} embedded />
-          </section>
         </div>
       </LpColorProvider>
 

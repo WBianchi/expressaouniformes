@@ -49,7 +49,7 @@ export function QualifyFlow({ product: fixed, source, onNavigate }: { product?: 
   const ready = isQualified(a) && route !== "minimo";
 
   const simulatorHref = product
-    ? `/produto/${product.slug}?${new URLSearchParams({ qtd: a.qty ?? "", ...(a.custom && a.technique && a.technique !== "nao-sei" ? { tecnica: a.technique } : {}) })}#personalizar`
+    ? `/produto/${product.slug}/simulador?${new URLSearchParams({ qtd: a.qty ?? "", ...(a.custom && a.technique && a.technique !== "nao-sei" ? { tecnica: a.technique } : {}) })}`
     : "/loja?tipo=stock";
 
   async function submit(skip = false) {

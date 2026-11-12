@@ -11,6 +11,7 @@ import { fetchShippingQuote } from "@/lib/shipping-client";
 import { Price, Stepper, Swatches } from "@/components/ui/primitives";
 import { Personalize, type PersonalizeProps } from "./Personalize";
 import { ProductHead } from "./ProductHead";
+import type { ColorProps } from "./ProductTop";
 import { StickyBar } from "./StickyBar";
 import s from "./Product.module.css";
 
@@ -20,10 +21,9 @@ const maskCep = (v: string) => {
 };
 
 /** Compra online da linha pronta-entrega (a partir de 5 peças). */
-export function StockBuyBox({ product, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & { product: Product }) {
+export function StockBuyBox({ product, color, onColor: setColor, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
   const router = useRouter();
   const { addToCart, openDrawer, cep: savedCep, setCep } = useStore();
-  const [color, setColor] = useState(product.colors[0]);
   const [sizes, setSizes] = useState<Partial<Record<Size, number>>>({});
   const [notes, setNotes] = useState("");
   const [cepInput, setCepInput] = useState("");

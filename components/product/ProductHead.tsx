@@ -3,6 +3,7 @@ import { Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { getCategory, type Product } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
+import { productRef } from "./ProductSpecs";
 import s from "./Product.module.css";
 
 /** Título e ações (favoritar/compartilhar) comuns às duas modalidades. */
@@ -48,6 +49,7 @@ export function ProductHead({ product }: { product: Product }) {
       <h1 className={s.title}>{product.name}</h1>
       <div className={s.headMeta}>
         <span>{product.fabric}</span>
+        <span>Código: {productRef(product)}</span>
       </div>
       <p className={s.short}>{product.short}</p>
     </div>

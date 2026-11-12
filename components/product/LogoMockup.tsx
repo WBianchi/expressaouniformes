@@ -3,6 +3,7 @@ import { useRef, type CSSProperties, type PointerEvent } from "react";
 import type { Position, Product } from "@/lib/catalog";
 import { clampPlacement, logoSpots, placedSpot, type Placement, type Placements, type View } from "@/lib/mockup";
 import { SafeImage } from "@/components/ui/primitives";
+import { useRecolored } from "@/lib/recolor";
 import s from "./LogoMockup.module.css";
 
 /**
@@ -21,6 +22,7 @@ export function LogoMockup({
   priority,
   alt,
   markers = true,
+  tint,
 }: {
   product: Pick<Product, "name" | "image" | "back" | "side" | "category"> & { slug?: string };
   view: View;
@@ -35,6 +37,8 @@ export function LogoMockup({
   alt?: string;
   /** mostra as áreas de aplicação quando ainda não há logo */
   markers?: boolean;
+  /** cor escolhida (hex) para pintar a peça; nula = cor original da foto */
+  tint?: string | null;
 }) {
   const square = useRef<HTMLDivElement>(null);
   const drag = useRef<{ pos: Position; dx: number; dy: number; s: number } | null>(null);
@@ -66,12 +70,13 @@ export function LogoMockup({
     onPlace(d.pos, clampPlacement({ x: p.x + d.dx, y: p.y + d.dy, s: d.s }, spots[d.pos]));
   };
   const end = () => (drag.current = null);
+  const src = useRecolored(view === "back" ? product.back : view === "side" ? product.side : product.image, tint);
 
   return (
     <div className={s.mock}>
       <div className={s.square} ref={square}>
         <SafeImage
-          src={view === "back" ? product.back : view === "side" ? product.side : product.image}
+          src={src}
           alt={alt ?? `${product.name}, ${view === "back" ? "costas" : view === "side" ? "lado" : "frente"}`}
           priority={priority}
         />

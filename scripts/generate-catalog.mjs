@@ -78,20 +78,26 @@ const RULES =
   "The garment is plain: no logo, no print, no embroidery, no text. Photorealistic, natural skin, real person, " +
   "soft studio light, seamless light warm-grey studio background, premium e-commerce catalog photo, sharp focus on the garment. No text, no watermark.";
 
+// uniforme, não moda: o cliente reprovou peça "agarradinha" (11/11)
+const fitFor = (garment) =>
+  /fitted/.test(garment)
+    ? "Corporate uniform look, not a fashion shoot: fitted cut but comfortable, never tight or clingy."
+    : "Corporate workwear uniform look, not a fashion shoot: regular, slightly loose fit with comfortable ease, the fabric hangs straight from the shoulders, never tight, slim or clingy on the body.";
+
 const prompts = ([, , garment, kind]) => ({
   "modelo-1": {
     size: "1024x1536",
-    prompt: `E-commerce photo of the SAME model shown on the LEFT of the reference, FRONT view, wearing this ${garment}. ${FRAME[kind]} Natural relaxed pose, looking at the camera. ${RULES}`,
+    prompt: `E-commerce photo of the SAME model shown on the LEFT of the reference, FRONT view, wearing this ${garment}. ${FRAME[kind]} Natural relaxed pose, looking at the camera. ${fitFor(garment)} ${RULES}`,
   },
   "modelo-2": {
     size: "1024x1536",
-    prompt: `E-commerce photo of the SAME model shown in the reference, seen from the BACK (back view, facing away from the camera), wearing this ${garment}. ${FRAME[kind]} ${RULES}`,
+    prompt: `E-commerce photo of the SAME model shown in the reference, seen from the BACK (back view, facing away from the camera), wearing this ${garment}. ${FRAME[kind]} ${fitFor(garment)} ${RULES}`,
   },
   packshot: {
     size: "1024x1024",
     prompt:
       `Product packshot of ONLY this ${garment}, FRONT view, on an invisible ghost mannequin (no person, no hanger, no body visible), ` +
-      "perfectly centered, filling about 75% of the frame height, seamless light grey background (#eef0f2), soft even studio light, realistic fabric texture and seams. " +
+      "regular uniform fit (not slim), perfectly centered, filling about 75% of the frame height, seamless light grey background (#eef0f2), soft even studio light, realistic fabric texture and seams. " +
       "Same color, fabric, collar, buttons, pockets and trims as in the reference. IGNORE text, logos, color charts and the blue background of the reference. " +
       "Completely plain: no logo, no print, no text, no labels. Premium e-commerce catalog consistency.",
   },

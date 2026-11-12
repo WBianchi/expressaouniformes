@@ -422,6 +422,16 @@
     display: none;
   }
 }
+/* página do produto: galeria + compra completa no mesmo cartão */
+.productTop {
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+/* no celular a página do produto já tem a barra de compra embaixo */
+@media (max-width: 899px) {
+  .sticky[data-desktop-only] {
+    display: none;
+  }
+}
 .page :global(#descricao) {
   scroll-margin-top: calc(var(--header-h) + 80px);
 }

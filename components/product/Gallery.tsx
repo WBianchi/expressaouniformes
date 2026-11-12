@@ -2,15 +2,20 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { inStock, type Position, type Product } from "@/lib/catalog";
+import { inStock, tintFor, type Position, type Product } from "@/lib/catalog";
 import type { Placement, Placements, View } from "@/lib/mockup";
+import { SafeImage } from "@/components/ui/primitives";
 import { LogoMockup } from "./LogoMockup";
 import s from "./Gallery.module.css";
 
-/** Slide da galeria: frente, costas e lado da peça (simulador de logo). Sem fotos com modelo aqui, a pedido do cliente. */
-export type Slide = View;
+/** Slide da galeria: frente, costas e lado da peça (simulador de logo) e a pessoa vestindo. */
+export type Slide = View | "modelo-1" | "modelo-2";
+const isView = (v: Slide): v is View => v === "front" || v === "back" || v === "side";
 
-/** Frente, costas e lado da peça, com a logo de cada posição aplicada (simulador). */
+/**
+ * Frente, costas e lado da peça, com a logo de cada posição aplicada (simulador) e na
+ * cor escolhida, e as fotos da pessoa vestindo (como nos marketplaces).
+ */
 export function Gallery({
   product,
   positions = [],
@@ -19,6 +24,7 @@ export function Gallery({
   onPlace,
   view: controlled,
   onViewChange,
+  color,
 }: {
   product: Product;
   positions?: Position[];
@@ -28,12 +34,16 @@ export function Gallery({
   onPlace?: (position: Position, placement: Placement) => void;
   view?: Slide;
   onViewChange?: (v: Slide) => void;
+  /** cor escolhida (id): a foto da peça muda de cor */
+  color?: string;
 }) {
   const VIEWS: { id: Slide; label: string }[] = [
     { id: "front", label: "Frente" },
     { id: "back", label: "Costas" },
     { id: "side", label: "Lado" },
+    ...product.photos.slice(0, 2).map((_, i) => ({ id: `modelo-${i + 1}` as Slide, label: i ? "Vestindo, costas" : "Vestindo" })),
   ];
+  const tint = tintFor(product, color);
   const [own, setOwn] = useState<Slide>(VIEWS[0].id);
   const view = controlled ?? own;
   const setView = (v: Slide) => (onViewChange ? onViewChange(v) : setOwn(v));
@@ -46,10 +56,14 @@ export function Gallery({
   const badge =
     product.kind === "custom" ? "Sob encomenda" : available ? "Pronta-entrega" : "Sob cotação";
 
-  const render = (v: (typeof VIEWS)[number], priority?: boolean, editable?: boolean) => (
+  const render = (v: (typeof VIEWS)[number], priority?: boolean, editable?: boolean) =>
+    !isView(v.id) ? (
+      <SafeImage className={s.model} src={product.photos[v.id === "modelo-2" ? 1 : 0]} alt={`${product.name}: ${v.label.toLowerCase()}`} />
+    ) : (
     <LogoMockup
       product={product}
       view={v.id}
+      tint={tint}
       positions={positions}
       logos={logos}
       placements={placements}

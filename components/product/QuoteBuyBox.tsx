@@ -10,11 +10,11 @@ import { Personalize, type PersonalizeProps } from "./Personalize";
 import { ProductHead } from "./ProductHead";
 import { StickyBar } from "./StickyBar";
 import s from "./Product.module.css";
+import type { ColorProps } from "./ProductTop";
 
 /** Itens sem estoque ou sob encomenda: entram no orçamento para empresas (30+ peças no pedido). */
-export function QuoteBuyBox({ product, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & { product: Product }) {
+export function QuoteBuyBox({ product, color, onColor: setColor, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
   const { add, items, total } = useQuote();
-  const [color, setColor] = useState(product.colors[0]);
   const [qty, setQty] = useState(CUSTOM_MIN_QTY);
   const actionsRef = useRef<HTMLDivElement>(null);
   const colorName = getColor(color)?.name ?? "";

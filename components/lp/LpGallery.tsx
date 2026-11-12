@@ -1,15 +1,31 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SafeImage } from "@/components/ui/primitives";
+import { useRecolored } from "@/lib/recolor";
+import { useLpColor } from "./LpParts";
 import s from "./Landing.module.css";
+
+type LpImage = { src: string; label: string; /** foto da peça sozinha: muda de cor com o seletor */ piece?: boolean };
+
+/** Foto da peça pintada na cor escolhida (a da pessoa vestindo fica como está). */
+function Photo({ im, alt, priority, tint }: { im: LpImage; alt: string; priority?: boolean; tint: string | null }) {
+  const src = useRecolored(im.src, im.piece ? tint : null);
+  return <SafeImage src={src} alt={alt} priority={priority} />;
+}
 
 /**
  * Galeria da landing page (estilo marketplace): foto principal grande e miniaturas
- * ao lado. Modelo vestindo a peça (frente e costas) e a peça sozinha (frente, costas, lado).
+ * embaixo. Modelo vestindo a peça (frente e costas) e a peça sozinha (frente, costas, lado).
  */
-export function LpGallery({ images, name }: { images: { src: string; label: string }[]; name: string }) {
+export function LpGallery({ images, name }: { images: LpImage[]; name: string }) {
   const [i, setI] = useState(0);
+  const tint = useLpColor()?.tint ?? null;
+  // ao escolher outra cor, mostra a peça sozinha (é ela que muda de cor)
+  useEffect(() => {
+    if (!tint) return;
+    setI((cur) => (images[cur]?.piece ? cur : Math.max(0, images.findIndex((im) => im.piece))));
+  }, [tint, images]);
   const touch = useRef<number | null>(null);
   const go = (d: number) => setI((cur) => (cur + d + images.length) % images.length);
   const current = images[i];
@@ -28,7 +44,7 @@ export function LpGallery({ images, name }: { images: { src: string; label: stri
       >
         {images.map((im, k) => (
           <div key={im.src} className={s.slide} data-active={k === i || undefined} aria-hidden={k !== i}>
-            <SafeImage src={im.src} alt={`${name}: ${im.label}`} priority={k === 0} />
+            <Photo im={im} alt={`${name}: ${im.label}`} priority={k === 0} tint={tint} />
           </div>
         ))}
         <span className={s.counter}>
@@ -53,7 +69,7 @@ export function LpGallery({ images, name }: { images: { src: string; label: stri
               onFocus={() => setI(k)}
               onClick={() => setI(k)}
             >
-              <SafeImage src={im.src} alt="" />
+              <Photo im={im} alt="" tint={tint} />
             </button>
           </li>
         ))}

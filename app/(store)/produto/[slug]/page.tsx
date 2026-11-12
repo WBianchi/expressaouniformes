@@ -2,16 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { company, getCategory, getProduct, inStock, products } from "@/lib/catalog";
+import { company, getCategory, getColor, getProduct, inStock, money, products } from "@/lib/catalog";
+import { PIX_DISCOUNT } from "@/lib/pricing";
+import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
+import { productFaq } from "@/lib/product-faq";
 import { ProductCard } from "@/components/ui/ProductCard";
-import { SectionHeader } from "@/components/ui/primitives";
 import { ProductTop } from "@/components/product/ProductTop";
-import { ProductSpecs } from "@/components/product/ProductSpecs";
+import { productRef, ProductSpecs, specRows } from "@/components/product/ProductSpecs";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
-import { RevealRoot } from "@/components/product/motion";
-import s from "@/components/product/Product.module.css";
+import { LpStickyBar } from "@/components/lp/LpParts";
+import { ProductFaq } from "@/components/lp/ProductFaq";
+import l from "@/components/lp/Landing.module.css";
 
+// Página do produto no mesmo formato de marketplace da landing page dos anúncios
+// (/lp/[slug]): fundo cinza com cartões, galeria com miniaturas, "quem viu também viu",
+// descrição e ficha técnica em tabela, perguntas e respostas e barra fixa ao rolar.
+// Aqui o cartão de compra é o completo: cor, tamanhos, logo por posição e carrinho.
 type Props = { params: Promise<{ slug: string }> };
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://expressaouniformes.vercel.app";
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -21,10 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const p = getProduct(slug);
   if (!p) return { title: "Produto não encontrado" };
-  const title = `${p.name} personalizada com sua logo`;
   return {
-    title,
-    description: `${p.short} ${inStock(p) ? `Compre online a partir de ${p.minQty} peças, com a sua logo.` : "Disponível por orçamento para empresas, a partir de 30 peças."}`,
+    title: `${p.name} personalizado com a sua logo | ${p.fabric}`,
+    description: `${p.short} ${inStock(p) ? `Compre online a partir de ${STOCK_MIN_QTY} peças, com a sua logo.` : `Fabricação para empresas a partir de ${CUSTOM_MIN_QTY} peças.`}`,
     alternates: { canonical: `/produto/${p.slug}` },
     openGraph: { title: p.name, description: p.short, images: [{ url: p.photos[0] ?? p.image }], type: "website" },
   };
@@ -35,75 +43,100 @@ export default async function ProductPage({ params }: Props) {
   const product = getProduct(slug);
   if (!product) notFound();
   const category = getCategory(product.category);
-  const sameCat = products.filter((p) => p.slug !== product.slug && p.category === product.category);
-  const related = [...sameCat.filter((p) => p.kind === product.kind), ...sameCat.filter((p) => p.kind !== product.kind)].slice(0, 5);
-  const fill = related.length < 5 ? products.filter((p) => p.slug !== product.slug && p.kind === product.kind && !related.includes(p)).slice(0, 5 - related.length) : [];
+  const available = inStock(product);
+  const related = [
+    ...products.filter((p) => p.slug !== product.slug && p.category === product.category),
+    ...products.filter((p) => p.slug !== product.slug && p.category !== product.category && p.kind === product.kind),
+  ].slice(0, 8);
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.description,
-    image: [...product.photos, product.image, product.back],
-    sku: product.slug,
-    category: category?.name,
-    material: product.fabric,
-    brand: { "@type": "Brand", name: company.name },
-    ...(product.kind === "stock"
-      ? {
-          offers: {
-            "@type": "Offer",
-            price: product.price.toFixed(2),
-            priceCurrency: "BRL",
-            availability: (product.stock ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-            eligibleQuantity: { "@type": "QuantitativeValue", minValue: product.minQty },
-            seller: { "@type": "Organization", name: company.name },
-          },
-        }
-      : {}),
+    "@graph": [
+      {
+        "@type": "Product",
+        name: product.name,
+        description: product.description,
+        sku: productRef(product),
+        category: category?.name,
+        image: [...product.photos, product.image, product.back, product.side].map((src) => `${SITE}${src}`),
+        brand: { "@type": "Brand", name: company.name },
+        manufacturer: { "@type": "Organization", name: company.name },
+        material: `${product.fabric} (${product.composition})`,
+        color: product.colors.map((id) => getColor(id)?.name).filter(Boolean).join(", "),
+        size: product.sizeChart.join(", "),
+        additionalProperty: specRows(product).map(([name, value]) => ({ "@type": "PropertyValue", name, value })),
+        ...(available
+          ? {
+              offers: {
+                "@type": "Offer",
+                url: `${SITE}/produto/${product.slug}`,
+                priceCurrency: "BRL",
+                price: product.price.toFixed(2),
+                availability: "https://schema.org/InStock",
+                eligibleQuantity: { "@type": "QuantitativeValue", minValue: STOCK_MIN_QTY },
+                seller: { "@type": "Organization", name: company.name },
+              },
+            }
+          : {}),
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: productFaq(product).map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Início", item: SITE },
+          { "@type": "ListItem", position: 2, name: category?.name, item: `${SITE}/loja?categoria=${product.category}` },
+          { "@type": "ListItem", position: 3, name: product.name, item: `${SITE}/produto/${product.slug}` },
+        ],
+      },
+    ],
   };
 
   return (
-    <RevealRoot className={s.page}>
+    <div className={l.page}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <LpStickyBar
+        name={product.name}
+        price={available ? `a partir de ${money(product.price * (1 - PIX_DISCOUNT))} no Pix` : `Sob cotação · a partir de ${CUSTOM_MIN_QTY} peças`}
+        cta={{ label: available ? "Comprar" : "Pedir orçamento", href: "#comprar" }}
+        desktopOnly
+      />
       <div className="container">
-        <nav aria-label="Trilha de navegação" className={s.crumbs}>
+        <nav className={l.crumbs} aria-label="Você está em">
           <Link href="/">Início</Link>
-          <ChevronRight size={13} aria-hidden />
-          <Link href="/loja">Produtos</Link>
-          {category && (
-            <>
-              <ChevronRight size={13} aria-hidden />
-              <Link href={`/loja?categoria=${category.slug}`}>{category.name}</Link>
-            </>
-          )}
-          <ChevronRight size={13} aria-hidden />
+          <ChevronRight size={13} />
+          <Link href={`/loja?categoria=${product.category}`}>{category?.name}</Link>
+          <ChevronRight size={13} />
           <span aria-current="page">{product.name}</span>
         </nav>
 
-        <ProductTop product={product} />
+        {/* galeria (simulador da logo, na cor escolhida) + cartão de compra */}
+        <div className={`${l.card} ${l.productTop}`} id="comprar">
+          <ProductTop product={product} />
+        </div>
 
-        <ProductSpecs product={product} />
+        {related.length > 0 && (
+          <section className={`${l.card} ${l.related}`} aria-labelledby="relacionados">
+            <h2 id="relacionados">Quem viu este produto, também viu</h2>
+            <div className={l.relatedRow}>
+              {related.map((p) => (
+                <ProductCard key={p.slug} product={p} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <div className={l.card}>
+          <ProductSpecs product={product} />
+        </div>
+        <div className={l.card}>
+          <ProductFaq product={product} />
+        </div>
       </div>
 
-      {related.length + fill.length > 0 && (
-        <section className={`container ${s.related}`} aria-labelledby="related-title" data-reveal="">
-          <SectionHeader
-            eyebrow={category?.name}
-            title={<span id="related-title">Produtos relacionados</span>}
-            action={
-              <Link href={`/loja?categoria=${product.category}`} className="btn btn-outline btn-sm">
-                Ver todos <ChevronRight size={15} />
-              </Link>
-            }
-          />
-          <div className={s.relatedGrid}>
-            {[...related, ...fill].map((p) => <ProductCard key={p.slug} product={p} />)}
-          </div>
-        </section>
-      )}
-
       <RecentlyViewed current={product.slug} />
-    </RevealRoot>
+    </div>
   );
 }

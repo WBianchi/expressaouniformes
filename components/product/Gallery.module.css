@@ -109,12 +109,19 @@
 .thumbs {
   display: flex;
   gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+/* foto da pessoa vestindo (retrato): inteira, sem cortar cabeça e pés */
+.model img {
+  object-fit: contain !important;
 }
 .thumb {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  flex: none;
   width: 84px;
   font-size: 12px;
   color: var(--text-2);

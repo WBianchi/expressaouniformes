@@ -473,3 +473,7 @@ export const whatsappLink = (text: string) =>
 
 export const money = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
+
+/** Cor (hex) para pintar a foto da peça; nula quando é a própria cor fotografada (a primeira). */
+export const tintFor = (p: Pick<Product, "colors">, colorId: string | undefined): string | null =>
+  !colorId || colorId === p.colors[0] ? null : (getColor(colorId)?.hex ?? null);

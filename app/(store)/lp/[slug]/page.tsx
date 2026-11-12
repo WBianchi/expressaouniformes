@@ -9,7 +9,7 @@ import { getClientLogos } from "@/lib/site-media";
 import { QualifyFlow } from "@/components/qualify/QualifyFlow";
 import { ClientLogos, FactoryStrip, TwoPaths } from "@/components/home/FactorySections";
 import { LpGallery } from "@/components/lp/LpGallery";
-import { LpStickyBar, LpVariants } from "@/components/lp/LpParts";
+import { LpColorProvider, LpStickyBar, LpVariants } from "@/components/lp/LpParts";
 import { productRef, ProductSpecs, specRows } from "@/components/product/ProductSpecs";
 import { ProductFaq } from "@/components/lp/ProductFaq";
 import { productFaq } from "@/lib/product-faq";
@@ -57,9 +57,9 @@ export default async function LandingPage({ params }: Props) {
   const images = [
     { src: product.photos[0], label: "vestindo, frente" },
     { src: product.photos[1], label: "vestindo, costas" },
-    { src: product.image, label: "peça, frente" },
-    { src: product.back, label: "peça, costas" },
-    { src: product.side, label: "peça, lado" },
+    { src: product.image, label: "peça, frente", piece: true },
+    { src: product.back, label: "peça, costas", piece: true },
+    { src: product.side, label: "peça, lado", piece: true },
   ];
 
   const jsonLd = {
@@ -130,6 +130,7 @@ export default async function LandingPage({ params }: Props) {
 
         <div className={s.top}>
           {/* cartão principal: galeria + informações e variações */}
+          <LpColorProvider colors={product.colors}>
           <div className={`${s.card} ${s.main}`}>
             <LpGallery images={images} name={product.name} />
             <div className={s.info}>
@@ -157,6 +158,7 @@ export default async function LandingPage({ params }: Props) {
               </p>
             </div>
           </div>
+          </LpColorProvider>
 
           {/* cartão de compra: preço, ações e qualificação */}
           <aside className={`${s.card} ${s.buy}`} aria-label="Comprar ou pedir orçamento">

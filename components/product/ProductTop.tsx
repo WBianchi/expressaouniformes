@@ -4,6 +4,8 @@ import { inStock, type Position, type Product, type Technique } from "@/lib/cata
 import { toCatalogTechnique, type ArtTechnique } from "@/lib/qualify";
 import { availablePositions, logoSpots, type Placement, type Placements } from "@/lib/mockup";
 import { Gallery, type Slide } from "./Gallery";
+
+export type ColorProps = { color: string; onColor: (id: string) => void };
 import { QuoteBuyBox } from "./QuoteBuyBox";
 import { StockBuyBox } from "./StockBuyBox";
 import { logoThumbs, useBrandLogos } from "./useBrandLogo";
@@ -20,6 +22,12 @@ export function ProductTop({ product }: { product: Product }) {
   // posição/tamanho que o cliente ajustou em cada lugar (sem ajuste = posição padrão)
   const [placements, setPlacements] = useState<Placements>({});
   const [technique, setTechnique] = useState<Technique | null>(null);
+  const [color, setColorState] = useState(product.colors[0]);
+  // ao trocar a cor, mostra a peça (a foto da pessoa vestindo não muda de cor)
+  const setColor = (id: string) => {
+    setColorState(id);
+    setView((v) => (v === "front" || v === "back" || v === "side" ? v : "front"));
+  };
 
   // vindo do questionário (?tecnica=bordado), já deixa a técnica marcada
   useEffect(() => {
@@ -53,7 +61,7 @@ export function ProductTop({ product }: { product: Product }) {
     });
   };
 
-  const custom = { positions, onPositions: setPositions, logos, onLogo, placements, onPlace, technique, onTechnique: setTechnique };
+  const custom = { color, onColor: setColor, positions, onPositions: setPositions, logos, onLogo, placements, onPlace, technique, onTechnique: setTechnique };
   return (
     <div className={s.top}>
       <Gallery
@@ -64,6 +72,7 @@ export function ProductTop({ product }: { product: Product }) {
         onPlace={onPlace}
         view={view}
         onViewChange={setView}
+        color={color}
       />
       {inStock(product) ? <StockBuyBox product={product} {...custom} /> : <QuoteBuyBox product={product} {...custom} />}
     </div>

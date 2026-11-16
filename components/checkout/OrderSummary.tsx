@@ -7,6 +7,7 @@ import type { CartLine } from "@/lib/pricing";
 import { SafeImage } from "@/components/ui/primitives";
 import { AnimatedMoney } from "@/components/cart/AnimatedMoney";
 import s from "./Checkout.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 type Totals = Pick<OrderQuote, "subtotal" | "discount" | "total" | "pixDiscount" | "chargeTotal" | "installments" | "installmentValue" | "items"> & {
   shipping: number | null;
@@ -16,6 +17,7 @@ type Totals = Pick<OrderQuote, "subtotal" | "discount" | "total" | "pixDiscount"
 
 /** Resumo sticky no desktop e colapsável no mobile. */
 export function OrderSummary({ lines, totals }: { lines: CartLine[]; totals: Totals }) {
+  const media = useProductMedia();
   const [open, setOpen] = useState(false);
   return (
     <aside className={s.summary} data-open={open || undefined} aria-labelledby="co-summary-title">
@@ -36,7 +38,7 @@ export function OrderSummary({ lines, totals }: { lines: CartLine[]; totals: Tot
             return (
               <li key={l.id} style={{ animationDelay: `${i * 70}ms` }}>
                 <span className={s.sumThumb}>
-                  <SafeImage src={p.image} alt="" />
+                  <SafeImage src={media(p).image} alt="" />
                   <b>{qty}</b>
                 </span>
                 <span className={s.sumText}>

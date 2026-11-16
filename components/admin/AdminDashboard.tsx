@@ -334,13 +334,11 @@ export default function AdminDashboard({
       }
     >
       <aside className="admin-sidebar">
-        <Link href="/" className="brand">
-          <span className="brand-symbol">e</span>
-          {!collapsed && (
-            <span>
-              expressão<small>PAINEL DA FÁBRICA</small>
-            </span>
-          )}
+        <Link href="/" className="brand" aria-label="Expressão Uniformes: ver a loja" title="Ver a loja">
+          {/* logo oficial; recolhido, mostra só o símbolo */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="brand-logo" src={dark ? "/images/logo-on-dark.png" : "/images/logo-on-light.png"} alt="Expressão Uniformes" width={171} height={40} />
+          {!collapsed && <small>PAINEL DA FÁBRICA</small>}
         </Link>
         <span className="sidebar-label">PRINCIPAL</span>
         <nav>

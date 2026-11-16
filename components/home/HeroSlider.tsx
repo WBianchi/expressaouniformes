@@ -57,13 +57,16 @@ export function HeroSlider({ banners }: { banners: Banner[] }) {
         {banners.map((b, i) => {
           const active = i === index;
           const Title = i === 0 ? "h1" : "h2";
+          // banner só com a imagem (arte que já traz o texto): sem escurecer a foto
+          const hasText = !!(b.title || b.subtitle);
+          const name = b.title || `Banner ${i + 1}`;
           return (
             <div
               key={b.id}
               className={s.slide}
               role="group"
               aria-roledescription="slide"
-              aria-label={`${i + 1} de ${count}: ${b.title}`}
+              aria-label={`${i + 1} de ${count}: ${name}`}
               aria-hidden={!active}
               inert={!active}
             >
@@ -79,10 +82,16 @@ export function HeroSlider({ banners }: { banners: Banner[] }) {
                   fetchPriority={i === 0 ? "high" : undefined}
                 />
               </picture>
-              <span className={s.scrim} aria-hidden />
+              {hasText && <span className={s.scrim} aria-hidden />}
+              {/* sem texto no botão: o banner inteiro leva ao link */}
+              {!b.ctaLabel && b.ctaHref && <Link href={safeHref(b.ctaHref)} className={s.slideLink} aria-label={name} />}
               <div className={`container ${s.content}`}>
                 <div className={s.copy}>
-                  <Title className={s.title}>{b.title}</Title>
+                  {b.title ? (
+                    <Title className={s.title}>{b.title}</Title>
+                  ) : (
+                    i === 0 && <h1 className="sr-only">Expressão Uniformes: uniformes personalizados para empresas</h1>
+                  )}
                   {b.subtitle && <p className={s.sub}>{b.subtitle}</p>}
                   {b.ctaLabel && b.ctaHref && (
                     <Link href={safeHref(b.ctaHref)} className={`btn btn-lg ${s.cta}`}>
@@ -111,7 +120,7 @@ export function HeroSlider({ banners }: { banners: Banner[] }) {
                 type="button"
                 role="tab"
                 aria-selected={i === index}
-                aria-label={`Banner ${i + 1}: ${b.title}`}
+                aria-label={b.title ? `Banner ${i + 1}: ${b.title}` : `Banner ${i + 1}`}
                 className={s.dot}
                 onClick={() => setIndex(i)}
               />

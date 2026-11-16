@@ -5,6 +5,7 @@ import { PIX_DISCOUNT } from "@/lib/pricing";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import { productFaq } from "@/lib/product-faq";
 import { getClientLogos, getPhotoOverrides } from "@/lib/site-media";
+import { withPhotos } from "@/lib/product-media";
 import { QualifyFlow } from "@/components/qualify/QualifyFlow";
 import { ClientLogos, FactoryStrip, TwoPaths } from "@/components/home/FactorySections";
 import { LpGallery } from "@/components/lp/LpGallery";
@@ -28,19 +29,19 @@ export async function ProductLanding({ product, source }: { product: Product; so
   const category = getCategory(product.category);
   const available = inStock(product);
   const [clientLogos, overrides] = await Promise.all([getClientLogos(), getPhotoOverrides()]);
-  // fotos com a pessoa vestindo: as trocadas no painel valem aqui também
-  const photos = product.photos.map((src, i) => overrides[product.slug]?.[i] ?? src);
+  // fotos trocadas no painel (pessoa vestindo e peça sozinha) valem aqui também
+  const media = withPhotos(product, overrides[product.slug]);
   const related = [
     ...products.filter((p) => p.slug !== product.slug && p.category === product.category),
     ...products.filter((p) => p.slug !== product.slug && p.category !== product.category && p.kind === product.kind),
   ].slice(0, 8);
 
   const images = [
-    { src: photos[0], label: "vestindo, frente" },
-    { src: photos[1], label: "vestindo, costas" },
-    { src: product.image, label: "peça, frente", piece: true },
-    { src: product.back, label: "peça, costas", piece: true },
-    { src: product.side, label: "peça, lado", piece: true },
+    { src: media.photos[0], label: "vestindo, frente" },
+    { src: media.photos[1], label: "vestindo, costas" },
+    { src: media.image, label: "peça, frente", piece: true },
+    { src: media.back, label: "peça, costas", piece: true },
+    { src: media.side, label: "peça, lado", piece: true },
   ].filter((im) => !!im.src);
 
   const jsonLd = {

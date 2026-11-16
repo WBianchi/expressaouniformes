@@ -2,6 +2,7 @@
 import { useActionState } from "react";
 import { Loader2, LockKeyhole } from "lucide-react";
 import { login, type LoginState } from "@/app/admin/actions";
+import { Logo } from "@/components/layout/Logo";
 import s from "./AdminLogin.module.css";
 
 export function AdminLogin({ configured }: { configured: boolean }) {
@@ -9,6 +10,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
   return (
     <main className={s.page}>
       <form className={s.card} action={action}>
+        <Logo height={36} className={s.logo} />
         <span className={s.icon} aria-hidden>
           <LockKeyhole size={24} />
         </span>

@@ -6,6 +6,7 @@ import { categories, getCategory, money, products } from "@/lib/catalog";
 import { CategoryIcon, SafeImage } from "@/components/ui/primitives";
 import { normalize, useDismiss } from "./hooks";
 import s from "./SearchBox.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 type Item =
   | { type: "product"; key: string; href: string; label: string; meta: string; image: string; custom: boolean }
@@ -60,13 +61,14 @@ export function SearchBox({
     return () => window.removeEventListener("keydown", onKey);
   }, [shortcut]);
 
+  const media = useProductMedia();
   const items = useMemo<Item[]>(() => {
     const term = normalize(q);
     if (!term) {
       const top: Item[] = [...products]
         .sort((a, b) => b.reviews - a.reviews)
         .slice(0, 4)
-        .map((p) => ({ type: "product", key: `p-${p.slug}`, href: `/produto/${p.slug}`, label: p.name, meta: p.kind === "stock" ? `a partir de ${money(p.price)}` : "Por orçamento · mín. 30 peças", image: p.image, custom: p.kind === "custom" }));
+        .map((p) => ({ type: "product", key: `p-${p.slug}`, href: `/produto/${p.slug}`, label: p.name, meta: p.kind === "stock" ? `a partir de ${money(p.price)}` : "Por orçamento · mín. 30 peças", image: media(p).image, custom: p.kind === "custom" }));
       const cats: Item[] = categories.slice(0, 4).map((c) => ({ type: "category", key: `c-${c.slug}`, href: `/loja?categoria=${c.slug}`, label: c.name, icon: c.icon }));
       return [...top, ...cats];
     }
@@ -89,11 +91,11 @@ export function SearchBox({
         href: `/produto/${p.slug}`,
         label: p.name,
         meta: p.kind === "stock" ? `a partir de ${money(p.price)}` : "Por orçamento · mín. 30 peças",
-        image: p.image,
+        image: media(p).image,
         custom: p.kind === "custom",
       }));
     return [...prods, ...cats, { type: "query", key: "q", href: `/loja?q=${encodeURIComponent(q.trim())}`, label: q.trim() }];
-  }, [q]);
+  }, [q, media]);
 
   const go = (href: string) => {
     setOpen(false);

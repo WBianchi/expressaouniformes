@@ -10,12 +10,14 @@ import { SafeImage, Stepper } from "@/components/ui/primitives";
 import { LOGO_ACCEPT, makeLogoThumb } from "./logoThumb";
 import { AnimatedMoney } from "./AnimatedMoney";
 import s from "./Cart.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 const allPositions = Object.keys(positionFees) as Position[];
 
 export function CartLineItem({ line, index }: { line: CartLine; index: number }) {
   const { updateLine, removeLine, restoreLine } = useStore();
   const product = getProduct(line.slug);
+  const media = useProductMedia();
   const color = getColor(line.color);
   const [draft, setDraft] = useState(line.sizes);
   const [notes, setNotes] = useState(line.notes ?? "");
@@ -84,7 +86,7 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
     <div className={s.lineWrap} data-removing={removing || undefined}>
     <article className={s.line} style={{ animationDelay: `${index * 70}ms` }} aria-labelledby={`${uid}-t`}>
       <Link href={`/produto/${product.slug}`} className={s.lineMedia} tabIndex={-1} aria-hidden>
-        <SafeImage src={product.image} alt="" />
+        <SafeImage src={media(product).image} alt="" />
         {firstLogo && (
           // eslint-disable-next-line @next/next/no-img-element
           <img className={s.lineLogoBadge} src={firstLogo.thumb} alt="" />

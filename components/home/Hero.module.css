@@ -40,6 +40,16 @@
   display: flex;
   align-items: center;
   height: 100%;
+  /* o texto não bloqueia o clique no banner inteiro (quando ele é o link) */
+  pointer-events: none;
+}
+.content a {
+  pointer-events: auto;
+}
+.slideLink {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 .copy {
   max-width: 560px;

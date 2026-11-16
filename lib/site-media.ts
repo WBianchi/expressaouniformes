@@ -63,7 +63,7 @@ export async function listPhotoOverrides(): Promise<PhotoOverrides> {
   const sql = await db();
   const rows = (await sql.query("select slug, slot, url from expressao.product_photos")) as { slug: string; slot: number; url: string }[];
   const out: PhotoOverrides = {};
-  for (const r of rows) (out[r.slug] ??= [null, null])[r.slot] = r.url;
+  for (const r of rows) (out[r.slug] ??= [null, null, null, null, null])[r.slot] = r.url;
   return out;
 }
 

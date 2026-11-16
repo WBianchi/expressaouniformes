@@ -2281,18 +2281,22 @@ footer {
   transition: width 0.2s;
 }
 .admin-sidebar .brand {
-  font-size: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   margin: 0 7px 33px;
-  gap: 8px;
 }
-.admin-sidebar .brand-symbol {
-  width: 39px;
-  height: 39px;
-  font-size: 40px;
+.admin-sidebar .brand-logo {
+  display: block;
+  width: 171px;
+  max-width: 100%;
+  height: auto;
 }
 .admin-sidebar .brand small {
-  font-size: 7px;
+  margin: 0 0 0 2px;
+  font-size: 8px;
   letter-spacing: 1.7px;
+  text-align: left;
 }
 .sidebar-label {
   font-size: 9px;
@@ -2698,7 +2702,15 @@ footer {
   padding-right: 12px;
 }
 .collapsed .admin-sidebar .brand {
+  align-items: center;
   margin: 0 0 35px;
+}
+/* recolhido: só o símbolo "e" (a parte esquerda da logo) */
+.collapsed .admin-sidebar .brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  object-position: left center;
 }
 .collapsed .sidebar-label {
   font-size: 0;

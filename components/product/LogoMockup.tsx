@@ -5,6 +5,7 @@ import { clampPlacement, logoSpots, placedSpot, type Placement, type Placements,
 import { SafeImage } from "@/components/ui/primitives";
 import { useRecolored } from "@/lib/recolor";
 import s from "./LogoMockup.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 /**
  * Foto real da peça com a logo do cliente em cada posição escolhida (cada posição
@@ -70,7 +71,9 @@ export function LogoMockup({
     onPlace(d.pos, clampPlacement({ x: p.x + d.dx, y: p.y + d.dy, s: d.s }, spots[d.pos]));
   };
   const end = () => (drag.current = null);
-  const src = useRecolored(view === "back" ? product.back : view === "side" ? product.side : product.image, tint);
+  // fotos da peça trocadas no painel valem aqui (a troca de cor gera a máscara na hora)
+  const piece = useProductMedia()(product);
+  const src = useRecolored(view === "back" ? piece.back : view === "side" ? piece.side : piece.image, tint);
 
   return (
     <div className={s.mock}>

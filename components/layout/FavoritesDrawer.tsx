@@ -6,10 +6,12 @@ import { useStore } from "@/components/store/StoreProvider";
 import { Drawer } from "@/components/ui/Drawer";
 import { SafeImage } from "@/components/ui/primitives";
 import s from "./FavoritesDrawer.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 /** Drawer lateral de favoritos. */
 export function FavoritesDrawer() {
   const { ready, favorites, toggleFavorite, drawer, openDrawer, closeDrawer } = useStore();
+  const media = useProductMedia();
   const open = drawer === "favorites";
   const items = favorites.map(getProduct).filter((p): p is Product => !!p);
 
@@ -50,7 +52,7 @@ export function FavoritesDrawer() {
           {items.map((p) => (
             <li key={p.slug} className={s.item}>
               <Link href={`/produto/${p.slug}`} className={s.thumb} onClick={closeDrawer} aria-label={p.name}>
-                <SafeImage src={p.image} alt="" />
+                <SafeImage src={media(p).image} alt="" />
               </Link>
               <div className={s.info}>
                 <small>{getCategory(p.category)?.name}</small>

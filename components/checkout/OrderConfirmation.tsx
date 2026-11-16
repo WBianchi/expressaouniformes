@@ -26,6 +26,7 @@ import { SafeImage } from "@/components/ui/primitives";
 import { readCompletedOrder, readStoredOrder, updateStoredOrderStatus } from "./orderStorage";
 import { useOrderStatus } from "./useOrderStatus";
 import s from "./Order.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 type State = { kind: "loading" } | { kind: "full"; order: CheckoutResponse } | { kind: "basic"; order: StoredOrder } | { kind: "missing" };
 
@@ -64,6 +65,11 @@ function useCountdown(target: Date | null) {
 const methodLabel = { pix: "Pix", boleto: "Boleto bancário", cartao: "Cartão de crédito" } as const;
 
 export function OrderConfirmation({ id }: { id: string }) {
+  const media = useProductMedia();
+  const pieceOf = (slug: string) => {
+    const p = getProduct(slug);
+    return p ? media(p).image : "";
+  };
   const [state, setState] = useState<State>({ kind: "loading" });
 
   useEffect(() => {
@@ -179,7 +185,7 @@ export function OrderConfirmation({ id }: { id: string }) {
             {o.quote.lines.map((l, i) => (
               <li key={i} style={{ animationDelay: `${200 + i * 80}ms` }}>
                 <span className={s.itemThumb}>
-                  <SafeImage src={getProduct(l.slug)?.image ?? ""} alt="" />
+                  <SafeImage src={pieceOf(l.slug)} alt="" />
                 </span>
                 <div>
                   <strong>{l.name}</strong>

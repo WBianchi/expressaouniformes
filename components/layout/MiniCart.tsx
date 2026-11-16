@@ -33,6 +33,7 @@ import { Drawer } from "@/components/ui/Drawer";
 import { SafeImage, Stepper } from "@/components/ui/primitives";
 import { maskCep } from "./hooks";
 import s from "./MiniCart.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 const SIZE_ORDER: Size[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 const gradeSummary = (l: CartLine) =>
@@ -42,6 +43,7 @@ const gradeSummary = (l: CartLine) =>
 
 function LineItem({ line, onNavigate }: { line: CartLine; onNavigate: () => void }) {
   const { updateLine, removeLine, restoreLine } = useStore();
+  const media = useProductMedia();
   const [editing, setEditing] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const p = getProduct(line.slug);
@@ -73,7 +75,7 @@ function LineItem({ line, onNavigate }: { line: CartLine; onNavigate: () => void
       <div className={s.lineInner}>
         <div className={s.lineRow}>
           <Link href={`/produto/${p.slug}`} className={s.thumb} onClick={onNavigate} aria-label={p.name}>
-            <SafeImage src={p.image} alt="" />
+            <SafeImage src={media(p).image} alt="" />
             {(() => {
               const logo = Object.values(lineLogos(line))[0];
               return (

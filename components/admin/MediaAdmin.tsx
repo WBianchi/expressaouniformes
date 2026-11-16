@@ -1,13 +1,15 @@
 "use client";
-// Painel: banners da home e fotos de vitrine dos produtos. Imagens vão direto
+// Painel: banners da home e fotos dos produtos (vitrine e peça sozinha). Imagens vão direto
 // do navegador para o Vercel Blob; os dados são gravados pelas server actions.
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Pencil, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Palette, Pencil, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
 import type { ClientLogo } from "@/lib/site-media";
 import { products } from "@/lib/catalog";
+import { defaultPhoto, PHOTO_SLOTS } from "@/lib/product-media";
+import { useRecolored } from "@/lib/recolor";
 import {
   addClientLogo,
   deleteBanner,
@@ -118,7 +120,7 @@ export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
                 {i + 1}
                 {!b.active && " · oculto"}
               </span>
-              <strong>{b.title}</strong>
+              <strong>{b.title || "Sem título (só a imagem)"}</strong>
               {b.subtitle && <small>{b.subtitle}</small>}
               {b.ctaLabel && (
                 <small className={s.cta}>
@@ -249,9 +251,13 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
           </div>
 
           <label className={s.field}>
-            Título
-            <input value={d.title} onChange={(e) => set("title", e.target.value)} maxLength={90} required />
+            Título (opcional)
+            <input value={d.title} onChange={(e) => set("title", e.target.value)} maxLength={90} />
           </label>
+          <p className={s.note}>
+            Sem título e sem texto de apoio, a imagem aparece limpa, sem escurecer. Use assim quando a arte do banner já traz o texto. Com
+            texto, a foto escurece um pouco do lado esquerdo para dar leitura. Sem texto do botão, o banner inteiro vira o link.
+          </p>
           <label className={s.field}>
             Texto de apoio
             <textarea value={d.subtitle} onChange={(e) => set("subtitle", e.target.value)} maxLength={180} rows={3} />
@@ -307,6 +313,26 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
 
 /* ---------------- Fotos dos produtos ---------------- */
 
+// cores para testar a troca de cor numa foto da peça enviada pelo painel (null = foto original)
+const TEST_TINTS = [null, "#1f4fb4", "#b3261e", "#1d1d1f", "#9fa1a2:mescla"] as const;
+
+/** Foto da peça com o botão "Testar cor": mostra a troca de cor como o cliente vai ver. */
+function PiecePreview({ src, test }: { src: string; test: boolean }) {
+  const [k, setK] = useState(0);
+  const shown = useRecolored(src, TEST_TINTS[k]);
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={shown} alt="" loading="lazy" />
+      {test && (
+        <button type="button" className={s.tintBtn} onClick={() => setK((v) => (v + 1) % TEST_TINTS.length)} title="Ver a peça em outra cor, como no site">
+          <Palette size={13} /> {k ? "Outra cor" : "Testar cor"}
+        </button>
+      )}
+    </>
+  );
+}
+
 export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides; enabled: boolean }) {
   const { pending, error, setError, run } = useAction();
   const [busy, setBusy] = useState<string | null>(null);
@@ -333,8 +359,14 @@ export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides
         <div>
           <h3>Fotos dos produtos</h3>
           <p>
-            Foto 1 aparece na vitrine e abre a página do produto; a foto 2 aparece ao passar o mouse e na galeria. Use fotos verticais
-            (4:5) de pessoas vestindo a peça. A prévia da logo continua usando a foto da peça sozinha.
+            <b>Vestindo:</b> a foto 1 aparece na vitrine e abre a página do produto; a 2 aparece ao passar o mouse e na galeria. Use fotos verticais
+            (4:5) de pessoas vestindo a peça.
+          </p>
+          <p>
+            <b>Peça sozinha (frente, costas e lado):</b> aparecem na galeria do produto e no simulador da logo, e são as fotos que mudam de cor quando o
+            cliente escolhe outra cor. Use foto quadrada, só a peça, centralizada e no mesmo enquadramento da foto atual (para a logo cair no lugar
+            certo), em fundo liso e claro, sem pessoa nem cabide. Peça branca ou cinza claro: prefira um fundo um pouco mais escuro que a peça. Depois de
+            enviar, use <b>Testar cor</b> para conferir a troca de cor.
           </p>
         </div>
       </div>
@@ -344,6 +376,60 @@ export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides
       <ul className={s.products} aria-busy={pending}>
         {products.map((p) => {
           const o = photos[p.slug] ?? [];
+          const slot = ({ slot, label, piece }: (typeof PHOTO_SLOTS)[number]) => {
+            const key = `${p.slug}-${slot}`;
+            const custom = o[slot];
+            const src = custom ?? defaultPhoto(p, slot);
+            return (
+              <div key={slot} className={s.slot}>
+                <span className={s.slotImg} data-piece={piece || undefined}>
+                  {piece ? (
+                    <PiecePreview key={src} src={src} test={!!custom} />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={src} alt="" loading="lazy" />
+                  )}
+                  {busy === key && <span className={s.uploading}>Enviando…</span>}
+                  <em>{custom ? "Personalizada" : "Padrão"}</em>
+                </span>
+                <small>{label}</small>
+                <div className={s.slotActions}>
+                  <button
+                    type="button"
+                    className="button secondary small"
+                    disabled={!enabled || pending || !!busy}
+                    onClick={() => inputs.current[key]?.click()}
+                  >
+                    <Upload size={14} /> Trocar
+                  </button>
+                  {custom && (
+                    <button
+                      type="button"
+                      className="icon-button"
+                      disabled={pending || !!busy}
+                      onClick={() => run(() => resetProductPhoto(p.slug, slot))}
+                      aria-label="Voltar para a foto padrão"
+                      title="Voltar para a foto padrão"
+                    >
+                      <RotateCcw size={15} />
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={(el) => {
+                    inputs.current[key] = el;
+                  }}
+                  type="file"
+                  accept={ACCEPT}
+                  hidden
+                  onChange={(e) => {
+                    onFile(p.slug, slot, e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </div>
+            );
+          };
           return (
             <li key={p.slug} className={s.product}>
               <div className={s.productHead}>
@@ -352,56 +438,11 @@ export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides
                   Ver na loja
                 </a>
               </div>
-              <div className={s.slots}>
-                {p.photos.map((def, slot) => {
-                  const key = `${p.slug}-${slot}`;
-                  const custom = o[slot];
-                  return (
-                    <div key={slot} className={s.slot}>
-                      <span className={s.slotImg}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={custom ?? def} alt="" loading="lazy" />
-                        {busy === key && <span className={s.uploading}>Enviando…</span>}
-                        <em>{custom ? "Personalizada" : "Padrão"}</em>
-                      </span>
-                      <small>Foto {slot + 1}</small>
-                      <div className={s.slotActions}>
-                        <button
-                          type="button"
-                          className="button secondary small"
-                          disabled={!enabled || pending || !!busy}
-                          onClick={() => inputs.current[key]?.click()}
-                        >
-                          <Upload size={14} /> Trocar
-                        </button>
-                        {custom && (
-                          <button
-                            type="button"
-                            className="icon-button"
-                            disabled={pending || !!busy}
-                            onClick={() => run(() => resetProductPhoto(p.slug, slot))}
-                            aria-label="Voltar para a foto padrão"
-                            title="Voltar para a foto padrão"
-                          >
-                            <RotateCcw size={15} />
-                          </button>
-                        )}
-                      </div>
-                      <input
-                        ref={(el) => {
-                          inputs.current[key] = el;
-                        }}
-                        type="file"
-                        accept={ACCEPT}
-                        hidden
-                        onChange={(e) => {
-                          onFile(p.slug, slot, e.target.files?.[0]);
-                          e.target.value = "";
-                        }}
-                      />
-                    </div>
-                  );
-                })}
+              <span className={s.groupLabel}>Vestindo (vitrine)</span>
+              <div className={s.slots}>{PHOTO_SLOTS.filter((x) => !x.piece).map(slot)}</div>
+              <span className={s.groupLabel}>Peça sozinha (simulador e troca de cor)</span>
+              <div className={s.slots} data-piece>
+                {PHOTO_SLOTS.filter((x) => x.piece).map(slot)}
               </div>
             </li>
           );

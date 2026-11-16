@@ -1,5 +1,5 @@
 "use server";
-// Edição de banners da home e fotos de vitrine dos produtos pelo painel.
+// Edição de banners da home e fotos dos produtos (vitrine e peça sozinha) pelo painel.
 import { del } from "@vercel/blob";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -39,7 +39,8 @@ async function run(fn: () => Promise<void>): Promise<MediaResult> {
 
 const bannerSchema = z.object({
   id: z.string().uuid().optional(),
-  title: z.string().trim().min(3, "Informe o título.").max(90, "Título muito longo (máx. 90)."),
+  // opcional: banner só com a imagem (arte que já traz o texto)
+  title: z.string().trim().max(90, "Título muito longo (máx. 90)."),
   subtitle: z.string().trim().max(180, "Texto muito longo (máx. 180)."),
   ctaLabel: z.string().trim().max(32, "Texto do botão muito longo (máx. 32)."),
   ctaHref: z.string().trim().max(300),
@@ -96,7 +97,8 @@ export async function reorderBanners(ids: string[]) {
 
 const slotSchema = z.object({
   slug: z.string().refine((s) => !!getProduct(s), "Produto inválido."),
-  slot: z.union([z.literal(0), z.literal(1)]),
+  // 0–1 pessoa vestindo; 2–4 peça sozinha (frente, costas, lado), ver lib/product-media.ts
+  slot: z.number().int().min(0, "Foto inválida.").max(4, "Foto inválida."),
 });
 
 export async function setProductPhoto(slug: string, slot: number, url: string) {

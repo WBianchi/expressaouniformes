@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS expressao.banners (
 );
 CREATE INDEX IF NOT EXISTS banners_sort_idx ON expressao.banners (sort, created_at);
 
--- slot 0 = foto principal (estúdio), slot 1 = segunda foto (ambiente de trabalho)
+-- slot 0 = foto principal (estúdio), slot 1 = segunda foto (ambiente de trabalho); 2–4 a peça sozinha (007)
 CREATE TABLE IF NOT EXISTS expressao.product_photos (
   slug text NOT NULL,
   slot smallint NOT NULL CHECK (slot IN (0, 1)),

@@ -5,17 +5,19 @@ import { getCategory, inStock, type Product } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
 import { Price, SafeImage, Swatches } from "@/components/ui/primitives";
 import s from "./Catalog.module.css";
+import { useProductMedia } from "@/components/store/MediaProvider";
 
 /** Versão em lista do card de produto (modo de exibição "lista"). */
 export function ProductRow({ product }: { product: Product }) {
   const { isFavorite, toggleFavorite } = useStore();
+  const media = useProductMedia();
   const fav = isFavorite(product.slug);
   const stock = inStock(product);
   const href = `/produto/${product.slug}`;
   return (
     <article className={s.row} data-kind={product.kind}>
       <Link href={href} className={s.rowMedia} aria-label={product.name}>
-        <SafeImage src={product.image} alt={product.name} />
+        <SafeImage src={media(product).image} alt={product.name} />
       </Link>
       <div className={s.rowBody}>
         <div className={s.rowTop}>

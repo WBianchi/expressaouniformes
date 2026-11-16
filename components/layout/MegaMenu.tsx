@@ -6,13 +6,14 @@ import { categories, getProduct, money, products, stockProducts } from "@/lib/ca
 import { CategoryIcon, SafeImage } from "@/components/ui/primitives";
 import s from "./MegaMenu.module.css";
 
-import { useProductPhotos } from "@/components/store/MediaProvider";
+import { useCategoryMedia, useProductPhotos } from "@/components/store/MediaProvider";
 const featured = getProduct("camiseta-malha-pv") ?? stockProducts[0];
 const countBy = (slug: string) => products.filter((p) => p.category === slug).length;
 
 /** Painel do mega menu "Produtos": categorias com prévia em imagem, modos de compra, destaque e banner. */
 export function MegaMenu({ id, open, onNavigate }: { id: string; open: boolean; onNavigate: () => void }) {
   const photosOf = useProductPhotos();
+  const catMedia = useCategoryMedia();
   const [active, setActive] = useState(categories[0].slug);
   const current = categories.find((c) => c.slug === active) ?? categories[0];
 
@@ -49,7 +50,7 @@ export function MegaMenu({ id, open, onNavigate }: { id: string; open: boolean; 
         <Link href={`/loja?categoria=${current.slug}`} onClick={onNavigate} className={s.preview} aria-label={`Ver ${current.name}`}>
           {categories.map((c) => (
             <span key={c.slug} className={s.previewImg} data-active={c.slug === active || undefined} aria-hidden>
-              <SafeImage src={c.image} alt="" />
+              <SafeImage src={catMedia(c).image} alt="" />
             </span>
           ))}
           <span className={s.previewShade} aria-hidden />

@@ -6,12 +6,12 @@ import { MobileMenu } from "@/components/layout/MobileMenu";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { WhatsAppFab } from "@/components/layout/WhatsAppFab";
 import { MediaProvider } from "@/components/store/MediaProvider";
-import { getPhotoOverrides } from "@/lib/site-media";
+import { getCategoryPhotos, getPhotoOverrides } from "@/lib/site-media";
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
-  const photos = await getPhotoOverrides();
+  const [photos, categories] = await Promise.all([getPhotoOverrides(), getCategoryPhotos()]);
   return (
-    <MediaProvider photos={photos}>
+    <MediaProvider photos={photos} categories={categories}>
       <a href="#conteudo" className="sr-only">
         Pular para o conteúdo
       </a>

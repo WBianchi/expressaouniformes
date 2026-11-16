@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRef } from "react";
+import { useCategoryMedia } from "@/components/store/MediaProvider";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { categories, inStock, products } from "@/lib/catalog";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
@@ -10,6 +11,7 @@ import s from "./Home.module.css";
 
 export function CategoryGrid() {
   const rail = useRef<HTMLUListElement>(null);
+  const catMedia = useCategoryMedia();
   const scroll = (d: number) => {
     const el = rail.current;
     if (el) el.scrollBy({ left: d * el.clientWidth * 0.8, behavior: "smooth" });
@@ -34,14 +36,18 @@ export function CategoryGrid() {
           </div>
         </div>
         <ul className={s.cats} ref={rail}>
-          {categories.map((c) => (
-            <li key={c.slug}>
-              {/* o nome da categoria já vem escrito na imagem */}
-              <Link href={`/loja?categoria=${c.slug}`} className={s.cat} aria-label={c.name}>
-                <SafeImage src={c.image} alt={c.name} />
-              </Link>
-            </li>
-          ))}
+          {categories.map((c) => {
+            const m = catMedia(c);
+            return (
+              <li key={c.slug}>
+                {/* a imagem padrão já traz o nome escrito; foto trocada no painel pode pedir o nome por cima */}
+                <Link href={`/loja?categoria=${c.slug}`} className={s.cat} aria-label={c.name}>
+                  <SafeImage src={m.image} alt={c.name} />
+                  {m.showName && <span className={s.catName}>{c.name}</span>}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>

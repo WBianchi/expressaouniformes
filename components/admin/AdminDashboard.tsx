@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
+  LayoutGrid,
   ShoppingBag,
   Shirt,
   Users,
@@ -42,10 +43,10 @@ import { LogoMockup } from "@/components/product/LogoMockup";
 import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
 import { logout } from "@/app/admin/actions";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
-import { BannersAdmin, ClientLogosAdmin, ProductPhotosAdmin } from "./MediaAdmin";
+import { BannersAdmin, CategoryPhotosAdmin, ClientLogosAdmin, ProductPhotosAdmin } from "./MediaAdmin";
 import { LeadsAdmin } from "./LeadsAdmin";
 import type { AdminLead } from "@/lib/lead-admin-types";
-import type { ClientLogo } from "@/lib/site-media";
+import type { CategoryPhotos, ClientLogo } from "@/lib/site-media";
 const navigation = [
   ["Visão geral", LayoutDashboard],
   ["Pedidos", ShoppingBag],
@@ -56,6 +57,7 @@ const navigation = [
   ["Clientes", Users],
   ["Tráfego", ChartNoAxesCombined],
   ["Banners", Image],
+  ["Categorias", LayoutGrid],
   ["Logos de clientes", Building2],
   ["Avaliações", Star],
   ["Cupons", Ticket],
@@ -204,6 +206,7 @@ export default function AdminDashboard({
   integrations,
   banners,
   photos,
+  categoryPhotos,
   leads,
   clientLogos,
 }: {
@@ -213,6 +216,7 @@ export default function AdminDashboard({
   integrations: Integrations;
   banners: Banner[] | null;
   photos: PhotoOverrides;
+  categoryPhotos: CategoryPhotos;
   leads: AdminLead[] | null;
   clientLogos: ClientLogo[] | null;
 }) {
@@ -664,6 +668,8 @@ export default function AdminDashboard({
             <ClientLogosAdmin logos={clientLogos} />
           ) : active === "Banners" ? (
             <BannersAdmin banners={banners} />
+          ) : active === "Categorias" ? (
+            <CategoryPhotosAdmin photos={categoryPhotos} enabled={integrations.database} />
           ) : active === "Produtos" ? (
             <ProductPhotosAdmin photos={photos} enabled={integrations.database} />
           ) : active === "Personalizações" ? (

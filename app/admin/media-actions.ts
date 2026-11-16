@@ -5,7 +5,7 @@ import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { isAdmin } from "@/lib/admin-auth";
 import { safeHref, safeImage } from "@/lib/banners";
-import { getProduct } from "@/lib/catalog";
+import { getCategory, getProduct } from "@/lib/catalog";
 import { MEDIA_TAG } from "@/lib/site-media";
 
 export type MediaResult = { ok: true } | { ok: false; error: string };
@@ -120,6 +120,39 @@ export async function resetProductPhoto(slug: string, slot: number) {
     const sql = await db();
     const k = slotSchema.parse({ slug, slot });
     const rows = (await sql.query("delete from expressao.product_photos where slug=$1 and slot=$2 returning url", [k.slug, k.slot])) as { url: string }[];
+    await dropBlob(rows[0]?.url);
+  });
+}
+
+/* ---------------- Fotos das categorias (home e menu) ---------------- */
+
+const categorySlug = z.string().refine((s) => !!getCategory(s), "Categoria inválida.");
+
+export async function setCategoryPhoto(slug: string, url: string) {
+  return run(async () => {
+    const sql = await db();
+    const k = categorySlug.parse(slug);
+    if (!safeImage(url)) throw new Error("Envie uma imagem.");
+    const [old] = (await sql.query("select url from expressao.category_photos where slug=$1", [k])) as { url: string }[];
+    await sql.query(
+      "insert into expressao.category_photos (slug, url) values ($1,$2) on conflict (slug) do update set url = excluded.url, updated_at = now()",
+      [k, url],
+    );
+    if (old && old.url !== url) await dropBlob(old.url);
+  });
+}
+
+export async function setCategoryShowName(slug: string, show: boolean) {
+  return run(async () => {
+    const sql = await db();
+    await sql.query("update expressao.category_photos set show_name=$2, updated_at=now() where slug=$1", [categorySlug.parse(slug), !!show]);
+  });
+}
+
+export async function resetCategoryPhoto(slug: string) {
+  return run(async () => {
+    const sql = await db();
+    const rows = (await sql.query("delete from expressao.category_photos where slug=$1 returning url", [categorySlug.parse(slug)])) as { url: string }[];
     await dropBlob(rows[0]?.url);
   });
 }

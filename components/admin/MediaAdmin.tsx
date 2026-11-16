@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Palette, Pencil, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
-import type { ClientLogo } from "@/lib/site-media";
-import { products } from "@/lib/catalog";
+import type { CategoryPhotos, ClientLogo } from "@/lib/site-media";
+import { categories, products } from "@/lib/catalog";
 import { defaultPhoto, PHOTO_SLOTS } from "@/lib/product-media";
 import { useRecolored } from "@/lib/recolor";
 import {
@@ -17,8 +17,11 @@ import {
   reorderBanners,
   reorderClientLogos,
   toggleClientLogo,
+  resetCategoryPhoto,
   resetProductPhoto,
   saveBanner,
+  setCategoryPhoto,
+  setCategoryShowName,
   setProductPhoto,
   type MediaResult,
 } from "@/app/admin/media-actions";
@@ -27,7 +30,7 @@ import s from "./MediaAdmin.module.css";
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
 const MAX_MB = 8;
 
-async function uploadImage(file: File, folder: "banners" | "produtos" | "clientes") {
+async function uploadImage(file: File, folder: "banners" | "produtos" | "categorias" | "clientes") {
   if (!ACCEPT.split(",").includes(file.type)) throw new Error("Use JPG, PNG, WebP ou AVIF.");
   if (file.size > MAX_MB * 1024 * 1024) throw new Error(`Imagem acima de ${MAX_MB} MB.`);
   const name = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
@@ -444,6 +447,107 @@ export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides
               <div className={s.slots} data-piece>
                 {PHOTO_SLOTS.filter((x) => x.piece).map(slot)}
               </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/* ---------------- Fotos das categorias ---------------- */
+
+export function CategoryPhotosAdmin({ photos, enabled }: { photos: CategoryPhotos; enabled: boolean }) {
+  const { pending, error, setError, run } = useAction();
+  const [busy, setBusy] = useState<string | null>(null);
+  const inputs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const onFile = async (slug: string, file?: File) => {
+    if (!file) return;
+    setBusy(slug);
+    setError(null);
+    try {
+      const url = await uploadImage(file, "categorias");
+      run(() => setCategoryPhoto(slug, url));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha no envio da imagem.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="admin-panel">
+      <div className="panel-heading">
+        <div>
+          <h3>Fotos das categorias</h3>
+          <p>
+            Aparecem na home (&quot;Compre por categoria&quot;) e no menu Produtos. Use imagem vertical (4:5, por exemplo 800×1000). As imagens padrão já
+            trazem o nome da categoria escrito; se a sua foto não tiver o nome, deixe marcado <b>Mostrar o nome sobre a foto</b>.
+          </p>
+        </div>
+      </div>
+      {!enabled && <p className={s.note}>Banco de dados não configurado: não é possível trocar as fotos.</p>}
+      {error && <p className={s.error}>{error}</p>}
+
+      <ul className={s.categories} aria-busy={pending}>
+        {categories.map((c) => {
+          const custom = photos[c.slug];
+          return (
+            <li key={c.slug} className={s.slot}>
+              <span className={s.slotImg}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={custom?.url ?? c.image} alt="" loading="lazy" />
+                {custom?.showName && <span className={s.catName}>{c.name}</span>}
+                {busy === c.slug && <span className={s.uploading}>Enviando…</span>}
+                <em>{custom ? "Personalizada" : "Padrão"}</em>
+              </span>
+              <small>{c.name}</small>
+              {custom && (
+                <label className={s.check}>
+                  <input
+                    type="checkbox"
+                    checked={custom.showName}
+                    disabled={pending}
+                    onChange={(e) => run(() => setCategoryShowName(c.slug, e.target.checked))}
+                  />
+                  Mostrar o nome sobre a foto
+                </label>
+              )}
+              <div className={s.slotActions}>
+                <button
+                  type="button"
+                  className="button secondary small"
+                  disabled={!enabled || pending || !!busy}
+                  onClick={() => inputs.current[c.slug]?.click()}
+                >
+                  <Upload size={14} /> Trocar
+                </button>
+                {custom && (
+                  <button
+                    type="button"
+                    className="icon-button"
+                    disabled={pending || !!busy}
+                    onClick={() => run(() => resetCategoryPhoto(c.slug))}
+                    aria-label="Voltar para a imagem padrão"
+                    title="Voltar para a imagem padrão"
+                  >
+                    <RotateCcw size={15} />
+                  </button>
+                )}
+              </div>
+              <input
+                ref={(el) => {
+                  inputs.current[c.slug] = el;
+                }}
+                type="file"
+                accept={ACCEPT}
+                hidden
+                onChange={(e) => {
+                  onFile(c.slug, e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
             </li>
           );
         })}

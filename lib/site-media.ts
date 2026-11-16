@@ -80,6 +80,29 @@ export const getPhotoOverrides = unstable_cache(
   { tags: [MEDIA_TAG], revalidate: 3600 },
 );
 
+/** Foto de categoria trocada pelo painel (slug → foto e se mostra o nome sobre ela). */
+export type CategoryPhotos = Record<string, { url: string; showName: boolean }>;
+
+export async function listCategoryPhotos(): Promise<CategoryPhotos> {
+  if (!process.env.DATABASE_URL) return {};
+  const sql = await db();
+  const rows = (await sql.query("select slug, url, show_name from expressao.category_photos")) as { slug: string; url: string; show_name: boolean }[];
+  return Object.fromEntries(rows.map((r) => [r.slug, { url: r.url, showName: r.show_name }]));
+}
+
+/** Fotos de categoria trocadas pelo painel. */
+export const getCategoryPhotos = unstable_cache(
+  async (): Promise<CategoryPhotos> => {
+    try {
+      return await listCategoryPhotos();
+    } catch {
+      return {};
+    }
+  },
+  ["category-photos"],
+  { tags: [MEDIA_TAG], revalidate: 3600 },
+);
+
 export type ClientLogo = { id: string; name: string; image: string; active: boolean };
 
 /** Todas as logos de clientes, na ordem (painel). */

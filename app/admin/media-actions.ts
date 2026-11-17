@@ -2,8 +2,8 @@
 // Edição de banners da home e fotos dos produtos (vitrine e peça sozinha) pelo painel.
 import { z } from "zod";
 import { safeHref, safeImage } from "@/lib/banners";
-import { getCategory, getProduct } from "@/lib/catalog";
-import { adminDb as db, dropBlob, runAction as run, type MediaResult } from "./action-utils";
+import { catalogHas, getCategory } from "@/lib/catalog";
+import { adminCatalog, adminDb as db, dropBlob, runAction as run, type MediaResult } from "./action-utils";
 
 export type { MediaResult };
 
@@ -66,14 +66,14 @@ export async function reorderBanners(ids: string[]) {
 }
 
 const slotSchema = z.object({
-  slug: z.string().refine((s) => !!getProduct(s), "Produto inválido."),
+  slug: z.string().refine((s) => catalogHas(s), "Produto inválido."),
   // 0–1 pessoa vestindo; 2–4 peça sozinha (frente, costas, lado), ver lib/product-media.ts
   slot: z.number().int().min(0, "Foto inválida.").max(4, "Foto inválida."),
 });
 
 export async function setProductPhoto(slug: string, slot: number, url: string) {
   return run(async () => {
-    const sql = await db();
+    const sql = await adminCatalog();
     const k = slotSchema.parse({ slug, slot });
     if (!safeImage(url)) throw new Error("Envie uma imagem.");
     const [old] = (await sql.query("select url from expressao.product_photos where slug=$1 and slot=$2", [k.slug, k.slot])) as { url: string }[];
@@ -87,7 +87,7 @@ export async function setProductPhoto(slug: string, slot: number, url: string) {
 
 export async function resetProductPhoto(slug: string, slot: number) {
   return run(async () => {
-    const sql = await db();
+    const sql = await adminCatalog();
     const k = slotSchema.parse({ slug, slot });
     const rows = (await sql.query("delete from expressao.product_photos where slug=$1 and slot=$2 returning url", [k.slug, k.slot])) as { url: string }[];
     await dropBlob(rows[0]?.url);
@@ -100,7 +100,7 @@ const categorySlug = z.string().refine((s) => !!getCategory(s), "Categoria invá
 
 export async function setCategoryPhoto(slug: string, url: string) {
   return run(async () => {
-    const sql = await db();
+    const sql = await adminCatalog();
     const k = categorySlug.parse(slug);
     if (!safeImage(url)) throw new Error("Envie uma imagem.");
     const [old] = (await sql.query("select url from expressao.category_photos where slug=$1", [k])) as { url: string }[];
@@ -114,14 +114,14 @@ export async function setCategoryPhoto(slug: string, url: string) {
 
 export async function setCategoryShowName(slug: string, show: boolean) {
   return run(async () => {
-    const sql = await db();
+    const sql = await adminCatalog();
     await sql.query("update expressao.category_photos set show_name=$2, updated_at=now() where slug=$1", [categorySlug.parse(slug), !!show]);
   });
 }
 
 export async function resetCategoryPhoto(slug: string) {
   return run(async () => {
-    const sql = await db();
+    const sql = await adminCatalog();
     const rows = (await sql.query("delete from expressao.category_photos where slug=$1 returning url", [categorySlug.parse(slug)])) as { url: string }[];
     await dropBlob(rows[0]?.url);
   });

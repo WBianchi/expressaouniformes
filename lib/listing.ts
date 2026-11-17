@@ -1,19 +1,39 @@
 // Anúncio editado pelo painel: validação e diferença em relação ao catálogo do código.
 // Puro (sem Next nem banco) para rodar no navegador, nas server actions e nos testes.
 import { z } from "zod";
-import { colors, type ListingFields, type Product, type Size, type Technique } from "./catalog.ts";
+import { colors, getCategory, type ListingFields, type Product, type Size, type Technique } from "./catalog.ts";
 import { safeImage } from "./banners.ts";
+import { EDITABLE_SPECS } from "./specs.ts";
 
 export const SIZE_OPTIONS = ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"] as const satisfies readonly Size[];
 export const TECHNIQUE_OPTIONS = ["Bordado", "Silk", "DTF", "Sublimação"] as const satisfies readonly Technique[];
+export const POSITION_OPTIONS = ["frente", "costas", "manga"] as const;
+const SPEC_KEYS = EDITABLE_SPECS.map((s) => s.key) as [string, ...string[]];
+
+/** Preço da personalização: técnica → posição → R$ por peça. */
+const feesSchema = z.partialRecord(z.enum(TECHNIQUE_OPTIONS), z.partialRecord(z.enum(POSITION_OPTIONS), z.number().min(0, "Preço inválido.").max(999, "Preço muito alto.")));
+/** Textos editados das linhas fixas da ficha técnica (vazio esconde a linha). */
+const specsSchema = z.partialRecord(z.enum(SPEC_KEYS), z.string().trim().max(400, "Texto da ficha técnica muito longo (máx. 400)."));
+const extraSpecsSchema = z
+  .array(
+    z.object({
+      label: z.string().trim().min(1, "Dê um nome a cada linha extra da ficha técnica.").max(60, "Nome da linha muito longo (máx. 60)."),
+      value: z.string().trim().min(1, "Preencha o texto de cada linha extra da ficha técnica.").max(400, "Texto da linha muito longo (máx. 400)."),
+    }),
+  )
+  .max(12, "No máximo 12 linhas extras na ficha técnica.");
+
+/** Fotos por anúncio (galeria). */
+export const MAX_PHOTOS = 15;
 
 const line = (label: string, max: number) => z.string().trim().max(max, `${label}: máximo de ${max} caracteres.`);
 const unique = <T,>(list: T[]) => new Set(list).size === list.length;
 
-/** Todos os campos do formulário "Editar anúncio" (fotos por cor ficam de fora: são salvas a cada envio). */
+/** Todos os campos do formulário "Editar anúncio" (a galeria e as fotos por cor são salvas à parte). */
 export const listingFormSchema = z
   .object({
     name: line("Título", 90).min(3, "Informe o título do anúncio."),
+    category: z.string().refine((c) => !!getCategory(c), "Escolha a categoria."),
     subtitle: line("Modelo", 80),
     description: line("Descrição", 1500).min(10, "Escreva a descrição do produto."),
     fabric: line("Tecido", 60).min(2, "Informe o tecido."),
@@ -31,6 +51,9 @@ export const listingFormSchema = z
       .min(1, "Escolha ao menos uma cor.")
       .max(100),
     sizes: z.array(z.enum(SIZE_OPTIONS)),
+    fees: feesSchema,
+    specs: specsSchema,
+    extraSpecs: extraSpecsSchema,
   })
   .superRefine((v, ctx) => {
     if (!unique(v.colors)) ctx.addIssue({ code: "custom", path: ["colors"], message: "Cor repetida." });
@@ -65,13 +88,27 @@ export const listingOverrideSchema = z
     colors: z.array(z.string()).transform((l) => l.filter((id) => colors.some((c) => c.id === id))).pipe(z.array(z.string()).min(1)),
     sizes: z.array(z.enum(SIZE_OPTIONS)),
     colorPhotos: colorPhotosSchema,
+    // categoria que deixou de existir é ignorada ao aplicar (o anúncio volta para a do código)
+    category: z.string().max(60),
+    photos: z.array(z.string().refine(safeImage)).max(MAX_PHOTOS),
+    fees: feesSchema,
+    specs: specsSchema,
+    extraSpecs: extraSpecsSchema,
   })
   .partial();
+
+/** Galeria do anúncio: fotos do site ou do Blob, de 1 a MAX_PHOTOS, sem repetir. */
+export const galleryPhotosSchema = z
+  .array(z.string().refine(safeImage, "Foto inválida."))
+  .min(1, "O anúncio precisa de pelo menos uma foto (a capa).")
+  .max(MAX_PHOTOS, `No máximo ${MAX_PHOTOS} fotos por anúncio.`)
+  .refine(unique, "Foto repetida na galeria.");
 
 /** Os campos editáveis de um produto, no formato do formulário. */
 export function listingFieldsOf(p: Product): ListingFields {
   return {
     name: p.name,
+    category: p.category,
     subtitle: p.subtitle,
     description: p.description,
     fabric: p.fabric,
@@ -84,8 +121,18 @@ export function listingFieldsOf(p: Product): ListingFields {
     compareAt: p.compareAt ?? null,
     colors: [...p.colors],
     sizes: [...p.sizes],
+    photos: [...p.photos],
+    fees: structuredClone(p.fees ?? {}),
+    specs: { ...(p.specs ?? {}) },
+    extraSpecs: (p.extraSpecs ?? []).map((r) => ({ ...r })),
     colorPhotos: p.colorPhotos ?? {},
   };
+}
+
+/** Os campos do formulário (sem a galeria e as fotos por cor, que têm botões próprios). */
+export function listingFormOf(p: Product): ListingForm {
+  const { photos: _photos, colorPhotos: _colors, ...form } = listingFieldsOf(p);
+  return form;
 }
 
 /** Só o que mudou em relação ao catálogo do código (o resto segue o código, inclusive correções futuras). */

@@ -8,7 +8,8 @@ import s from "./Footer.module.css";
 
 type Col = { title: string; links: { href: string; label: string; external?: boolean }[] };
 
-const cols: Col[] = [
+// função (não constante): as categorias renomeadas ou criadas no painel entram ao desenhar
+const columns = (): Col[] => [
   {
     title: "Institucional",
     links: [
@@ -114,7 +115,7 @@ export function Footer() {
 
         {/* ---------- colunas (desktop) ---------- */}
         <div className={s.cols}>
-          {cols.map((c) => (
+          {columns().map((c) => (
             <nav key={c.title} aria-label={c.title} className={s.col}>
               <h3>{c.title}</h3>
               {c.title === "Categorias" ? (
@@ -140,7 +141,7 @@ export function Footer() {
 
         {/* ---------- acordeão (mobile) ---------- */}
         <div className={s.accordion}>
-          {cols.map((c) => (
+          {columns().map((c) => (
             <details key={c.title} className={s.acc}>
               <summary>
                 {c.title}

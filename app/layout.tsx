@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import StoreProvider from "@/components/store/StoreProvider";
-import { getListings } from "@/lib/listings-server";
+import { getCatalogEdits } from "@/lib/listings-server";
 import "./globals.css";
 
 const body = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
@@ -19,6 +19,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // avisa o navegador que o site tem tema escuro próprio (não aplicar o escurecimento automático)
+  colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#070e19" },
@@ -29,14 +31,14 @@ export const viewport: Viewport = {
 const themeScript = `try{var t=localStorage.getItem("eu-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const listings = await getListings();
+  const edits = await getCatalogEdits();
   return (
     <html lang="pt-BR" className={`${body.variable} ${heading.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <StoreProvider listings={listings}>{children}</StoreProvider>
+        <StoreProvider edits={edits}>{children}</StoreProvider>
         <Toaster richColors closeButton position="bottom-right" offset={{ bottom: 96, right: 24 }} mobileOffset={{ bottom: 96 }} toastOptions={{ style: { fontFamily: "var(--font-sans)" } }} />
       </body>
     </html>

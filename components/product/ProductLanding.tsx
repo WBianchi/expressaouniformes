@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BadgeCheck, ChevronRight, ClipboardList, Factory, MessageCircle, ShoppingBag, Truck } from "lucide-react";
-import { company, getCategory, getColor, inStock, money, products, whatsappLink, type Product } from "@/lib/catalog";
+import { company, fabricText, getCategory, getColor, inStock, money, products, whatsappLink, type Product } from "@/lib/catalog";
 import { PIX_DISCOUNT } from "@/lib/pricing";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import { productFaq } from "@/lib/product-faq";
@@ -37,13 +37,13 @@ export async function ProductLanding({ product, source }: { product: Product; so
     ...products.filter((p) => p.slug !== product.slug && p.category !== product.category && p.kind === product.kind),
   ].slice(0, 8);
 
+  // galeria: as fotos do anúncio (na ordem do painel, capa primeiro) e a peça sozinha (muda de cor)
   const images = [
-    { src: media.photos[0], label: "vestindo, frente" },
-    { src: media.photos[1], label: "vestindo, costas" },
+    ...media.photos.map((src, i) => ({ src, label: `foto ${i + 1}` })),
     { src: media.image, label: "peça, frente", piece: true },
     { src: media.back, label: "peça, costas", piece: true },
     { src: media.side, label: "peça, lado", piece: true },
-  ].filter((im) => !!im.src);
+  ].filter((im, i, all) => !!im.src && all.findIndex((x) => x.src === im.src) === i);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -57,7 +57,7 @@ export async function ProductLanding({ product, source }: { product: Product; so
         image: images.map((im) => (im.src.startsWith("http") ? im.src : `${SITE}${im.src}`)),
         brand: { "@type": "Brand", name: company.name },
         manufacturer: { "@type": "Organization", name: company.name },
-        material: `${product.fabric} (${product.composition})`,
+        material: fabricText(product) || undefined,
         color: product.colors.map((id) => getColor(id)?.name).filter(Boolean).join(", "),
         size: product.sizeChart.join(", "),
         additionalProperty: specRows(product).map(([name, value]) => ({ "@type": "PropertyValue", name, value })),
@@ -121,7 +121,7 @@ export async function ProductLanding({ product, source }: { product: Product; so
                 </span>
                 <h1 className={s.title}>{product.name}</h1>
                 <p className={s.subtitle}>
-                  {product.subtitle} · {product.fabric} ({product.composition})
+                  {[product.subtitle, fabricText(product)].filter(Boolean).join(" · ")}
                 </p>
                 <span className={s.ref}>Código: {productRef(product)}</span>
                 <LpVariants colors={product.colors} sizes={product.sizeChart} />

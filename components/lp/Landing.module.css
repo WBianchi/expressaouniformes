@@ -77,17 +77,42 @@
 .slide {
   position: absolute;
   inset: 0;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
   opacity: 0;
+  pointer-events: none;
+  cursor: zoom-in;
   transition: opacity 0.25s var(--ease);
 }
+/* as fotos ficam empilhadas: só a visível recebe clique e toque */
 .slide[data-active] {
+  z-index: 1;
   opacity: 1;
+  pointer-events: auto;
+}
+.expand {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: var(--shadow-xs);
+  color: var(--text);
 }
 .slide img {
   object-fit: contain !important;
 }
 .counter {
   position: absolute;
+  z-index: 2;
   left: 10px;
   bottom: 10px;
   padding: 3px 9px;
@@ -98,6 +123,7 @@
 }
 .nav {
   position: absolute;
+  z-index: 2;
   top: 50%;
   translate: 0 -50%;
   display: grid;
@@ -140,6 +166,101 @@
 }
 .thumb[aria-current="true"] {
   border-color: var(--text);
+}
+
+/* foto ampliada */
+.lbOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgb(0 0 0 / 0.82);
+}
+.lightbox {
+  position: fixed;
+  z-index: 101;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px var(--gutter) 20px;
+  outline: none;
+}
+.lbHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.lbTools {
+  display: flex;
+  gap: 8px;
+}
+.lbTools button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.14);
+  color: #fff;
+}
+.lbStage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: min(100%, calc(100dvh - 110px));
+  aspect-ratio: 1;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #f4f5f6;
+  cursor: zoom-in;
+  touch-action: none;
+}
+.lbStage[data-zoom] {
+  cursor: zoom-out;
+}
+.lbImg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.25s var(--ease);
+}
+.lbStage[data-zoom] .lbImg {
+  transition: transform 0.25s var(--ease), transform-origin 0.08s linear;
+}
+.lbImg img {
+  object-fit: contain !important;
+  pointer-events: none;
+  user-select: none;
+}
+.lbNav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.9);
+  color: #10213a;
+}
+.lbNav[data-dir="prev"] {
+  left: max(10px, var(--gutter));
+}
+.lbNav[data-dir="next"] {
+  right: max(10px, var(--gutter));
+}
+@media (max-width: 720px) {
+  /* no celular a troca de foto é deslizando; setas menores, junto da borda */
+  .lbNav {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 /* informações */

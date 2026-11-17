@@ -1,6 +1,6 @@
 // Regras de preço puras: usadas no cliente (exibição) e no servidor (cobrança).
 // O servidor sempre recalcula a partir do catálogo; nunca confiar em valores enviados pelo navegador.
-import { getProduct, positionFees, type Position, type Size, type Technique } from "./catalog.ts";
+import { feeFor, getProduct, type Position, type Size, type Technique } from "./catalog.ts";
 import type { Placements } from "./mockup.ts";
 
 /** Logo de uma posição: miniatura para a prévia e, quando enviado, o arquivo original (Blob, pasta artes/). */
@@ -36,10 +36,17 @@ export const volumeTiers = [
 export const volumeDiscount = (qty: number) =>
   volumeTiers.find((t) => qty >= t.min)?.off ?? 0;
 
-export function unitPrice(l: Pick<CartLine, "slug" | "positions" | "sizes">) {
+/** Personalização da linha: soma do preço de cada posição na técnica escolhida (R$ por peça). */
+export function lineFees(l: Pick<CartLine, "slug" | "positions" | "technique">) {
+  const p = getProduct(l.slug);
+  if (!p) return 0;
+  return round(l.positions.reduce((s, pos) => s + feeFor(p, l.technique, pos), 0));
+}
+
+export function unitPrice(l: Pick<CartLine, "slug" | "positions" | "sizes" | "technique">) {
   const p = getProduct(l.slug);
   if (!p || p.kind !== "stock") return 0;
-  const fees = l.positions.reduce((s, pos) => s + positionFees[pos].fee, 0);
+  const fees = lineFees(l);
   const base = p.price + fees;
   return round(base * (1 - volumeDiscount(lineQuantity(l))));
 }

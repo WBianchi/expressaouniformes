@@ -17,7 +17,7 @@
   position: absolute;
   display: grid;
   place-items: center;
-  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  transform: translate(-50%, -50%);
   pointer-events: none;
   animation: spotIn 0.35s var(--ease) both;
 }
@@ -28,13 +28,21 @@
   filter: drop-shadow(0 0.5px 0.5px rgb(0 0 0 / 0.18));
   opacity: 0.97;
 }
-.spot[data-empty] {
-  border: 1.5px dashed rgb(255 255 255 / 0.9);
-  outline: 1px dashed rgb(0 0 0 / 0.35);
+/* área de aplicação da posição (onde a logo pode ficar) */
+.area {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed rgb(255 255 255 / 0.85);
+  outline: 1px dashed rgb(0 0 0 / 0.3);
   border-radius: 4px;
-  background: rgb(255 255 255 / 0.12);
+  pointer-events: none;
 }
-.spot small {
+.area[data-empty] {
+  background: rgb(255 255 255 / 0.12);
+  animation: spotIn 0.35s var(--ease) both;
+}
+.area small {
   font-size: clamp(7px, 1.6cqw, 12px);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -44,7 +52,6 @@
 @keyframes spotIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(0.85);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -53,11 +60,12 @@
   }
 }
 
-/* logo arrastável (posicionamento livre) */
+/* logo arrastável (dentro da área da posição) */
 .spot[data-editable] {
   pointer-events: auto;
   cursor: grab;
   touch-action: none;
+  user-select: none;
   outline: 1px dashed transparent;
   outline-offset: 2px;
   transition: outline-color var(--dur-fast) var(--ease);
@@ -69,4 +77,16 @@
 }
 .spot[data-editable]:active {
   cursor: grabbing;
+}
+
+/* logo pequena: área de toque maior que a imagem, para o dedo pegar fácil no celular */
+.spot[data-editable]::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .area[data-empty] {
+    animation: none;
+  }
 }

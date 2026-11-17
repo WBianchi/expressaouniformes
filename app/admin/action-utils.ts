@@ -5,6 +5,7 @@ import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { isAdmin } from "@/lib/admin-auth";
 import { MEDIA_TAG } from "@/lib/site-media";
+import { syncCatalog } from "@/lib/listings-server";
 
 export type MediaResult = { ok: true } | { ok: false; error: string };
 
@@ -14,6 +15,13 @@ export async function adminDb() {
   if (!process.env.DATABASE_URL) throw new Error("Banco de dados não configurado.");
   const { neon } = await import("@neondatabase/serverless");
   return neon(process.env.DATABASE_URL);
+}
+
+/** Banco com a sessão conferida e o catálogo com as edições mais novas do painel (para validar). */
+export async function adminCatalog() {
+  const sql = await adminDb();
+  await syncCatalog(true);
+  return sql;
 }
 
 /** Conteúdo da loja mudou: invalida o cache e as páginas geradas. */

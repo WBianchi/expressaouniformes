@@ -37,12 +37,13 @@ import {
   Building2,
   UserPlus,
 } from "lucide-react";
-import { money, type ListingOverrides } from "@/lib/catalog";
+import { money, type CatalogEdits } from "@/lib/catalog";
 import { artStatusInfo } from "@/lib/art";
 import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
 import { logout } from "@/app/admin/actions";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
-import { BannersAdmin, CategoryPhotosAdmin, ClientLogosAdmin } from "./MediaAdmin";
+import { BannersAdmin, ClientLogosAdmin } from "./MediaAdmin";
+import { CategoriesAdmin } from "./CategoriesAdmin";
 import { ListingsAdmin } from "./ListingsAdmin";
 import { ArtQueue, ItemArt, artApproved, needsArt } from "./ArtQueue";
 import { LeadsAdmin } from "./LeadsAdmin";
@@ -210,7 +211,7 @@ export default function AdminDashboard({
   banners,
   photos,
   categoryPhotos,
-  listings,
+  edits,
   leads,
   clientLogos,
 }: {
@@ -221,7 +222,7 @@ export default function AdminDashboard({
   banners: Banner[] | null;
   photos: PhotoOverrides;
   categoryPhotos: CategoryPhotos;
-  listings: ListingOverrides;
+  edits: CatalogEdits;
   leads: AdminLead[] | null;
   clientLogos: ClientLogo[] | null;
 }) {
@@ -675,9 +676,9 @@ export default function AdminDashboard({
           ) : active === "Banners" ? (
             <BannersAdmin banners={banners} />
           ) : active === "Categorias" ? (
-            <CategoryPhotosAdmin photos={categoryPhotos} enabled={integrations.database} />
+            <CategoriesAdmin photos={categoryPhotos} edits={edits} enabled={integrations.database} />
           ) : active === "Anúncios" ? (
-            <ListingsAdmin listings={listings} photos={photos} enabled={integrations.database} />
+            <ListingsAdmin edits={edits} photos={photos} enabled={integrations.database} />
           ) : active === "Personalizações" ? (
             <ArtQueue orders={allOrders} enabled={integrations.database && source === "db"} />
           ) : active === "Produção" ? (

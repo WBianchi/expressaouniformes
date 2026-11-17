@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft, MessageCircle, Search, Shirt } from "lucide-react";
 import { categories, whatsappLink } from "@/lib/catalog";
+import { syncCatalog } from "@/lib/listings-server";
 import s from "./not-found.module.css";
 
-export default function NotFound() {
+export default async function NotFound() {
+  await syncCatalog();
   return (
     <main className={s.page}>
       {/* React 19 eleva <title> ao <head>; o Next já injeta robots noindex nas respostas 404 */}

@@ -17,6 +17,8 @@ export type Category = {
   icon: string;
   description: string;
   image: string;
+  /** criada pelo painel (não existe no código) */
+  created?: boolean;
 };
 
 export type Highlight = { title: string; text: string };
@@ -68,7 +70,18 @@ export type Product = {
   gallery: string[];
   /** fotos de pessoa vestindo por cor (enviadas pelo painel): cor → [frente, costas] */
   colorPhotos?: Record<string, string[]>;
+  /** anúncio cadastrado pelo painel (não existe no código) */
+  created?: boolean;
+  /** preço da personalização por técnica e posição (R$ por peça); vazio = tabela padrão (positionFees) */
+  fees?: CustomizationFees;
+  /** ficha técnica: textos editados das linhas fixas (vazio = esconde a linha) */
+  specs?: Partial<Record<string, string>>;
+  /** ficha técnica: linhas extras criadas no painel */
+  extraSpecs?: { label: string; value: string }[];
 };
+
+/** Preço da personalização: técnica → posição → R$ por peça. */
+export type CustomizationFees = Partial<Record<Technique, Partial<Record<Position, number>>>>;
 
 const c = (id: string, name: string, hex: string, pattern?: Color["pattern"]): Color => ({ id, name, hex, ...(pattern ? { pattern } : {}) });
 
@@ -178,7 +191,11 @@ const back = (slug: string) => `/images/products/${slug}-costas.webp`;
 const side = (slug: string) => `/images/products/${slug}-lado.webp`;
 const photos = (slug: string) => [1, 2].map((n) => `/images/products/${slug}-modelo-${n}.webp`);
 
-type Base = Omit<Product, "image" | "back" | "side" | "photos" | "gallery" | "rating" | "reviews" | "features" | "short"> & { short?: string };
+type Base = Omit<Product, "image" | "back" | "side" | "photos" | "gallery" | "rating" | "reviews" | "features" | "short"> & {
+  short?: string;
+  /** fotos do anúncio (capa primeiro); sem elas, as fotos padrão do produto */
+  photos?: string[];
+};
 
 const COSTURA: Highlight = { title: "Costura reforçada", text: "Maior durabilidade e acabamento profissional." };
 const GRAMATURA: Highlight = { title: "Alta gramatura", text: "Elevada gramatura do tecido." };
@@ -425,75 +442,174 @@ const base: Base[] = [
 ];
 
 /** Ficha técnica em lista (vitrine, busca, landing page). */
-const featuresOf = (p: Base) => [
-  `${p.fabric} (${p.composition})`,
-  p.subtitle,
-  ...p.highlights.map((h) => h.title),
-  `Tamanhos ${p.sizeChart.length > 1 ? `${p.sizeChart[0]} ao ${p.sizeChart[p.sizeChart.length - 1]}` : p.sizeChart[0].toLowerCase()}`,
-];
+const featuresOf = (p: Base) =>
+  [
+    p.fabric && (p.composition ? `${p.fabric} (${p.composition})` : p.fabric),
+    p.subtitle,
+    ...p.highlights.map((h) => h.title),
+    p.sizeChart.length ? `Tamanhos ${p.sizeChart.length > 1 ? `${p.sizeChart[0]} ao ${p.sizeChart[p.sizeChart.length - 1]}` : p.sizeChart[0].toLowerCase()}` : "",
+  ].filter(Boolean);
 
-const build = (p: Base): Product => ({
-  ...p,
-  short: p.short ?? `${p.subtitle}. ${p.fabric}, ${p.composition}.`,
-  features: featuresOf(p),
-  rating: 0,
-  reviews: 0,
-  image: img(p.slug),
-  back: back(p.slug),
-  side: side(p.slug),
-  photos: photos(p.slug),
-  gallery: [...photos(p.slug), img(p.slug), back(p.slug), side(p.slug)],
-});
+/** Imagem neutra para anúncio cadastrado no painel que ainda não tem foto. */
+export const NO_PHOTO = "/images/sem-foto.svg";
+
+const build = (p: Base): Product => {
+  // anúncio do painel: só as fotos enviadas (a capa vale também para a peça até chegar a foto dela)
+  const ph = p.photos?.length ? p.photos : p.created ? [NO_PHOTO] : photos(p.slug);
+  const image = p.created ? ph[0] : img(p.slug);
+  const backImg = p.created ? ph[0] : back(p.slug);
+  const sideImg = p.created ? ph[0] : side(p.slug);
+  return {
+    ...p,
+    short: p.short ?? [p.subtitle, [p.fabric, p.composition].filter(Boolean).join(", ")].filter(Boolean).join(". ") + ".",
+    features: featuresOf(p),
+    rating: 0,
+    reviews: 0,
+    image,
+    back: backImg,
+    side: sideImg,
+    photos: ph,
+    gallery: [...ph, image, backImg, sideImg],
+  };
+};
 
 export const products: Product[] = base.map(build);
+export const stockProducts = products.filter((p) => p.kind === "stock");
+export const customProducts = products.filter((p) => p.kind === "custom");
 
-// ---------------------------------------------------------------- edições do painel (Anúncios)
+// ---------------------------------------------------------------- edições do painel (Anúncios e Categorias)
 
-/** Campos do anúncio que o painel edita; o resto (modo de venda, categoria, fotos padrão) continua vindo daqui. */
+/** Campos do anúncio que o painel edita; o resto (modo de venda, fotos da peça) continua vindo daqui. */
 export type ListingFields = Pick<
   Product,
-  "name" | "subtitle" | "description" | "fabric" | "composition" | "fabricNote" | "highlights" | "sizeChart" | "techniques" | "price" | "colors" | "sizes"
+  "name" | "subtitle" | "description" | "fabric" | "composition" | "fabricNote" | "highlights" | "sizeChart" | "techniques" | "price" | "colors" | "sizes" | "category"
 > & {
+  fees: CustomizationFees;
+  specs: Partial<Record<string, string>>;
+  extraSpecs: { label: string; value: string }[];
   /** preço "de" riscado; null = sem */
   compareAt: number | null;
+  /** fotos do anúncio, na ordem da galeria (a primeira é a capa) */
+  photos: string[];
   colorPhotos: Record<string, string[]>;
 };
 /** Edições do painel por produto (só os campos alterados). */
 export type ListingOverrides = Record<string, Partial<ListingFields>>;
 
+/** Categoria renomeada ou criada no painel. */
+export type CategoryEdit = { name?: string; description?: string; icon?: string; created?: boolean };
+export type CategoryEdits = Record<string, CategoryEdit>;
+
+/** Anúncio cadastrado no painel: os dados de partida (o resto vem das edições do anúncio). */
+export type CreatedProduct = { name: string; kind: SaleKind; category: string; published: boolean };
+export type CreatedProducts = Record<string, CreatedProduct>;
+
+export type CatalogEdits = { listings: ListingOverrides; categories: CategoryEdits; created: CreatedProducts };
+export const NO_EDITS: CatalogEdits = { listings: {}, categories: {}, created: {} };
+
 const baseBySlug = new Map(base.map((b) => [b.slug, b]));
+const codeSlugs = new Set(base.map((b) => b.slug));
+const baseCategories = categories.map((c) => ({ ...c }));
+
+/** Ponto de partida de um anúncio cadastrado no painel. */
+function createdBase(slug: string, c: CreatedProduct): Base {
+  const stock = c.kind === "stock";
+  return {
+    slug,
+    name: c.name,
+    kind: c.kind,
+    category: c.category,
+    subtitle: "",
+    price: 0,
+    minQty: stock ? 5 : 30,
+    ...(stock ? { stock: 9999, badge: "Pronta-entrega" } : {}),
+    colors: ["branco"],
+    sizes: stock ? ["P", "M", "G", "GG"] : [],
+    sizeChart: ["P", "M", "G", "GG"],
+    fabric: "",
+    composition: "",
+    fabricNote: "",
+    description: "",
+    highlights: [],
+    techniques: ["Silk", "DTF", "Bordado"],
+    created: true,
+  };
+}
+
+/** Nome original da categoria no código (o que vem escrito na imagem padrão); criada no painel = undefined. */
+export const categoryBaseName = (slug: string) => baseCategories.find((c) => c.slug === slug)?.name;
+
+/** Existe no catálogo (do código ou cadastrado no painel, publicado ou rascunho). */
+export const catalogHas = (slug: string) => baseBySlug.has(slug);
 
 /** O produto com as edições do painel, sem mexer no catálogo. Sem edição = como está no código. */
 export function withListing(slug: string, o: Partial<ListingFields> | undefined): Product | undefined {
   const b = baseBySlug.get(slug);
   if (!b) return undefined;
   if (!o) return build(b);
-  const { compareAt, ...rest } = o;
-  return build({ ...b, ...rest, compareAt: compareAt === undefined ? b.compareAt : (compareAt ?? undefined) });
+  const { compareAt, category, ...rest } = o;
+  return build({
+    ...b,
+    ...rest,
+    // categoria apagada no painel: volta para a de origem
+    category: category && categories.some((c) => c.slug === category) ? category : b.category,
+    compareAt: compareAt === undefined ? b.compareAt : (compareAt ?? undefined),
+  });
 }
 
-let appliedSig = "{}";
+const replaceItems = <T,>(list: T[], next: T[]) => list.splice(0, list.length, ...next);
+
+let appliedSig = JSON.stringify(NO_EDITS);
 
 /**
- * Aplica as edições do painel aos produtos do catálogo (os mesmos objetos, alterados no lugar),
- * para que tudo que lê `products`/`getProduct` (páginas, carrinho, preço do checkout) veja o anúncio editado.
+ * Aplica as edições do painel ao catálogo (os mesmos objetos e listas, alterados no lugar),
+ * para que tudo que lê `products`, `categories`, `getProduct` (páginas, carrinho, preço do
+ * checkout) veja os anúncios e as categorias editados.
  * No servidor: `syncCatalog()` (lib/listings-server.ts) no início de cada página e rota.
  * No navegador: o StoreProvider aplica o que veio do servidor antes de desenhar a loja.
  */
-export function applyListings(overrides: ListingOverrides) {
-  const sig = JSON.stringify(overrides);
+export function applyCatalogEdits(e: CatalogEdits) {
+  const sig = JSON.stringify(e);
   if (sig === appliedSig) return;
   appliedSig = sig;
-  for (const p of products) {
-    const next = withListing(p.slug, overrides[p.slug])!;
-    const target = p as Record<string, unknown>;
-    for (const k of Object.keys(target)) if (!(k in next)) delete target[k];
-    Object.assign(p, next);
-  }
-}
 
-export const stockProducts = products.filter((p) => p.kind === "stock");
-export const customProducts = products.filter((p) => p.kind === "custom");
+  // categorias: nome e descrição editados; as criadas no painel entram no fim
+  const cats: Category[] = baseCategories.map((b) => {
+    const c = categories.find((x) => x.slug === b.slug) ?? { ...b };
+    const ed = e.categories[b.slug];
+    return Object.assign(c, b, ed?.name ? { name: ed.name } : {}, ed?.description ? { description: ed.description } : {}, ed?.icon ? { icon: ed.icon } : {});
+  });
+  for (const [slug, ed] of Object.entries(e.categories)) {
+    if (!ed.created || baseCategories.some((b) => b.slug === slug)) continue;
+    const c = categories.find((x) => x.slug === slug) ?? ({} as Category);
+    cats.push(Object.assign(c, { slug, name: ed.name ?? slug, description: ed.description ?? "", icon: ed.icon ?? "Shirt", image: NO_PHOTO, created: true }));
+  }
+  replaceItems(categories, cats);
+
+  // anúncios cadastrados: base de partida (rascunhos também, para o painel editar)
+  for (const slug of [...baseBySlug.keys()]) if (!codeSlugs.has(slug)) baseBySlug.delete(slug);
+  for (const [slug, c] of Object.entries(e.created)) if (!codeSlugs.has(slug)) baseBySlug.set(slug, createdBase(slug, c));
+
+  // produtos da loja: os do código e os cadastrados já publicados, todos com as edições
+  const live = [...base.map((b) => b.slug), ...Object.entries(e.created).filter(([slug, c]) => c.published && !codeSlugs.has(slug)).map(([slug]) => slug)];
+  const next = live.map((slug) => {
+    const fresh = withListing(slug, e.listings[slug])!;
+    const p = products.find((x) => x.slug === slug);
+    if (!p) return fresh;
+    const target = p as Record<string, unknown>;
+    for (const k of Object.keys(target)) if (!(k in fresh)) delete target[k];
+    return Object.assign(p, fresh);
+  });
+  replaceItems(products, next);
+  replaceItems(
+    stockProducts,
+    next.filter((p) => p.kind === "stock"),
+  );
+  replaceItems(
+    customProducts,
+    next.filter((p) => p.kind === "custom"),
+  );
+}
 
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
 /** Compra online liberada: linha pronta-entrega com estoque. O resto só entra por orçamento. */
@@ -501,12 +617,22 @@ export const inStock = (p: Product) => p.kind === "stock" && (p.stock ?? 0) > 0;
 export const getCategory = (slug: string) => categories.find((c) => c.slug === slug);
 export const getColor = (id: string) => colors.find((c) => c.id === id);
 
-/** Personalização (pronta-entrega): taxa por posição de logo, por peça. */
+/** Personalização (pronta-entrega): taxa padrão por posição de logo, por peça (vale para qualquer técnica
+ * enquanto o anúncio não tiver preço próprio por técnica; ver feeFor). */
 export const positionFees: Record<Position, { label: string; fee: number }> = {
   frente: { label: "Frente (peito)", fee: 6.9 },
   costas: { label: "Costas", fee: 8.9 },
   manga: { label: "Manga", fee: 4.9 },
 };
+
+/** Técnica usada no preço quando o cliente ainda não escolheu: a primeira do anúncio. */
+export const defaultTechnique = (p: Pick<Product, "techniques">): Technique | undefined => p.techniques[0];
+
+/** Preço da personalização de uma posição na técnica escolhida (R$ por peça). */
+export function feeFor(p: Pick<Product, "fees" | "techniques">, technique: Technique | null | undefined, position: Position): number {
+  const t = technique ?? defaultTechnique(p);
+  return (t && p.fees?.[t]?.[position]) ?? positionFees[position].fee;
+}
 
 export const company = {
   name: "Expressão Uniformes",
@@ -523,6 +649,19 @@ export const whatsappLink = (text: string) =>
 
 export const money = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
+
+/** "Malha PV (67% poliéster + 33% viscose)", sem parênteses vazios em anúncio ainda incompleto. */
+export const fabricText = (p: Pick<Product, "fabric" | "composition">) => (p.composition ? `${p.fabric} (${p.composition})` : p.fabric).trim();
+
+/** Descrição curta para o Google: nome, modelo, tecido, cores, tamanhos e técnicas (pula o que estiver vazio). */
+export function seoDescription(p: Product) {
+  const sizes = p.sizeChart.length ? `tamanhos ${p.sizeChart.length > 1 ? `${p.sizeChart[0]} ao ${p.sizeChart[p.sizeChart.length - 1]}` : p.sizeChart[0]}` : "";
+  return [
+    `${p.name}${p.subtitle ? ` (${p.subtitle.toLowerCase()})` : ""}${p.fabric ? ` em ${fabricText(p).replace(p.fabric, p.fabric.toLowerCase())}` : ""}.`,
+    [`${p.colors.length} ${p.colors.length === 1 ? "cor" : "cores"}`, sizes].filter(Boolean).join(", ") + ".",
+    `Logo em ${p.techniques.join(", ").toLowerCase()}. Direto da fábrica.`,
+  ].join(" ");
+}
 
 /** Cor (hex) para pintar a foto da peça; nula quando é a própria cor fotografada (a primeira). */
 export const tintFor = (p: Pick<Product, "colors">, colorId: string | undefined): string | null => {

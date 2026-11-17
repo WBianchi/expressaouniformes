@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Catalog from "@/components/catalog/Catalog";
 import { parseFilters } from "@/components/catalog/filters";
 import { getCategory } from "@/lib/catalog";
+import { syncCatalog } from "@/lib/listings-server";
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  await syncCatalog();
   const f = parseFilters(await searchParams);
   const cat = f.categoria ? getCategory(f.categoria) : undefined;
   return {
@@ -18,6 +20,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 export default async function LojaPage({ searchParams }: Props) {
+  await syncCatalog();
   const initial = parseFilters(await searchParams);
   return <Catalog initial={initial} />;
 }

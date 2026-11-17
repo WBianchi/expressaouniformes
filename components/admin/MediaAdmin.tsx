@@ -4,7 +4,20 @@
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Palette, Pencil, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Eye,
+  EyeOff,
+  ImagePlus,
+  Palette,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import type { Banner } from "@/lib/banners";
 import type { CategoryPhotos, ClientLogo } from "@/lib/site-media";
 import { categories, type Product } from "@/lib/catalog";
@@ -30,11 +43,22 @@ import s from "./MediaAdmin.module.css";
 export const ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
 const MAX_MB = 8;
 
-export async function uploadImage(file: File, folder: "banners" | "produtos" | "categorias" | "clientes") {
-  if (!ACCEPT.split(",").includes(file.type)) throw new Error("Use JPG, PNG, WebP ou AVIF.");
-  if (file.size > MAX_MB * 1024 * 1024) throw new Error(`Imagem acima de ${MAX_MB} MB.`);
-  const name = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
-  const blob = await upload(`${folder}/${name}`, file, { access: "public", handleUploadUrl: "/api/admin/upload" });
+export async function uploadImage(
+  file: File,
+  folder: "banners" | "produtos" | "categorias" | "clientes",
+) {
+  if (!ACCEPT.split(",").includes(file.type))
+    throw new Error("Use JPG, PNG, WebP ou AVIF.");
+  if (file.size > MAX_MB * 1024 * 1024)
+    throw new Error(`Imagem acima de ${MAX_MB} MB.`);
+  const name = file.name
+    .toLowerCase()
+    .replace(/[^a-z0-9.]+/g, "-")
+    .slice(-60);
+  const blob = await upload(`${folder}/${name}`, file, {
+    access: "public",
+    handleUploadUrl: "/api/admin/upload",
+  });
   return blob.url;
 }
 
@@ -73,7 +97,15 @@ export function useAction() {
 /* ---------------- Banners ---------------- */
 
 type Draft = Omit<Banner, "id"> & { id?: string };
-const emptyDraft: Draft = { title: "", subtitle: "", ctaLabel: "", ctaHref: "/loja?tipo=stock", image: "", imageMobile: "", active: true };
+const emptyDraft: Draft = {
+  title: "",
+  subtitle: "",
+  ctaLabel: "",
+  ctaHref: "/loja?tipo=stock",
+  image: "",
+  imageMobile: "",
+  active: true,
+};
 
 export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
   const { pending, error, setError, run } = useAction();
@@ -83,7 +115,9 @@ export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
   if (!banners)
     return (
       <div className="admin-panel">
-        <p className={s.note}>Banco de dados não configurado: a home usa os banners padrão.</p>
+        <p className={s.note}>
+          Banco de dados não configurado: a home usa os banners padrão.
+        </p>
       </div>
     );
 
@@ -100,18 +134,28 @@ export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
         <div>
           <h3>Banners da home</h3>
           <p>
-            Os banners ativos passam sozinhos no topo da página inicial, na ordem abaixo. Imagem do computador: horizontal, 2400 × 1000 px,
-            com as pessoas à direita (o texto fica à esquerda). Imagem do celular (opcional): vertical, 1080 × 1350 px, com as pessoas em
-            cima (o texto fica embaixo).
+            Os banners ativos passam sozinhos no topo da página inicial, na
+            ordem abaixo. Imagem do computador: horizontal, 2400 × 1000 px, com
+            as pessoas à direita (o texto fica à esquerda). Imagem do celular
+            (opcional): vertical, 1080 × 1350 px, com as pessoas em cima (o
+            texto fica embaixo).
           </p>
         </div>
-        <button type="button" className="button primary small" onClick={() => (setError(null), setDraft({ ...emptyDraft }))}>
+        <button
+          type="button"
+          className="button primary small"
+          onClick={() => (setError(null), setDraft({ ...emptyDraft }))}
+        >
           <Plus size={15} /> Novo banner
         </button>
       </div>
 
       {error && <p className={s.error}>{error}</p>}
-      {activeCount === 0 && <p className={s.note}>Nenhum banner ativo: a home mostra os banners padrão.</p>}
+      {activeCount === 0 && (
+        <p className={s.note}>
+          Nenhum banner ativo: a home mostra os banners padrão.
+        </p>
+      )}
 
       <ol className={s.banners} aria-busy={pending}>
         {banners.map((b, i) => (
@@ -132,23 +176,43 @@ export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
               )}
             </div>
             <div className={s.bannerActions}>
-              <button type="button" className="icon-button" disabled={pending || i === 0} onClick={() => move(i, -1)} aria-label="Subir">
+              <button
+                type="button"
+                className="icon-button"
+                disabled={pending || i === 0}
+                onClick={() => move(i, -1)}
+                aria-label="Subir"
+              >
                 <ArrowUp size={16} />
               </button>
-              <button type="button" className="icon-button" disabled={pending || i === banners.length - 1} onClick={() => move(i, 1)} aria-label="Descer">
+              <button
+                type="button"
+                className="icon-button"
+                disabled={pending || i === banners.length - 1}
+                onClick={() => move(i, 1)}
+                aria-label="Descer"
+              >
                 <ArrowDown size={16} />
               </button>
               <button
                 type="button"
                 className="icon-button"
                 disabled={pending}
-                onClick={() => run(() => saveBanner({ ...b, active: !b.active }))}
+                onClick={() =>
+                  run(() => saveBanner({ ...b, active: !b.active }))
+                }
                 aria-label={b.active ? "Ocultar" : "Mostrar"}
                 title={b.active ? "Ocultar da home" : "Mostrar na home"}
               >
                 {b.active ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
-              <button type="button" className="icon-button" disabled={pending} onClick={() => (setError(null), setDraft({ ...b }))} aria-label="Editar">
+              <button
+                type="button"
+                className="icon-button"
+                disabled={pending}
+                onClick={() => (setError(null), setDraft({ ...b }))}
+                aria-label="Editar"
+              >
                 <Pencil size={16} />
               </button>
               {confirmDelete === b.id ? (
@@ -156,14 +220,25 @@ export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
                   type="button"
                   className={`button small ${s.danger}`}
                   disabled={pending}
-                  onClick={() => run(() => deleteBanner(b.id), () => setConfirmDelete(null))}
+                  onClick={() =>
+                    run(
+                      () => deleteBanner(b.id),
+                      () => setConfirmDelete(null),
+                    )
+                  }
                   onBlur={() => setConfirmDelete(null)}
                   autoFocus
                 >
                   Confirmar exclusão
                 </button>
               ) : (
-                <button type="button" className="icon-button" disabled={pending} onClick={() => setConfirmDelete(b.id)} aria-label="Excluir">
+                <button
+                  type="button"
+                  className="icon-button"
+                  disabled={pending}
+                  onClick={() => setConfirmDelete(b.id)}
+                  aria-label="Excluir"
+                >
                   <Trash2 size={16} />
                 </button>
               )}
@@ -177,13 +252,20 @@ export function BannersAdmin({ banners }: { banners: Banner[] | null }) {
   );
 }
 
-function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () => void }) {
+function BannerEditor({
+  draft: initial,
+  onClose,
+}: {
+  draft: Draft;
+  onClose: () => void;
+}) {
   const { pending, error, setError, run } = useAction();
   const [d, setD] = useState<Draft>(initial);
   const [uploading, setUploading] = useState(false);
   const custom = !LINKS.some(([href]) => href === d.ctaHref);
   const [customLink, setCustomLink] = useState(custom && !!d.ctaHref);
-  const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((x) => ({ ...x, [k]: v }));
+  const set = <K extends keyof Draft>(k: K, v: Draft[K]) =>
+    setD((x) => ({ ...x, [k]: v }));
 
   const onFile = async (field: "image" | "imageMobile", file?: File) => {
     if (!file) return;
@@ -200,10 +282,23 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
 
   return (
     <div className="order-drawer-overlay" onClick={onClose}>
-      <aside className={`order-drawer ${s.editor}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Editar banner">
+      <aside
+        className={`order-drawer ${s.editor}`}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Editar banner"
+      >
         <div className="row-between">
-          <span className="eyebrow">{d.id ? "EDITAR BANNER" : "NOVO BANNER"}</span>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Fechar">
+          <span className="eyebrow">
+            {d.id ? "EDITAR BANNER" : "NOVO BANNER"}
+          </span>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Fechar"
+          >
             <X />
           </button>
         </div>
@@ -219,14 +314,22 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
             {(
               [
                 ["image", "Computador", "2400 × 1000 px", s.dropWide],
-                ["imageMobile", "Celular (opcional)", "1080 × 1350 px", s.dropTall],
+                [
+                  "imageMobile",
+                  "Celular (opcional)",
+                  "1080 × 1350 px",
+                  s.dropTall,
+                ],
               ] as const
             ).map(([field, label, size, cls]) => (
               <div key={field} className={s.imageField}>
                 <span className={s.imageLabel}>
                   {label} <small>{size}</small>
                 </span>
-                <label className={`${s.drop} ${cls}`} data-has={!!d[field] || undefined}>
+                <label
+                  className={`${s.drop} ${cls}`}
+                  data-has={!!d[field] || undefined}
+                >
                   {d[field] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={d[field]} alt={`Prévia: ${label}`} />
@@ -237,7 +340,12 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
                     </span>
                   )}
                   {uploading && <span className={s.uploading}>Enviando…</span>}
-                  <input type="file" accept={ACCEPT} onChange={(e) => onFile(field, e.target.files?.[0])} disabled={uploading} />
+                  <input
+                    type="file"
+                    accept={ACCEPT}
+                    onChange={(e) => onFile(field, e.target.files?.[0])}
+                    disabled={uploading}
+                  />
                   {d[field] && (
                     <span className={s.change}>
                       <Upload size={14} /> Trocar
@@ -245,7 +353,11 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
                   )}
                 </label>
                 {field === "imageMobile" && d.imageMobile && (
-                  <button type="button" className={s.linkBtn} onClick={() => set("imageMobile", "")}>
+                  <button
+                    type="button"
+                    className={s.linkBtn}
+                    onClick={() => set("imageMobile", "")}
+                  >
                     Usar a imagem do computador no celular
                   </button>
                 )}
@@ -255,20 +367,36 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
 
           <label className={s.field}>
             Título (opcional)
-            <input value={d.title} onChange={(e) => set("title", e.target.value)} maxLength={90} />
+            <input
+              value={d.title}
+              onChange={(e) => set("title", e.target.value)}
+              maxLength={90}
+            />
           </label>
           <p className={s.note}>
-            Sem título e sem texto de apoio, a imagem aparece limpa, sem escurecer. Use assim quando a arte do banner já traz o texto. Com
-            texto, a foto escurece um pouco do lado esquerdo para dar leitura. Sem texto do botão, o banner inteiro vira o link.
+            Sem título e sem texto de apoio, a imagem aparece limpa, sem
+            escurecer. Use assim quando a arte do banner já traz o texto. Com
+            texto, a foto escurece um pouco do lado esquerdo para dar leitura.
+            Sem texto do botão, o banner inteiro vira o link.
           </p>
           <label className={s.field}>
             Texto de apoio
-            <textarea value={d.subtitle} onChange={(e) => set("subtitle", e.target.value)} maxLength={180} rows={3} />
+            <textarea
+              value={d.subtitle}
+              onChange={(e) => set("subtitle", e.target.value)}
+              maxLength={180}
+              rows={3}
+            />
           </label>
           <div className={s.row}>
             <label className={s.field}>
               Texto do botão
-              <input value={d.ctaLabel} onChange={(e) => set("ctaLabel", e.target.value)} maxLength={32} placeholder="Ex.: Ver polos" />
+              <input
+                value={d.ctaLabel}
+                onChange={(e) => set("ctaLabel", e.target.value)}
+                maxLength={32}
+                placeholder="Ex.: Ver polos"
+              />
             </label>
             <label className={s.field}>
               Link do botão
@@ -292,19 +420,36 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
           {customLink && (
             <label className={s.field}>
               Endereço do link
-              <input value={d.ctaHref} onChange={(e) => set("ctaHref", e.target.value)} placeholder="/produto/polo-pv-basica ou https://…" />
+              <input
+                value={d.ctaHref}
+                onChange={(e) => set("ctaHref", e.target.value)}
+                placeholder="/produto/polo-pv-basica ou https://…"
+              />
             </label>
           )}
           <label className={s.check}>
-            <input type="checkbox" checked={d.active} onChange={(e) => set("active", e.target.checked)} /> Mostrar na home
+            <input
+              type="checkbox"
+              checked={d.active}
+              onChange={(e) => set("active", e.target.checked)}
+            />{" "}
+            Mostrar na home
           </label>
 
           {error && <p className={s.error}>{error}</p>}
           <div className={s.formActions}>
-            <button type="button" className="button secondary" onClick={onClose}>
+            <button
+              type="button"
+              className="button secondary"
+              onClick={onClose}
+            >
               Cancelar
             </button>
-            <button type="submit" className="button primary" disabled={pending || uploading || !d.image}>
+            <button
+              type="submit"
+              className="button primary"
+              disabled={pending || uploading || !d.image}
+            >
               {pending ? "Salvando…" : "Salvar banner"}
             </button>
           </div>
@@ -317,7 +462,13 @@ function BannerEditor({ draft: initial, onClose }: { draft: Draft; onClose: () =
 /* ---------------- Fotos dos produtos ---------------- */
 
 // cores para testar a troca de cor numa foto da peça enviada pelo painel (null = foto original)
-const TEST_TINTS = [null, "#1f4fb4", "#b3261e", "#1d1d1f", "#9fa1a2:mescla"] as const;
+const TEST_TINTS = [
+  null,
+  "#1f4fb4",
+  "#b3261e",
+  "#1d1d1f",
+  "#9fa1a2:mescla",
+] as const;
 
 /** Foto da peça com o botão "Testar cor": mostra a troca de cor como o cliente vai ver. */
 function PiecePreview({ src, test }: { src: string; test: boolean }) {
@@ -328,7 +479,12 @@ function PiecePreview({ src, test }: { src: string; test: boolean }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={shown} alt="" loading="lazy" />
       {test && (
-        <button type="button" className={s.tintBtn} onClick={() => setK((v) => (v + 1) % TEST_TINTS.length)} title="Ver a peça em outra cor, como no site">
+        <button
+          type="button"
+          className={s.tintBtn}
+          onClick={() => setK((v) => (v + 1) % TEST_TINTS.length)}
+          title="Ver a peça em outra cor, como no site"
+        >
           <Palette size={13} /> {k ? "Outra cor" : "Testar cor"}
         </button>
       )}
@@ -337,7 +493,18 @@ function PiecePreview({ src, test }: { src: string; test: boolean }) {
 }
 
 /** Fotos de um produto: vestindo (vitrine) e peça sozinha (simulador e troca de cor). Cada envio já salva. */
-export function ProductPhotoSlots({ product: p, photos: o, enabled }: { product: Product; photos: (string | null)[]; enabled: boolean }) {
+export function ProductPhotoSlots({
+  product: p,
+  photos: o,
+  enabled,
+  pieceOnly,
+}: {
+  product: Product;
+  photos: (string | null)[];
+  enabled: boolean;
+  /** só a peça sozinha (a galeria do anúncio cuida das fotos vestindo) */
+  pieceOnly?: boolean;
+}) {
   const { pending, error, setError, run } = useAction();
   const [busy, setBusy] = useState<number | null>(null);
   const inputs = useRef<Record<number, HTMLInputElement | null>>({});
@@ -373,7 +540,12 @@ export function ProductPhotoSlots({ product: p, photos: o, enabled }: { product:
         </span>
         <small>{label}</small>
         <div className={s.slotActions}>
-          <button type="button" className="button secondary small" disabled={!enabled || pending || busy !== null} onClick={() => inputs.current[slot]?.click()}>
+          <button
+            type="button"
+            className="button secondary small"
+            disabled={!enabled || pending || busy !== null}
+            onClick={() => inputs.current[slot]?.click()}
+          >
             <Upload size={14} /> Trocar
           </button>
           {custom && (
@@ -408,17 +580,29 @@ export function ProductPhotoSlots({ product: p, photos: o, enabled }: { product:
   return (
     <div aria-busy={pending}>
       {error && <p className={s.error}>{error}</p>}
-      <span className={s.groupLabel}>Vestindo (vitrine)</span>
+      {!pieceOnly && (
+        <>
+          <span className={s.groupLabel}>Vestindo (vitrine)</span>
+          <p className={s.note}>
+            A foto 1 aparece na vitrine e abre a página do produto; a 2 aparece
+            ao passar o mouse e na galeria. Use fotos verticais (4:5) de pessoas
+            vestindo a peça.
+          </p>
+          <div className={s.slots}>
+            {PHOTO_SLOTS.filter((x) => !x.piece).map(slot)}
+          </div>
+        </>
+      )}
+      <span className={s.groupLabel}>
+        Peça sozinha (simulador e troca de cor)
+      </span>
       <p className={s.note}>
-        A foto 1 aparece na vitrine e abre a página do produto; a 2 aparece ao passar o mouse e na galeria. Use fotos verticais (4:5) de pessoas vestindo
-        a peça.
-      </p>
-      <div className={s.slots}>{PHOTO_SLOTS.filter((x) => !x.piece).map(slot)}</div>
-      <span className={s.groupLabel}>Peça sozinha (simulador e troca de cor)</span>
-      <p className={s.note}>
-        Aparecem na galeria e no simulador da logo, e são as fotos que mudam de cor quando o cliente escolhe outra cor. Use foto quadrada, só a peça,
-        centralizada e no mesmo enquadramento da foto atual (para a logo cair no lugar certo), em fundo liso e claro, sem pessoa nem cabide. Peça branca
-        ou cinza claro: prefira um fundo um pouco mais escuro que a peça. Depois de enviar, use <b>Testar cor</b> para conferir.
+        Aparecem na galeria e no simulador da logo, e são as fotos que mudam de
+        cor quando o cliente escolhe outra cor. Use foto quadrada, só a peça,
+        centralizada e no mesmo enquadramento da foto atual (para a logo cair no
+        lugar certo), em fundo liso e claro, sem pessoa nem cabide. Peça branca
+        ou cinza claro: prefira um fundo um pouco mais escuro que a peça. Depois
+        de enviar, use <b>Testar cor</b> para conferir.
       </p>
       <div className={s.slots} data-piece>
         {PHOTO_SLOTS.filter((x) => x.piece).map(slot)}
@@ -429,7 +613,13 @@ export function ProductPhotoSlots({ product: p, photos: o, enabled }: { product:
 
 /* ---------------- Fotos das categorias ---------------- */
 
-export function CategoryPhotosAdmin({ photos, enabled }: { photos: CategoryPhotos; enabled: boolean }) {
+export function CategoryPhotosAdmin({
+  photos,
+  enabled,
+}: {
+  photos: CategoryPhotos;
+  enabled: boolean;
+}) {
   const { pending, error, setError, run } = useAction();
   const [busy, setBusy] = useState<string | null>(null);
   const inputs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -454,12 +644,18 @@ export function CategoryPhotosAdmin({ photos, enabled }: { photos: CategoryPhoto
         <div>
           <h3>Fotos das categorias</h3>
           <p>
-            Aparecem na home (&quot;Compre por categoria&quot;) e no menu Produtos. Use imagem vertical (4:5, por exemplo 800×1000). As imagens padrão já
-            trazem o nome da categoria escrito; se a sua foto não tiver o nome, deixe marcado <b>Mostrar o nome sobre a foto</b>.
+            Aparecem na home (&quot;Compre por categoria&quot;) e no menu
+            Produtos. Use imagem vertical (4:5, por exemplo 800×1000). As
+            imagens padrão já trazem o nome da categoria escrito; se a sua foto
+            não tiver o nome, deixe marcado <b>Mostrar o nome sobre a foto</b>.
           </p>
         </div>
       </div>
-      {!enabled && <p className={s.note}>Banco de dados não configurado: não é possível trocar as fotos.</p>}
+      {!enabled && (
+        <p className={s.note}>
+          Banco de dados não configurado: não é possível trocar as fotos.
+        </p>
+      )}
       {error && <p className={s.error}>{error}</p>}
 
       <ul className={s.categories} aria-busy={pending}>
@@ -470,8 +666,12 @@ export function CategoryPhotosAdmin({ photos, enabled }: { photos: CategoryPhoto
               <span className={s.slotImg}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={custom?.url ?? c.image} alt="" loading="lazy" />
-                {custom?.showName && <span className={s.catName}>{c.name}</span>}
-                {busy === c.slug && <span className={s.uploading}>Enviando…</span>}
+                {custom?.showName && (
+                  <span className={s.catName}>{c.name}</span>
+                )}
+                {busy === c.slug && (
+                  <span className={s.uploading}>Enviando…</span>
+                )}
                 <em>{custom ? "Personalizada" : "Padrão"}</em>
               </span>
               <small>{c.name}</small>
@@ -481,7 +681,9 @@ export function CategoryPhotosAdmin({ photos, enabled }: { photos: CategoryPhoto
                     type="checkbox"
                     checked={custom.showName}
                     disabled={pending}
-                    onChange={(e) => run(() => setCategoryShowName(c.slug, e.target.checked))}
+                    onChange={(e) =>
+                      run(() => setCategoryShowName(c.slug, e.target.checked))
+                    }
                   />
                   Mostrar o nome sobre a foto
                 </label>
@@ -570,8 +772,10 @@ export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
         <div>
           <h3>Empresas que vestem Expressão</h3>
           <p>
-            Logos de clientes exibidas na home e nas landing pages, para dar confiança a quem visita. Use somente logos de empresas que autorizaram.
-            Prefira PNG com fundo transparente. Sem logos ativas, a seção não aparece no site.
+            Logos de clientes exibidas na home e nas landing pages, para dar
+            confiança a quem visita. Use somente logos de empresas que
+            autorizaram. Prefira PNG com fundo transparente. Sem logos ativas, a
+            seção não aparece no site.
           </p>
         </div>
       </div>
@@ -589,7 +793,12 @@ export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
           );
         }}
       >
-        <button type="button" className={s.clientDrop} onClick={() => input.current?.click()} disabled={uploading}>
+        <button
+          type="button"
+          className={s.clientDrop}
+          onClick={() => input.current?.click()}
+          disabled={uploading}
+        >
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={image} alt="Prévia da logo" />
@@ -599,32 +808,74 @@ export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
             </span>
           )}
         </button>
-        <input ref={input} type="file" accept={ACCEPT} hidden onChange={(e) => (onFile(e.target.files?.[0]), (e.target.value = ""))} />
+        <input
+          ref={input}
+          type="file"
+          accept={ACCEPT}
+          hidden
+          onChange={(e) => (onFile(e.target.files?.[0]), (e.target.value = ""))}
+        />
         <label className={s.field}>
           Empresa
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="Ex.: Mercado Bom Preço" />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={80}
+            placeholder="Ex.: Mercado Bom Preço"
+          />
         </label>
-        <button type="submit" className="button primary" disabled={pending || uploading || !image || name.trim().length < 2 || !authorized}>
+        <button
+          type="submit"
+          className="button primary"
+          disabled={
+            pending ||
+            uploading ||
+            !image ||
+            name.trim().length < 2 ||
+            !authorized
+          }
+        >
           <Plus size={15} /> Adicionar
         </button>
       </form>
       <label className={s.check}>
-        <input type="checkbox" checked={authorized} onChange={(e) => setAuthorized(e.target.checked)} /> Confirmo que a empresa autorizou o uso da logo no site
+        <input
+          type="checkbox"
+          checked={authorized}
+          onChange={(e) => setAuthorized(e.target.checked)}
+        />{" "}
+        Confirmo que a empresa autorizou o uso da logo no site
       </label>
 
       {error && <p className={s.error}>{error}</p>}
 
       <ul className={s.clientList} aria-busy={pending}>
         {logos.map((l, i) => (
-          <li key={l.id} className={s.clientItem} data-off={!l.active || undefined}>
+          <li
+            key={l.id}
+            className={s.clientItem}
+            data-off={!l.active || undefined}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={l.image} alt={l.name} />
             <strong>{l.name}</strong>
             <div className={s.bannerActions}>
-              <button type="button" className="icon-button" disabled={pending || i === 0} onClick={() => move(i, -1)} aria-label="Mover para a esquerda">
+              <button
+                type="button"
+                className="icon-button"
+                disabled={pending || i === 0}
+                onClick={() => move(i, -1)}
+                aria-label="Mover para a esquerda"
+              >
                 <ArrowUp size={16} />
               </button>
-              <button type="button" className="icon-button" disabled={pending || i === logos.length - 1} onClick={() => move(i, 1)} aria-label="Mover para a direita">
+              <button
+                type="button"
+                className="icon-button"
+                disabled={pending || i === logos.length - 1}
+                onClick={() => move(i, 1)}
+                aria-label="Mover para a direita"
+              >
                 <ArrowDown size={16} />
               </button>
               <button
@@ -641,14 +892,25 @@ export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
                   type="button"
                   className={`button small ${s.danger}`}
                   disabled={pending}
-                  onClick={() => run(() => deleteClientLogo(l.id), () => setConfirmDelete(null))}
+                  onClick={() =>
+                    run(
+                      () => deleteClientLogo(l.id),
+                      () => setConfirmDelete(null),
+                    )
+                  }
                   onBlur={() => setConfirmDelete(null)}
                   autoFocus
                 >
                   Confirmar
                 </button>
               ) : (
-                <button type="button" className="icon-button" disabled={pending} onClick={() => setConfirmDelete(l.id)} aria-label="Excluir">
+                <button
+                  type="button"
+                  className="icon-button"
+                  disabled={pending}
+                  onClick={() => setConfirmDelete(l.id)}
+                  aria-label="Excluir"
+                >
                   <Trash2 size={16} />
                 </button>
               )}
@@ -656,7 +918,9 @@ export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
           </li>
         ))}
       </ul>
-      {!logos.length && <p className={s.note}>Nenhuma logo cadastrada ainda.</p>}
+      {!logos.length && (
+        <p className={s.note}>Nenhuma logo cadastrada ainda.</p>
+      )}
     </div>
   );
 }

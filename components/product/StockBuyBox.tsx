@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Factory, Loader2, MapPin, MessageCircle, PackageCheck, ShoppingCart, Truck } from "lucide-react";
 import { getColor, money, positionFees, whatsappLink, type Product, type Size } from "@/lib/catalog";
 import { CUSTOM_MIN_QTY } from "@/lib/quote";
-import { maxInstallments, PIX_DISCOUNT, unitPrice, type ShippingOption, volumeDiscount, volumeTiers } from "@/lib/pricing";
+import { lineFees, maxInstallments, PIX_DISCOUNT, unitPrice, type ShippingOption, volumeDiscount, volumeTiers } from "@/lib/pricing";
 import { useStore } from "@/components/store/StoreProvider";
 import { fetchShippingQuote } from "@/lib/shipping-client";
 import { Price, Stepper, Swatches } from "@/components/ui/primitives";
@@ -39,10 +39,11 @@ export function StockBuyBox({ product, color, onColor: setColor, positions, onPo
   }, [savedCep]);
 
   const qty = Object.values(sizes).reduce<number>((a, b) => a + (b || 0), 0);
-  const fees = positions.reduce((t, p) => t + positionFees[p].fee, 0);
+  // personalização: preço de cada posição na técnica escolhida
+  const fees = lineFees({ slug: product.slug, positions, technique: technique ?? undefined });
   const baseUnit = product.price + fees;
   const off = volumeDiscount(qty);
-  const unit = unitPrice({ slug: product.slug, positions, sizes });
+  const unit = unitPrice({ slug: product.slug, positions, sizes, technique: technique ?? undefined });
   const total = Math.round(unit * qty * 100) / 100;
   const pix = Math.round(total * (1 - PIX_DISCOUNT) * 100) / 100;
   const installments = maxInstallments(total);

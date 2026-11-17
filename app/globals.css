@@ -1,7 +1,9 @@
 /* Expressão Uniformes — design tokens e base.
    Componentes usam CSS Modules e consomem somente estas variáveis. */
 :root {
-  color-scheme: light;
+  /* o site tem tema claro e escuro: sem isto, o modo escuro forçado do celular (Samsung Internet,
+     Chrome "escurecer sites") escurece a página por conta própria e a logo azul some no fundo escuro */
+  color-scheme: light dark;
   /* marca (logo: azul/ciano + dourado) */
   --brand-900: #071a33;
   --brand-800: #0b2545;
@@ -126,6 +128,9 @@
     --pattern-grid: linear-gradient(rgb(110 162 255 / 0.05) 1px, transparent 1px),
       linear-gradient(90deg, rgb(110 162 255 / 0.05) 1px, transparent 1px);
   }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;

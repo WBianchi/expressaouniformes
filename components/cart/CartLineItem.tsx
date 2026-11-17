@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Check, ImagePlus, MessageSquareText, Sparkles, Trash2, TrendingDown, TriangleAlert } from "lucide-react";
-import { getColor, getProduct, money, positionFees, type Position, type Size } from "@/lib/catalog";
-import { type CartLine, lineLogos, lineQuantity, lineTotal, unitPrice, volumeDiscount, volumeTiers } from "@/lib/pricing";
+import { feeFor, getColor, getProduct, money, positionFees, type Position, type Size } from "@/lib/catalog";
+import { type CartLine, lineLogos, lineQuantity, lineTotal, unitPrice, volumeDiscount, volumeTiers, lineFees } from "@/lib/pricing";
 import { useStore } from "@/components/store/StoreProvider";
 import { SafeImage, Stepper } from "@/components/ui/primitives";
 import { LOGO_ACCEPT, makeLogoThumb } from "./logoThumb";
@@ -34,7 +34,7 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
   const belowMin = draftQty < product.minQty;
   const qty = lineQuantity(line);
   const unit = unitPrice(line);
-  const fees = line.positions.reduce((t, p) => t + positionFees[p].fee, 0);
+  const fees = lineFees(line);
   const fullUnit = product.price + fees;
   const off = volumeDiscount(qty);
   const next = [...volumeTiers].reverse().find((t) => qty < t.min);
@@ -137,7 +137,7 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
                 <button key={p} type="button" className={s.position} aria-pressed={on} onClick={() => togglePosition(p)}>
                   <span className={s.check} aria-hidden>{on && <Check size={12} strokeWidth={3} />}</span>
                   {positionFees[p].label}
-                  <small>+{money(positionFees[p].fee)}/pç</small>
+                  <small>+{money(feeFor(product, line.technique, p))}/pç</small>
                 </button>
               );
             })}

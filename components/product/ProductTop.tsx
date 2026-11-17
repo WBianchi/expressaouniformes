@@ -21,7 +21,8 @@ export function ProductTop({ product }: { product: Product }) {
   const [view, setView] = useState<Slide>("front");
   // posição/tamanho que o cliente ajustou em cada lugar (sem ajuste = posição padrão)
   const [placements, setPlacements] = useState<Placements>({});
-  const [technique, setTechnique] = useState<Technique | null>(null);
+  // a técnica define o preço da personalização: começa na primeira do anúncio
+  const [technique, setTechnique] = useState<Technique | null>(product.techniques[0] ?? null);
   const [color, setColorState] = useState(product.colors[0]);
   const setColor = (id: string) => {
     setColorState(id);
@@ -51,6 +52,13 @@ export function ProductTop({ product }: { product: Product }) {
   const onLogo: typeof setLogo = (position, next) => {
     const spot = next && logoSpots(product)[position];
     if (spot) setView(spot.view);
+    // logo nova (ou trocada) começa centralizada na área, num tamanho que cabe
+    if (next?.thumb !== logos[position]?.thumb)
+      setPlacements((cur) => {
+        const rest = { ...cur };
+        delete rest[position];
+        return rest;
+      });
     setLogo(position, next);
   };
 
@@ -77,6 +85,7 @@ export function ProductTop({ product }: { product: Product }) {
         view={view}
         onViewChange={setView}
         color={color}
+        technique={technique}
       />
       {inStock(product) ? <StockBuyBox product={product} {...custom} /> : <QuoteBuyBox product={product} {...custom} />}
     </div>

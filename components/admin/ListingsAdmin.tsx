@@ -1,52 +1,40 @@
 "use client";
-// Painel → Anúncios: cada produto abre "Editar anúncio" (título, descrição, ficha técnica, preço,
-// cores, tamanhos e galeria). O texto é salvo no botão "Salvar anúncio"; as fotos, a cada envio.
+// Painel → Anúncios: lista de anúncios, "Novo anúncio" e "Editar anúncio" (título, categoria,
+// descrição, ficha técnica, preço, cores, tamanhos, galeria e fotos). O texto é salvo no botão
+// "Salvar anúncio"; a galeria no "Salvar galeria"; as fotos da peça e por cor, a cada envio.
 import { useMemo, useRef, useState } from "react";
+import { ArrowLeft, Eye, EyeOff, ExternalLink, ImagePlus, Pencil, Plus, RotateCcw, Search, Trash2, Upload, X } from "lucide-react";
 import {
-  ArrowLeft,
-  ExternalLink,
-  ImagePlus,
-  Pencil,
-  Plus,
-  RotateCcw,
-  Search,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
-import {
+  categories,
+  catalogHas,
   colors as palette,
   getCategory,
   getColor,
   money,
+  NO_PHOTO,
+  positionFees,
   products,
   withListing,
+  type Position,
+  type Technique,
+  type CatalogEdits,
   type Color,
-  type ListingOverrides,
+  type Product,
+  type SaleKind,
 } from "@/lib/catalog";
 import type { PhotoOverrides } from "@/lib/banners";
-import {
-  listingFieldsOf,
-  SIZE_OPTIONS,
-  TECHNIQUE_OPTIONS,
-  type ListingForm,
-} from "@/lib/listing";
-import {
-  resetListing,
-  saveListing,
-  setColorPhoto,
-} from "@/app/admin/listing-actions";
-import {
-  ACCEPT,
-  ProductPhotoSlots,
-  uploadImage,
-  useAction,
-} from "./MediaAdmin";
+import { withPhotos } from "@/lib/product-media";
+import { listingFormOf, SIZE_OPTIONS, TECHNIQUE_OPTIONS, type ListingForm } from "@/lib/listing";
+import { availablePositions, TECHNIQUE_CAPS } from "@/lib/mockup";
+import { defaultSpecs, EDITABLE_SPECS, type SpecKey } from "@/lib/specs";
+import { createProduct, deleteProduct, resetListing, saveListing, setColorPhoto, setPublished } from "@/app/admin/listing-actions";
+import { ACCEPT, ProductPhotoSlots, uploadImage, useAction } from "./MediaAdmin";
+import { GalleryEditor } from "./GalleryEditor";
 import m from "./MediaAdmin.module.css";
 import s from "./ListingsAdmin.module.css";
 
 const NO_PHOTOS: (string | null)[] = [null, null, null, null, null];
-type Filter = "todos" | "stock" | "custom" | "editados";
+type Filter = "todos" | "stock" | "custom" | "editados" | "rascunhos";
 
 /** "24,90" → 24.9; vazio → null; inválido → NaN */
 const parseMoney = (v: string) => {
@@ -56,58 +44,50 @@ const parseMoney = (v: string) => {
     .replace(",", ".");
   return t ? Number(t) : null;
 };
-const moneyText = (n: number | null) =>
-  n === null ? "" : n.toFixed(2).replace(".", ",");
+const moneyText = (n: number | null) => (n === null ? "" : n.toFixed(2).replace(".", ","));
 
 function Swatch({ c }: { c: Color }) {
-  return (
-    <span
-      className={s.swatch}
-      data-mescla={c.pattern === "mescla" || undefined}
-      style={{ background: c.hex }}
-      aria-hidden
-    />
-  );
+  return <span className={s.swatch} data-mescla={c.pattern === "mescla" || undefined} style={{ background: c.hex }} aria-hidden />;
 }
 
-export function ListingsAdmin({
-  listings,
-  photos,
-  enabled,
-}: {
-  listings: ListingOverrides;
-  photos: PhotoOverrides;
-  enabled: boolean;
-}) {
+export function ListingsAdmin({ edits, photos, enabled }: { edits: CatalogEdits; photos: PhotoOverrides; enabled: boolean }) {
   const [editing, setEditing] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("todos");
 
+  // anúncios da loja + rascunhos cadastrados no painel (ainda fora da loja)
+  const drafts = Object.entries(edits.created)
+    .filter(([, c]) => !c.published)
+    .flatMap(([slug]) => {
+      const p = withListing(slug, edits.listings[slug]);
+      return p ? [p] : [];
+    });
+  const all: Product[] = [...products, ...drafts];
+
   if (editing)
-    return (
+    return catalogHas(editing) ? (
       <ListingEditor
         key={editing}
         slug={editing}
-        override={listings[editing]}
+        edits={edits}
         photos={photos[editing] ?? NO_PHOTOS}
         enabled={enabled}
         onBack={() => setEditing(null)}
       />
+    ) : (
+      <div className="admin-panel">
+        <p className="empty-state">Abrindo o anúncio…</p>
+      </div>
     );
 
-  const isEdited = (slug: string) =>
-    Object.keys(listings[slug] ?? {}).some((k) => k !== "colorPhotos");
+  const isEdited = (slug: string) => Object.keys(edits.listings[slug] ?? {}).length > 0 || !!photos[slug]?.some(Boolean);
   const q = query.trim().toLowerCase();
-  const list = products.filter(
+  const list = all.filter(
     (p) =>
-      (!q ||
-        `${p.name} ${p.subtitle} ${getCategory(p.category)?.name}`
-          .toLowerCase()
-          .includes(q)) &&
+      (!q || `${p.name} ${p.subtitle} ${getCategory(p.category)?.name}`.toLowerCase().includes(q)) &&
       (filter === "todos" ||
-        (filter === "editados"
-          ? isEdited(p.slug) || photos[p.slug]?.some(Boolean)
-          : p.kind === filter)),
+        (filter === "editados" ? isEdited(p.slug) : filter === "rascunhos" ? drafts.includes(p) : p.kind === filter)),
   );
 
   return (
@@ -115,28 +95,27 @@ export function ListingsAdmin({
       <div className="panel-heading">
         <div>
           <h3>Anúncios</h3>
-          <p>
-            Clique num produto para editar o anúncio: título, descrição, ficha
-            técnica, preço, cores, tamanhos e fotos.
-          </p>
+          <p>Clique num produto para editar o anúncio: título, categoria, descrição, ficha técnica, preço, cores, tamanhos e fotos.</p>
         </div>
+        <button type="button" className="button primary small" disabled={!enabled} onClick={() => setCreating(true)}>
+          <Plus size={15} /> Novo anúncio
+        </button>
       </div>
       <div className={s.body}>
-        {!enabled && (
-          <p className={m.note}>
-            Banco de dados não configurado: dá para ver os anúncios, mas não
-            salvar alterações.
-          </p>
+        {!enabled && <p className={m.note}>Banco de dados não configurado: dá para ver os anúncios, mas não salvar alterações.</p>}
+        {creating && (
+          <NewListing
+            onCancel={() => setCreating(false)}
+            onCreated={(slug) => {
+              setCreating(false);
+              setEditing(slug);
+            }}
+          />
         )}
         <div className={s.toolbar}>
           <label className={s.search}>
             <Search size={16} />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar produto"
-              aria-label="Buscar produto"
-            />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar produto" aria-label="Buscar produto" />
           </label>
           <div className={s.tabs} role="tablist" aria-label="Filtrar anúncios">
             {(
@@ -145,106 +124,177 @@ export function ListingsAdmin({
                 ["stock", "Pronta-entrega"],
                 ["custom", "Fabricação"],
                 ["editados", "Editados"],
+                ...(drafts.length ? ([["rascunhos", `Rascunhos (${drafts.length})`]] as const) : []),
               ] as const
             ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={filter === id}
-                onClick={() => setFilter(id)}
-              >
+              <button key={id} type="button" role="tab" aria-selected={filter === id} onClick={() => setFilter(id)}>
                 {label}
               </button>
             ))}
           </div>
         </div>
         <ul className={s.grid}>
-          {list.map((p) => (
-            <li key={p.slug}>
-              <button
-                type="button"
-                className={s.card}
-                onClick={() => setEditing(p.slug)}
-              >
-                <span className={s.cardImg}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photos[p.slug]?.[0] ?? p.photos[0]}
-                    alt=""
-                    loading="lazy"
-                  />
-                  {isEdited(p.slug) && <em>Editado</em>}
-                </span>
-                <span className={s.cardBody}>
-                  <small>
-                    {p.kind === "stock" ? "Pronta-entrega" : "Fabricação"} ·{" "}
-                    {getCategory(p.category)?.name}
-                  </small>
-                  <strong>{p.name}</strong>
-                  <span>
-                    {p.kind === "stock"
-                      ? `${money(p.price)} / peça`
-                      : "Sob orçamento"}
+          {list.map((p) => {
+            const draft = drafts.includes(p);
+            const cover = withPhotos(p, photos[p.slug]).photos[0];
+            return (
+              <li key={p.slug}>
+                <button type="button" className={s.card} onClick={() => setEditing(p.slug)}>
+                  <span className={s.cardImg}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={cover} alt="" loading="lazy" />
+                    {draft ? <em data-tone="draft">Rascunho</em> : isEdited(p.slug) && <em>Editado</em>}
                   </span>
-                </span>
-                <span className={s.cardEdit}>
-                  <Pencil size={14} /> Editar anúncio
-                </span>
-              </button>
-            </li>
-          ))}
+                  <span className={s.cardBody}>
+                    <small>
+                      {p.kind === "stock" ? "Pronta-entrega" : "Fabricação"} · {getCategory(p.category)?.name}
+                    </small>
+                    <strong>{p.name}</strong>
+                    <span>{p.kind === "stock" ? `${money(p.price)} / peça` : "Sob orçamento"}</span>
+                  </span>
+                  <span className={s.cardEdit}>
+                    <Pencil size={14} /> Editar anúncio
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
-        {!list.length && (
-          <p className="empty-state">Nenhum produto encontrado.</p>
-        )}
+        {!list.length && <p className="empty-state">Nenhum produto encontrado.</p>}
       </div>
     </div>
   );
 }
 
+/* ---------------- Novo anúncio ---------------- */
+
+function NewListing({ onCancel, onCreated }: { onCancel: () => void; onCreated: (slug: string) => void }) {
+  const { pending, error, setError, run } = useAction();
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState(categories[0]?.slug ?? "");
+  const [kind, setKind] = useState<SaleKind>("custom");
+  return (
+    <form
+      className={s.newForm}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (name.trim().length < 3) return setError("Informe o título do anúncio.");
+        let slug = "";
+        run(
+          async () => {
+            const r = await createProduct({ name, kind, category });
+            if (r.ok && r.slug) slug = r.slug;
+            return r;
+          },
+          () => onCreated(slug),
+        );
+      }}
+    >
+      <div className={s.newHead}>
+        <h4>Novo anúncio</h4>
+        <button type="button" className="icon-button" onClick={onCancel} aria-label="Fechar">
+          <X size={16} />
+        </button>
+      </div>
+      <div className={s.newFields}>
+        <label className={m.field}>
+          Título do anúncio
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={90} placeholder="Ex.: Camisa Polo Dry Fit" autoFocus required />
+        </label>
+        <label className={m.field}>
+          Categoria
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <fieldset className={s.fieldset}>
+          <legend>Como vende</legend>
+          <div className={s.chips}>
+            <label className={s.chip}>
+              <input type="radio" name="kind" checked={kind === "custom"} onChange={() => setKind("custom")} /> Fabricação (sob orçamento)
+            </label>
+            <label className={s.chip}>
+              <input type="radio" name="kind" checked={kind === "stock"} onChange={() => setKind("stock")} /> Pronta-entrega (compra no site)
+            </label>
+          </div>
+        </fieldset>
+      </div>
+      <p className={s.hint}>
+        O anúncio nasce como rascunho, fora da loja. Na próxima tela você completa descrição, ficha técnica, preço, cores e fotos, e depois publica.
+      </p>
+      {error && <p className={m.error}>{error}</p>}
+      <div className="button-row">
+        <button type="submit" className="button primary small" disabled={pending}>
+          {pending ? "Criando…" : "Criar e continuar"}
+        </button>
+        <button type="button" className="button secondary small" onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+}
+
 /* ---------------- Editar anúncio ---------------- */
 
-function ListingEditor({
-  slug,
-  override,
-  photos,
-  enabled,
-  onBack,
-}: {
-  slug: string;
-  override: ListingOverrides[string] | undefined;
-  photos: (string | null)[];
-  enabled: boolean;
-  onBack: () => void;
-}) {
+function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string; edits: CatalogEdits; photos: (string | null)[]; enabled: boolean; onBack: () => void }) {
+  const override = edits.listings[slug];
+  const created = edits.created[slug];
   const catalog = useMemo(() => withListing(slug, undefined)!, [slug]);
   const current = useMemo(() => withListing(slug, override)!, [slug, override]);
   const stock = catalog.kind === "stock";
-  const initial = useMemo<ListingForm>(() => {
-    const { colorPhotos: _ignored, ...rest } = listingFieldsOf(current);
-    return rest;
-  }, [current]);
+  const initial = useMemo<ListingForm>(() => listingFormOf(current), [current]);
+  // galeria: as fotos do anúncio com as trocas antigas de vitrine (posições 1 e 2)
+  // (a imagem neutra de anúncio sem foto não entra na galeria)
+  const gallery = useMemo(() => withPhotos(current, photos).photos.filter((src) => src !== NO_PHOTO), [current, photos]);
 
   const { pending, error, setError, run } = useAction();
   const [d, setD] = useState<ListingForm>(initial);
   const [price, setPrice] = useState(moneyText(initial.price));
   const [compareAt, setCompareAt] = useState(moneyText(initial.compareAt));
   const [chart, setChart] = useState(initial.sizeChart.join(", "));
+  // preço da personalização (técnica × posição) e textos da ficha técnica, como aparecem no site
+  const positions = useMemo(() => availablePositions(current), [current]);
+  const autoSpecs = useMemo(() => defaultSpecs(current), [current]);
+  const feeTextOf = (f: ListingForm) =>
+    Object.fromEntries(
+      TECHNIQUE_OPTIONS.flatMap((t) => positions.map((pos) => [`${t}|${pos}`, moneyText(f.fees[t]?.[pos] ?? positionFees[pos].fee)])),
+    ) as Record<string, string>;
+  const specTextOf = (f: ListingForm) => Object.fromEntries(EDITABLE_SPECS.map(({ key }) => [key, f.specs[key] ?? autoSpecs[key]])) as Record<SpecKey, string>;
+  const [feeText, setFeeText] = useState(() => feeTextOf(initial));
+  const [specText, setSpecText] = useState(() => specTextOf(initial));
   const [saved, setSaved] = useState(false);
-  const [confirmReset, setConfirmReset] = useState(false);
+  const [confirm, setConfirm] = useState<"reset" | "delete" | null>(null);
   const [colorQuery, setColorQuery] = useState("");
   const set = <K extends keyof ListingForm>(k: K, v: ListingForm[K]) => {
     setSaved(false);
     setD((x) => ({ ...x, [k]: v }));
   };
+  const typed = (fn: (v: string) => void) => (e: { target: { value: string } }) => {
+    setSaved(false);
+    fn(e.target.value);
+  };
 
   const draft = (): ListingForm | string => {
     const p = parseMoney(price);
     const c = parseMoney(compareAt);
-    if (stock && (p === null || Number.isNaN(p)))
-      return "Informe o preço de venda (ex.: 24,90).";
+    if (stock && (p === null || Number.isNaN(p))) return "Informe o preço de venda (ex.: 24,90).";
     if (Number.isNaN(c ?? 0)) return 'Preço "de" inválido (ex.: 29,90).';
+    // só guarda o que difere do padrão (tabela padrão de personalização e textos automáticos da ficha)
+    const fees: ListingForm["fees"] = {};
+    if (stock)
+      for (const t of d.techniques)
+        for (const pos of positions) {
+          const v = parseMoney(feeText[`${t}|${pos}`] ?? "");
+          if (v === null || Number.isNaN(v)) return `Preço da personalização inválido: ${t}, ${positionFees[pos].label.toLowerCase()}.`;
+          if (Math.abs(v - positionFees[pos].fee) > 0.001) (fees[t] ??= {})[pos] = v;
+        }
+    const specs: ListingForm["specs"] = {};
+    for (const { key } of EDITABLE_SPECS) if (specText[key].trim() !== autoSpecs[key]) specs[key] = specText[key].trim();
     return {
       ...d,
       price: stock ? p! : d.price,
@@ -254,21 +304,24 @@ function ListingEditor({
         .map((x) => x.trim())
         .filter(Boolean),
       highlights: d.highlights.filter((h) => h.title.trim() || h.text.trim()),
+      extraSpecs: d.extraSpecs.filter((r) => r.label.trim() || r.value.trim()),
+      fees,
+      specs,
     };
   };
   const dirty = (() => {
     const v = draft();
-    return (
-      typeof v === "string" || JSON.stringify(v) !== JSON.stringify(initial)
-    );
+    return typeof v === "string" || JSON.stringify(v) !== JSON.stringify(initial);
   })();
-  const edited = Object.keys(override ?? {}).some((k) => k !== "colorPhotos");
+  const edited = Object.keys(override ?? {}).some((k) => k !== "colorPhotos" && k !== "photos");
 
   const load = (f: ListingForm) => {
     setD(f);
     setPrice(moneyText(f.price));
     setCompareAt(moneyText(f.compareAt));
     setChart(f.sizeChart.join(", "));
+    setFeeText(feeTextOf(f));
+    setSpecText(specTextOf(f));
   };
 
   const save = () => {
@@ -292,11 +345,7 @@ function ListingEditor({
       );
     } else set("colors", [...d.colors, id]);
   };
-  const shownColors = palette.filter(
-    (c) =>
-      !colorQuery.trim() ||
-      c.name.toLowerCase().includes(colorQuery.trim().toLowerCase()),
-  );
+  const shownColors = palette.filter((c) => !colorQuery.trim() || c.name.toLowerCase().includes(colorQuery.trim().toLowerCase()));
 
   return (
     <div className={s.editor}>
@@ -306,21 +355,34 @@ function ListingEditor({
         </button>
         <div className={s.editorTitle}>
           <span className="eyebrow">
-            EDITAR ANÚNCIO · {stock ? "PRONTA-ENTREGA" : "FABRICAÇÃO"}
+            {created ? "ANÚNCIO CADASTRADO NO PAINEL" : "EDITAR ANÚNCIO"} · {stock ? "PRONTA-ENTREGA" : "FABRICAÇÃO"}
           </span>
           <h2>{current.name}</h2>
         </div>
         <div className={s.headActions}>
-          <a
-            className="button secondary small"
-            href={`/produto/${slug}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Ver na loja <ExternalLink size={14} />
-          </a>
-          {edited &&
-            (confirmReset ? (
+          {(!created || created.published) && (
+            <a className="button secondary small" href={`/produto/${slug}`} target="_blank" rel="noreferrer">
+              Ver na loja <ExternalLink size={14} />
+            </a>
+          )}
+          {created ? (
+            confirm === "delete" ? (
+              <>
+                <button type="button" className={`button small ${m.danger}`} disabled={pending} onClick={() => run(() => deleteProduct(slug), onBack)}>
+                  Confirmar: excluir anúncio
+                </button>
+                <button type="button" className="button secondary small" onClick={() => setConfirm(null)}>
+                  Cancelar
+                </button>
+              </>
+            ) : (
+              <button type="button" className="button secondary small" onClick={() => setConfirm("delete")}>
+                <Trash2 size={14} /> Excluir anúncio
+              </button>
+            )
+          ) : (
+            edited &&
+            (confirm === "reset" ? (
               <>
                 <button
                   type="button"
@@ -330,21 +392,15 @@ function ListingEditor({
                     run(
                       () => resetListing(slug),
                       () => {
-                        const { colorPhotos: _ignored, ...rest } =
-                          listingFieldsOf(catalog);
-                        load(rest);
-                        setConfirmReset(false);
+                        load(listingFormOf(catalog));
+                        setConfirm(null);
                       },
                     )
                   }
                 >
                   Confirmar: voltar ao texto original
                 </button>
-                <button
-                  type="button"
-                  className="button secondary small"
-                  onClick={() => setConfirmReset(false)}
-                >
+                <button type="button" className="button secondary small" onClick={() => setConfirm(null)}>
                   Cancelar
                 </button>
               </>
@@ -352,14 +408,39 @@ function ListingEditor({
               <button
                 type="button"
                 className="button secondary small"
-                onClick={() => setConfirmReset(true)}
-                title="Volta texto, preço, cores e tamanhos ao catálogo original (as fotos ficam)"
+                onClick={() => setConfirm("reset")}
+                title="Volta texto, categoria, preço, cores e tamanhos ao catálogo original (as fotos ficam)"
               >
                 <RotateCcw size={14} /> Restaurar original
               </button>
-            ))}
+            ))
+          )}
         </div>
       </div>
+
+      {created && (
+        <div className={s.publish} data-live={created.published || undefined}>
+          <span>
+            {created.published ? (
+              <>
+                <Eye size={16} /> <b>Publicado:</b> o anúncio está na loja.
+              </>
+            ) : (
+              <>
+                <EyeOff size={16} /> <b>Rascunho:</b> ainda não aparece na loja. Complete as informações, salve, envie ao menos a foto de capa e publique.
+              </>
+            )}
+          </span>
+          <button
+            type="button"
+            className={`button small ${created.published ? "secondary" : "primary"}`}
+            disabled={!enabled || pending}
+            onClick={() => run(() => setPublished(slug, !created.published))}
+          >
+            {created.published ? "Tirar da loja" : "Publicar anúncio"}
+          </button>
+        </div>
+      )}
 
       <form
         className={s.form}
@@ -369,39 +450,32 @@ function ListingEditor({
         }}
       >
         <section className="admin-panel">
-          <h3 className={s.sectionTitle}>Título e descrição</h3>
+          <h3 className={s.sectionTitle}>Título, categoria e descrição</h3>
           <label className={m.field}>
             Título do anúncio
-            <input
-              value={d.name}
-              onChange={(e) => set("name", e.target.value)}
-              maxLength={90}
-              required
-            />
+            <input value={d.name} onChange={(e) => set("name", e.target.value)} maxLength={90} required />
           </label>
-          <label className={m.field}>
-            Modelo / gola
-            <input
-              value={d.subtitle}
-              onChange={(e) => set("subtitle", e.target.value)}
-              maxLength={80}
-              placeholder="Ex.: Gola careca ou gola V"
-            />
-          </label>
+          <div className={m.row}>
+            <label className={m.field}>
+              Categoria
+              <select value={d.category} onChange={(e) => set("category", e.target.value)}>
+                {categories.map((c) => (
+                  <option key={c.slug} value={c.slug}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={m.field}>
+              Modelo / gola
+              <input value={d.subtitle} onChange={(e) => set("subtitle", e.target.value)} maxLength={80} placeholder="Ex.: Gola careca ou gola V" />
+            </label>
+          </div>
           <label className={m.field}>
             Descrição
-            <textarea
-              value={d.description}
-              onChange={(e) => set("description", e.target.value)}
-              maxLength={1500}
-              rows={5}
-              required
-            />
+            <textarea value={d.description} onChange={(e) => set("description", e.target.value)} maxLength={1500} rows={5} required />
           </label>
-          <p className={s.hint}>
-            Aparece na página do produto e no Google. Descreva o tecido, o
-            conforto e para quem a peça é indicada.
-          </p>
+          <p className={s.hint}>Aparece na página do produto e no Google. Descreva o tecido, o conforto e para quem a peça é indicada.</p>
         </section>
 
         {stock && (
@@ -410,32 +484,68 @@ function ListingEditor({
             <div className={m.row}>
               <label className={m.field}>
                 Preço por peça (R$)
-                <input
-                  value={price}
-                  onChange={(e) => (setSaved(false), setPrice(e.target.value))}
-                  inputMode="decimal"
-                  placeholder="24,90"
-                  required
-                />
+                <input value={price} onChange={typed(setPrice)} inputMode="decimal" placeholder="24,90" required />
               </label>
               <label className={m.field}>
                 Preço &quot;de&quot;, riscado (opcional)
-                <input
-                  value={compareAt}
-                  onChange={(e) => (
-                    setSaved(false),
-                    setCompareAt(e.target.value)
-                  )}
-                  inputMode="decimal"
-                  placeholder="29,90"
-                />
+                <input value={compareAt} onChange={typed(setCompareAt)} inputMode="decimal" placeholder="29,90" />
               </label>
             </div>
             <p className={s.hint}>
-              Valor da peça lisa. A personalização soma por posição da logo e os
-              descontos por quantidade continuam valendo. É este valor que o
-              checkout cobra.
+              Valor da peça lisa. A personalização soma por posição da logo e os descontos por quantidade continuam valendo. É este valor que o checkout
+              cobra.
             </p>
+          </section>
+        )}
+
+        {stock && d.techniques.length > 0 && positions.length > 0 && (
+          <section className="admin-panel">
+            <h3 className={s.sectionTitle}>Preço da personalização (por peça)</h3>
+            <p className={s.hint}>
+              Quanto soma ao preço da peça cada posição da logo, em cada técnica. No simulador, o cliente escolhe a técnica e vê o valor de cada posição.
+            </p>
+            <div className={s.feeTable} role="table" aria-label="Preço da personalização por técnica e posição">
+              <div role="row" className={s.feeRow}>
+                <span role="columnheader">Técnica</span>
+                {positions.map((pos) => (
+                  <span key={pos} role="columnheader">
+                    {positionFees[pos].label}
+                  </span>
+                ))}
+              </div>
+              {TECHNIQUE_OPTIONS.filter((t) => d.techniques.includes(t)).map((t: Technique) => (
+                <div key={t} role="row" className={s.feeRow}>
+                  <span role="rowheader">
+                    <b>{t}</b>
+                  </span>
+                  {positions.map((pos: Position) => {
+                    const cap = TECHNIQUE_CAPS[t]?.[pos];
+                    return (
+                      <label key={pos} role="cell" className={s.feeCell}>
+                        <span className={s.feeInput}>
+                          R$
+                          <input
+                            value={feeText[`${t}|${pos}`] ?? ""}
+                            onChange={(e) => {
+                              setSaved(false);
+                              const v = e.target.value;
+                              setFeeText((x) => ({ ...x, [`${t}|${pos}`]: v }));
+                            }}
+                            inputMode="decimal"
+                            aria-label={`Preço de ${t} na ${positionFees[pos].label.toLowerCase()}`}
+                          />
+                        </span>
+                        {cap && (
+                          <small>
+                            até {cap.w} × {cap.h} cm
+                          </small>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
@@ -444,40 +554,21 @@ function ListingEditor({
           <div className={m.row}>
             <label className={m.field}>
               Tecido
-              <input
-                value={d.fabric}
-                onChange={(e) => set("fabric", e.target.value)}
-                maxLength={60}
-                required
-              />
+              <input value={d.fabric} onChange={(e) => set("fabric", e.target.value)} maxLength={60} required />
             </label>
             <label className={m.field}>
               Composição
-              <input
-                value={d.composition}
-                onChange={(e) => set("composition", e.target.value)}
-                maxLength={80}
-                placeholder="Ex.: 67% poliéster + 33% viscose"
-              />
+              <input value={d.composition} onChange={(e) => set("composition", e.target.value)} maxLength={80} placeholder="Ex.: 67% poliéster + 33% viscose" />
             </label>
           </div>
           <div className={m.row}>
             <label className={m.field}>
               Observação do tecido
-              <input
-                value={d.fabricNote}
-                onChange={(e) => set("fabricNote", e.target.value)}
-                maxLength={80}
-                placeholder="Ex.: Variação de tecido disponível"
-              />
+              <input value={d.fabricNote} onChange={(e) => set("fabricNote", e.target.value)} maxLength={80} placeholder="Ex.: Variação de tecido disponível" />
             </label>
             <label className={m.field}>
               Grade de tamanhos (fabricação)
-              <input
-                value={chart}
-                onChange={(e) => (setSaved(false), setChart(e.target.value))}
-                placeholder="PP, P, M, G, GG"
-              />
+              <input value={chart} onChange={typed(setChart)} placeholder="PP, P, M, G, GG" />
             </label>
           </div>
           <fieldset className={s.fieldset}>
@@ -489,14 +580,7 @@ function ListingEditor({
                     type="checkbox"
                     checked={d.techniques.includes(t)}
                     onChange={(e) =>
-                      set(
-                        "techniques",
-                        e.target.checked
-                          ? TECHNIQUE_OPTIONS.filter(
-                              (x) => x === t || d.techniques.includes(x),
-                            )
-                          : d.techniques.filter((x) => x !== t),
-                      )
+                      set("techniques", e.target.checked ? TECHNIQUE_OPTIONS.filter((x) => x === t || d.techniques.includes(x)) : d.techniques.filter((x) => x !== t))
                     }
                   />
                   {t}
@@ -506,10 +590,7 @@ function ListingEditor({
           </fieldset>
           <fieldset className={s.fieldset}>
             <legend>Destaques</legend>
-            <p className={s.hint}>
-              Aparecem na lista de vantagens da página do produto (ex.:
-              &quot;Costura reforçada&quot;).
-            </p>
+            <p className={s.hint}>Aparecem na lista de vantagens da página do produto (ex.: &quot;Costura reforçada&quot;).</p>
             {d.highlights.map((h, i) => (
               <div key={i} className={s.highlight}>
                 <input
@@ -517,9 +598,7 @@ function ListingEditor({
                   onChange={(e) =>
                     set(
                       "highlights",
-                      d.highlights.map((x, k) =>
-                        k === i ? { ...x, title: e.target.value } : x,
-                      ),
+                      d.highlights.map((x, k) => (k === i ? { ...x, title: e.target.value } : x)),
                     )
                   }
                   maxLength={60}
@@ -531,9 +610,7 @@ function ListingEditor({
                   onChange={(e) =>
                     set(
                       "highlights",
-                      d.highlights.map((x, k) =>
-                        k === i ? { ...x, text: e.target.value } : x,
-                      ),
+                      d.highlights.map((x, k) => (k === i ? { ...x, text: e.target.value } : x)),
                     )
                   }
                   maxLength={200}
@@ -556,14 +633,94 @@ function ListingEditor({
               </div>
             ))}
             {d.highlights.length < 8 && (
-              <button
-                type="button"
-                className="button secondary small"
-                onClick={() =>
-                  set("highlights", [...d.highlights, { title: "", text: "" }])
-                }
-              >
+              <button type="button" className="button secondary small" onClick={() => set("highlights", [...d.highlights, { title: "", text: "" }])}>
                 <Plus size={14} /> Adicionar destaque
+              </button>
+            )}
+          </fieldset>
+          <fieldset className={s.fieldset}>
+            <legend>Outras linhas da ficha técnica</legend>
+            <p className={s.hint}>
+              Produto, modelo, categoria, tecido, composição, tamanhos, cores, destaques e técnicas vêm dos campos acima. Estas linhas você edita aqui; deixe em
+              branco para não mostrar a linha no site.
+            </p>
+            {EDITABLE_SPECS.map(({ key, label }) => (
+              <label key={key} className={`${m.field} ${s.specField}`}>
+                <span>
+                  {label}
+                  {specText[key].trim() !== autoSpecs[key] && (
+                    <button
+                      type="button"
+                      className={s.linkBtn}
+                      onClick={() => {
+                        setSaved(false);
+                        setSpecText((x) => ({ ...x, [key]: autoSpecs[key] }));
+                      }}
+                    >
+                      voltar ao texto automático
+                    </button>
+                  )}
+                </span>
+                <textarea
+                  rows={key === "cuidados" ? 3 : 1}
+                  maxLength={400}
+                  value={specText[key]}
+                  placeholder="(linha escondida)"
+                  onChange={(e) => {
+                    setSaved(false);
+                    const v = e.target.value;
+                    setSpecText((x) => ({ ...x, [key]: v }));
+                  }}
+                />
+              </label>
+            ))}
+          </fieldset>
+          <fieldset className={s.fieldset}>
+            <legend>Linhas extras da ficha técnica</legend>
+            {d.extraSpecs.map((r, i) => (
+              <div key={i} className={s.highlight}>
+                <input
+                  value={r.label}
+                  onChange={(e) =>
+                    set(
+                      "extraSpecs",
+                      d.extraSpecs.map((x, k) => (k === i ? { ...x, label: e.target.value } : x)),
+                    )
+                  }
+                  maxLength={60}
+                  placeholder="Nome da linha (ex.: Gramatura)"
+                  aria-label={`Nome da linha extra ${i + 1}`}
+                />
+                <input
+                  value={r.value}
+                  onChange={(e) =>
+                    set(
+                      "extraSpecs",
+                      d.extraSpecs.map((x, k) => (k === i ? { ...x, value: e.target.value } : x)),
+                    )
+                  }
+                  maxLength={400}
+                  placeholder="Texto (ex.: 160 g/m²)"
+                  aria-label={`Texto da linha extra ${i + 1}`}
+                />
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={() =>
+                    set(
+                      "extraSpecs",
+                      d.extraSpecs.filter((_, k) => k !== i),
+                    )
+                  }
+                  aria-label={`Remover linha extra ${i + 1}`}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+            {d.extraSpecs.length < 12 && (
+              <button type="button" className="button secondary small" onClick={() => set("extraSpecs", [...d.extraSpecs, { label: "", value: "" }])}>
+                <Plus size={14} /> Adicionar linha
               </button>
             )}
           </fieldset>
@@ -573,15 +730,7 @@ function ListingEditor({
           <h3 className={s.sectionTitle}>Cores</h3>
           <label className={m.field}>
             Cor da peça nas fotos
-            <select
-              value={d.colors[0]}
-              onChange={(e) =>
-                set("colors", [
-                  e.target.value,
-                  ...d.colors.filter((x) => x !== e.target.value),
-                ])
-              }
-            >
+            <select value={d.colors[0]} onChange={(e) => set("colors", [e.target.value, ...d.colors.filter((x) => x !== e.target.value)])}>
               {d.colors.map((id) => (
                 <option key={id} value={id}>
                   {getColor(id)?.name ?? id}
@@ -590,23 +739,16 @@ function ListingEditor({
             </select>
           </label>
           <p className={s.hint}>
-            Precisa ser a cor da peça que aparece nas fotos: é a partir dela que
-            o site pinta as outras cores. Se trocar as fotos da peça por uma de
-            outra cor, troque aqui também.
+            Precisa ser a cor da peça que aparece nas fotos: é a partir dela que o site pinta as outras cores. Se trocar as fotos da peça por uma de outra cor,
+            troque aqui também.
           </p>
           <div className={s.colorHead}>
             <span>
-              {d.colors.length}{" "}
-              {d.colors.length === 1 ? "cor à venda" : "cores à venda"}
+              {d.colors.length} {d.colors.length === 1 ? "cor à venda" : "cores à venda"}
             </span>
             <label className={s.search}>
               <Search size={15} />
-              <input
-                value={colorQuery}
-                onChange={(e) => setColorQuery(e.target.value)}
-                placeholder="Buscar cor"
-                aria-label="Buscar cor"
-              />
+              <input value={colorQuery} onChange={(e) => setColorQuery(e.target.value)} placeholder="Buscar cor" aria-label="Buscar cor" />
             </label>
           </div>
           <div className={s.colors}>
@@ -620,11 +762,7 @@ function ListingEditor({
                   className={s.color}
                   aria-pressed={on}
                   disabled={photoColor}
-                  title={
-                    photoColor
-                      ? "É a cor das fotos: escolha outra cor das fotos antes de tirar esta"
-                      : undefined
-                  }
+                  title={photoColor ? "É a cor das fotos: escolha outra cor das fotos antes de tirar esta" : undefined}
                   onClick={() => toggleColor(c.id)}
                 >
                   <Swatch c={c} />
@@ -639,25 +777,14 @@ function ListingEditor({
         {stock && (
           <section className="admin-panel">
             <h3 className={s.sectionTitle}>Tamanhos à venda</h3>
-            <p className={s.hint}>
-              Os tamanhos que o cliente pode escolher na compra pelo site.
-            </p>
+            <p className={s.hint}>Os tamanhos que o cliente pode escolher na compra pelo site.</p>
             <div className={s.chips}>
               {SIZE_OPTIONS.map((z) => (
                 <label key={z} className={s.chip}>
                   <input
                     type="checkbox"
                     checked={d.sizes.includes(z)}
-                    onChange={(e) =>
-                      set(
-                        "sizes",
-                        e.target.checked
-                          ? SIZE_OPTIONS.filter(
-                              (x) => x === z || d.sizes.includes(x),
-                            )
-                          : d.sizes.filter((x) => x !== z),
-                      )
-                    }
+                    onChange={(e) => set("sizes", e.target.checked ? SIZE_OPTIONS.filter((x) => x === z || d.sizes.includes(x)) : d.sizes.filter((x) => x !== z))}
                   />
                   {z}
                 </label>
@@ -683,17 +810,16 @@ function ListingEditor({
               <button
                 type="button"
                 className="button secondary small"
-                onClick={() => (load(initial), setError(null))}
+                onClick={() => {
+                  load(initial);
+                  setError(null);
+                }}
                 disabled={pending}
               >
                 Descartar
               </button>
             )}
-            <button
-              type="submit"
-              className="button primary small"
-              disabled={!enabled || pending || !dirty}
-            >
+            <button type="submit" className="button primary small" disabled={!enabled || pending || !dirty}>
               {pending ? "Salvando…" : "Salvar anúncio"}
             </button>
           </div>
@@ -701,43 +827,26 @@ function ListingEditor({
       </form>
 
       <section className="admin-panel">
-        <h3 className={s.sectionTitle}>Galeria</h3>
-        <p className={s.hint}>
-          As fotos são salvas assim que enviadas. As da peça sozinha (frente,
-          costas e lado) são separadas das fotos vestindo.
-        </p>
+        <h3 className={s.sectionTitle}>Galeria do anúncio</h3>
+        <p className={s.hint}>Fotos comerciais (pessoa vestindo, detalhes, ambiente). Elas não mudam de cor; quem muda de cor é a peça sozinha, logo abaixo.</p>
+        <GalleryEditor key={gallery.join("|")} slug={slug} saved={gallery} enabled={enabled} />
+      </section>
+
+      <section className="admin-panel">
+        <h3 className={s.sectionTitle}>Mockups da peça (simulador e troca de cor)</h3>
         <div className={s.gallery}>
-          <ProductPhotoSlots
-            product={catalog}
-            photos={photos}
-            enabled={enabled}
-          />
+          <ProductPhotoSlots product={catalog} photos={photos} enabled={enabled} pieceOnly />
         </div>
       </section>
 
-      <ColorPhotos
-        slug={slug}
-        colors={current.colors}
-        photos={current.colorPhotos ?? {}}
-        enabled={enabled}
-      />
+      <ColorPhotos slug={slug} colors={current.colors} photos={current.colorPhotos ?? {}} enabled={enabled} />
     </div>
   );
 }
 
 /* ---------------- Fotos vestindo por cor ---------------- */
 
-function ColorPhotos({
-  slug,
-  colors,
-  photos,
-  enabled,
-}: {
-  slug: string;
-  colors: string[];
-  photos: Record<string, string[]>;
-  enabled: boolean;
-}) {
+function ColorPhotos({ slug, colors, photos, enabled }: { slug: string; colors: string[]; photos: Record<string, string[]>; enabled: boolean }) {
   const { pending, error, setError, run } = useAction();
   const [extra, setExtra] = useState<string[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -763,10 +872,8 @@ function ColorPhotos({
     <section className="admin-panel" aria-busy={pending}>
       <h3 className={s.sectionTitle}>Fotos vestindo por cor (opcional)</h3>
       <p className={s.hint}>
-        Quando o cliente escolhe uma cor na página do produto, as fotos de
-        pessoa vestindo dessa cor aparecem no lugar das fotos padrão. Cor sem
-        foto própria continua mostrando a foto padrão, e a peça sozinha muda de
-        cor. Use fotos verticais (4:5), no mesmo estilo das fotos da vitrine.
+        Quando o cliente escolhe uma cor na página do produto, as fotos de pessoa vestindo dessa cor aparecem no lugar das fotos da galeria. Cor sem foto
+        própria continua mostrando a galeria, e a peça sozinha muda de cor. Use fotos verticais (4:5), no mesmo estilo das fotos da vitrine.
       </p>
       {error && <p className={m.error}>{error}</p>}
       <div className={s.colorRows}>
@@ -777,9 +884,7 @@ function ColorPhotos({
             <div key={color} className={s.colorRow}>
               <span className={s.colorName}>
                 {c && <Swatch c={c} />} {c?.name ?? color}
-                {!colors.includes(color) && (
-                  <small>(cor fora da lista à venda)</small>
-                )}
+                {!colors.includes(color) && <small>(cor fora da lista à venda)</small>}
               </span>
               <div className={m.slots}>
                 {([0, 1] as const).map((index) => {
@@ -796,20 +901,11 @@ function ColorPhotos({
                             <ImagePlus size={20} />
                           </span>
                         )}
-                        {busy === key && (
-                          <span className={m.uploading}>Enviando…</span>
-                        )}
+                        {busy === key && <span className={m.uploading}>Enviando…</span>}
                       </span>
-                      <small>
-                        {index ? "Vestindo 2 (costas)" : "Vestindo 1 (frente)"}
-                      </small>
+                      <small>{index ? "Vestindo 2 (costas)" : "Vestindo 1 (frente)"}</small>
                       <div className={m.slotActions}>
-                        <button
-                          type="button"
-                          className="button secondary small"
-                          disabled={!enabled || pending || !!busy}
-                          onClick={() => inputs.current[key]?.click()}
-                        >
+                        <button type="button" className="button secondary small" disabled={!enabled || pending || !!busy} onClick={() => inputs.current[key]?.click()}>
                           <Upload size={14} /> {src ? "Trocar" : "Enviar"}
                         </button>
                         {src && (
@@ -817,9 +913,7 @@ function ColorPhotos({
                             type="button"
                             className="icon-button"
                             disabled={pending || !!busy}
-                            onClick={() =>
-                              run(() => setColorPhoto(slug, color, index, null))
-                            }
+                            onClick={() => run(() => setColorPhoto(slug, color, index, null))}
                             aria-label="Remover foto"
                             title="Remover foto"
                           >

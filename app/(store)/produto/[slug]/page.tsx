@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProduct, products } from "@/lib/catalog";
+import { getProduct, products, seoDescription } from "@/lib/catalog";
 import { syncCatalog } from "@/lib/listings-server";
 import { ProductLanding } from "@/components/product/ProductLanding";
 
@@ -17,9 +17,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   await syncCatalog();
   const p = getProduct(slug);
   if (!p) return { title: "Produto não encontrado" };
-  const description = `${p.name} (${p.subtitle.toLowerCase()}) em ${p.fabric.toLowerCase()} ${p.composition}. ${p.colors.length} cores, tamanhos ${p.sizeChart[0]} ao ${p.sizeChart[p.sizeChart.length - 1]}. Logo em ${p.techniques.join(", ").toLowerCase()}. Direto da fábrica.`;
+  const description = seoDescription(p);
   return {
-    title: `${p.name} personalizado com a sua logo | ${p.fabric}`,
+    title: `${p.name} personalizado com a sua logo${p.fabric ? ` | ${p.fabric}` : ""}`,
     description,
     alternates: { canonical: `/produto/${p.slug}` },
     openGraph: { title: p.name, description, images: [{ url: p.photos[0] ?? p.image }], type: "website" },

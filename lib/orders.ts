@@ -2,7 +2,7 @@
 // Funções puras (sem "server-only") para poderem ser testadas com node:test e usadas pelo cliente
 // apenas para tipos/validação. A persistência (Neon) só roda quando DATABASE_URL existe.
 import { z } from "zod";
-import { getColor, getProduct, positionFees, type Position, type Size } from "./catalog.ts";
+import { defaultTechnique, getColor, getProduct, positionFees, type Position, type Size } from "./catalog.ts";
 import {
   type CartLine,
   type Coupon,
@@ -236,7 +236,8 @@ export function computeQuote(input: {
         total: lineTotal(l),
         logos: lineLogos(l),
         placements: l.placements,
-        technique: l.technique,
+        // sem técnica escolhida, o preço usou a primeira técnica do anúncio: o pedido registra essa
+        technique: l.technique ?? (l.positions.length ? defaultTechnique(getProduct(l.slug) ?? { techniques: [] }) : undefined),
         notes: l.notes,
       })),
       items: t.items,

@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { leadSchema } from "@/lib/lead";
+import { syncCatalog } from "@/lib/listings-server";
 
 // limite simples por IP (por instância)
 const hits = new Map<string, number[]>();
@@ -15,6 +16,8 @@ export async function POST(request: Request) {
   if (recent.length >= 10) return NextResponse.json({ error: "Muitas tentativas. Tente de novo em alguns minutos." }, { status: 429 });
   hits.set(ip, [...recent, now]);
 
+  // anúncio cadastrado no painel também gera lead
+  await syncCatalog();
   const parsed = leadSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Dados inválidos." }, { status: 400 });
   const l = parsed.data;

@@ -2257,7 +2257,13 @@ footer {
   color: var(--admin-text);
   font-size: 14px;
 }
+/* o painel tem o próprio tema: campos nativos (caixas de seleção, listas) seguem ele, não o tema do
+   computador (no modo escuro do sistema, as caixas desmarcadas apareciam pretas, como bloqueadas) */
+.admin-app {
+  color-scheme: light;
+}
 .admin-app.dark {
+  color-scheme: dark;
   --admin-bg: #101b2b;
   --admin-panel: #19283c;
   --admin-text: #dde9f7;

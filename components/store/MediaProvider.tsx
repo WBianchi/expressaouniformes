@@ -20,9 +20,10 @@ export function MediaProvider({ photos, categories = {}, children }: { photos: P
 /** Foto da categoria com a troca do painel; `showName`: escrever o nome sobre a foto (a padrão já traz o nome na arte). */
 export function useCategoryMedia() {
   const overrides = useContext(CategoryContext);
-  return useCallback((c: { slug: string; image: string }) => {
+  return useCallback((c: { slug: string; image: string; created?: boolean }) => {
     const o = overrides[c.slug];
-    return { image: o?.url ?? c.image, showName: !!o?.showName };
+    // categoria criada no painel ainda sem foto: imagem neutra com o nome por cima
+    return { image: o?.url ?? c.image, showName: o ? o.showName : !!c.created };
   }, [overrides]);
 }
 

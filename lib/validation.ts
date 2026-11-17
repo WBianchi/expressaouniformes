@@ -25,7 +25,10 @@ export const cartLineSchema = z
     placements: z
       .partialRecord(
         z.enum(["frente", "costas", "manga"]),
-        z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100), s: z.number().min(0.5).max(2) }),
+        // w = largura da logo em cm; s = escala do formato antigo (carrinhos salvos antes)
+        z
+          .object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100), w: z.number().min(0.5).max(100).optional(), s: z.number().min(0.5).max(2).optional() })
+          .refine((p) => p.w !== undefined || p.s !== undefined),
       )
       .optional(),
     notes: z.string().max(1000).optional(),

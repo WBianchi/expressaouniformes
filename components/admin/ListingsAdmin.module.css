@@ -393,3 +393,244 @@
 .gallery p {
   margin: 0;
 }
+
+.cardImg em[data-tone="draft"] {
+  background: #8a5a00;
+}
+
+/* novo anúncio */
+.newForm {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--blue, #215fcc);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--blue, #215fcc) 5%, var(--admin-panel, #fff));
+}
+.newHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.newHead h4 {
+  margin: 0;
+  font-size: 16px;
+}
+.newFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.newFields fieldset {
+  grid-column: 1 / -1;
+}
+
+/* rascunho × publicado (anúncio cadastrado no painel) */
+.publish {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fff6e0;
+  color: #6b4700;
+  font-size: 13.5px;
+}
+.publish > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.publish[data-live] {
+  background: #e7f6ec;
+  color: #1d6b3a;
+}
+:global(.admin-app.dark) .publish {
+  background: #3a2f12;
+  color: #f3d08a;
+}
+:global(.admin-app.dark) .publish[data-live] {
+  background: #173a26;
+  color: #a6e2bd;
+}
+
+/* galeria do anúncio */
+.galleryEditor {
+  display: grid;
+  gap: 12px;
+}
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.photo {
+  display: grid;
+  gap: 6px;
+  cursor: grab;
+}
+.photo[data-dragging] {
+  opacity: 0.4;
+}
+.photoImg {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #eef1f5;
+}
+.photo[data-cover] .photoImg {
+  border-color: var(--blue, #215fcc);
+}
+.photoImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+  pointer-events: none;
+}
+.photoImg em {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--blue, #215fcc);
+  color: #fff;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+.photoNum {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgb(16 33 58 / 0.75);
+  color: #fff;
+  font-size: 11px;
+}
+.photoActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.photoActions :global(.icon-button) {
+  width: 30px;
+  height: 30px;
+}
+.addPhotos {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  padding: 10px;
+  border: 2px dashed var(--admin-line, #d5dbe4);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted, #5b6573);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.addPhotos small {
+  font-size: 11.5px;
+}
+.addPhotos:hover:not(:disabled),
+.addPhotos[data-over] {
+  border-color: var(--blue, #215fcc);
+  color: var(--blue, #215fcc);
+}
+@media (max-width: 720px) {
+  .newFields {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* preço da personalização (técnica × posição) */
+.feeTable {
+  display: grid;
+  gap: 6px;
+  overflow-x: auto;
+}
+.feeRow {
+  display: grid;
+  grid-template-columns: 120px repeat(3, minmax(120px, 1fr));
+  gap: 8px;
+  align-items: center;
+  min-width: 480px;
+}
+.feeRow:first-child {
+  color: var(--muted, #5b6573);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.feeCell {
+  display: grid;
+  gap: 2px;
+}
+.feeCell small {
+  color: var(--muted, #5b6573);
+  font-size: 11.5px;
+}
+.feeInput {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--admin-line, #d5dbe4);
+  border-radius: 10px;
+  background: var(--admin-panel, #fff);
+  color: var(--muted, #5b6573);
+  font-size: 13px;
+}
+.feeInput input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 0;
+  border: 0;
+  background: transparent;
+  color: var(--admin-text, #182f48);
+  font: inherit;
+  font-weight: 600;
+  outline: none;
+}
+
+/* linhas da ficha técnica */
+.specField > span {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.specField textarea {
+  resize: vertical;
+}
+.linkBtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue, #215fcc);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+}

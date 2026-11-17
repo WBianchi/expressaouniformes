@@ -27,6 +27,14 @@
 .slide[data-active] {
   opacity: 1;
 }
+/* as fotos ficam empilhadas: só a visível recebe clique e toque (senão a de cima, transparente,
+   "rouba" o arraste da logo) */
+.slide:not([data-active]) {
+  pointer-events: none;
+}
+.slide[data-active] {
+  z-index: 1;
+}
 .badge {
   position: absolute;
   z-index: 2;

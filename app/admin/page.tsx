@@ -8,7 +8,8 @@ import { listOrders } from "@/lib/order-lookup";
 import { hasDatabase } from "@/lib/orders";
 import { listBanners, listCategoryPhotos, listClientLogos, listPhotoOverrides } from "@/lib/site-media";
 import { listLeads } from "@/lib/leads";
-import { listListings } from "@/lib/listings-server";
+import { listCatalogEdits } from "@/lib/listings-server";
+import { NO_EDITS } from "@/lib/catalog";
 
 export const metadata = {
   title: "Painel da fábrica",
@@ -17,14 +18,14 @@ export const metadata = {
 
 export default async function Page() {
   if (!(await isAdmin())) return <AdminLogin configured={adminConfigured()} />;
-  const [result, banners, photos, leads, clientLogos, categoryPhotos, listings] = await Promise.all([
+  const [result, banners, photos, leads, clientLogos, categoryPhotos, edits] = await Promise.all([
     listOrders(),
     listBanners().catch(() => null),
     listPhotoOverrides().catch(() => ({})),
     listLeads().catch(() => null),
     listClientLogos().catch(() => null),
     listCategoryPhotos().catch(() => ({})),
-    listListings().catch(() => ({})),
+    listCatalogEdits().catch(() => NO_EDITS),
   ]);
   return (
     <AdminDashboard
@@ -34,7 +35,7 @@ export default async function Page() {
       banners={banners}
       photos={photos}
       categoryPhotos={categoryPhotos}
-      listings={listings}
+      edits={edits}
       leads={leads}
       clientLogos={clientLogos}
       integrations={{

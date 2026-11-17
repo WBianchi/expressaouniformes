@@ -17,7 +17,8 @@ import {
   tintFor,
   type Position,
 } from "@/lib/catalog";
-import { logoSpots, type View } from "@/lib/mockup";
+import { cmText, logoBox, logoSpots, type View } from "@/lib/mockup";
+import { useLogoAspects } from "@/components/product/useLogoAspect";
 import {
   adjustmentMessage,
   artStatusInfo,
@@ -65,6 +66,15 @@ export function ItemArt({ item }: { item: Item }) {
         positions.some((p) => logoSpots(product)[p]?.view === v),
       )
     : [];
+  // tamanho real da logo em cada posição (a altura sai da proporção da imagem)
+  const aspectOf = useLogoAspects(positions.map((p) => item.logos?.[p]?.thumb));
+  const size = (p: Position) => {
+    const spot = product && logoSpots(product, item.technique)[p];
+    const logo = item.logos?.[p];
+    if (!spot || !logo) return "";
+    const box = logoBox(spot, item.placements?.[p], aspectOf(logo.thumb));
+    return ` · ${cmText(box.w)} × ${cmText(box.hCm)} cm`;
+  };
   // a peça na cor do pedido (o item guarda o nome da cor)
   const tint = product
     ? tintFor(product, colors.find((c) => c.name === item.color)?.id)
@@ -83,6 +93,7 @@ export function ItemArt({ item }: { item: Item }) {
                 placements={item.placements}
                 markers={false}
                 tint={tint}
+                technique={item.technique}
               />
             </span>
           ))}
@@ -95,6 +106,7 @@ export function ItemArt({ item }: { item: Item }) {
             <li key={p}>
               <span>
                 <b>{positionFees[p].label}</b>
+                {size(p)}
                 {item.placements?.[p] ? " · posição ajustada pelo cliente" : ""}
                 <small>
                   {logo ? logo.name : "Sem logo: o cliente ainda vai enviar"}

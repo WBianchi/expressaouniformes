@@ -21,7 +21,7 @@ export function productFaq(p: Product): { q: string; a: string }[] {
     },
     {
       q: `Qual o tecido e a composição?`,
-      a: `${p.fabric}, ${p.composition}. ${p.fabricNote}.`,
+      a: [p.fabric, p.composition].filter(Boolean).join(", ") + "." + (p.fabricNote ? ` ${p.fabricNote}.` : ""),
     },
     {
       q: "Quais cores estão disponíveis?",

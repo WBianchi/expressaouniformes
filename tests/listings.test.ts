@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyListings, getProduct, withListing } from "../lib/catalog.ts";
-import { cleanColorPhotos, listingDiff, listingFieldsOf, listingFormSchema, listingOverrideSchema } from "../lib/listing.ts";
+import { applyCatalogEdits, categories, getCategory, getProduct, NO_EDITS, products, stockProducts, withListing } from "../lib/catalog.ts";
+import { cleanColorPhotos, galleryPhotosSchema, listingDiff, listingFieldsOf, listingFormOf, listingFormSchema, listingOverrideSchema } from "../lib/listing.ts";
 import { unitPrice } from "../lib/pricing.ts";
 import { cartLineSchema } from "../lib/validation.ts";
 import { adjustmentMessage, artPath, customerWhatsapp, isArtUrl } from "../lib/art.ts";
@@ -13,7 +13,7 @@ test("anúncio editado vale para o catálogo inteiro e para o preço cobrado", (
   const sizes = { M: 5, G: 5 };
   const before = unitPrice({ slug: SLUG, positions: [], sizes });
   try {
-    applyListings({ [SLUG]: { name: "Camiseta Nova", price: 30, compareAt: null, sizes: ["M", "G"] } });
+    applyCatalogEdits({ ...NO_EDITS, listings: { [SLUG]: { name: "Camiseta Nova", price: 30, compareAt: null, sizes: ["M", "G"] } } });
     const p = getProduct(SLUG)!;
     assert.equal(p.name, "Camiseta Nova");
     assert.equal(p.price, 30);
@@ -27,7 +27,7 @@ test("anúncio editado vale para o catálogo inteiro e para o preço cobrado", (
     const line = { id: "a", slug: SLUG, color: p.colors[0], sizes: { P: 5 }, positions: [] };
     assert.equal(cartLineSchema.safeParse(line).success, false);
   } finally {
-    applyListings({});
+    applyCatalogEdits(NO_EDITS);
   }
   const back = getProduct(SLUG)!;
   assert.equal(back.name, original.name);
@@ -42,7 +42,7 @@ test("só o que mudou é gravado", () => {
 });
 
 test("formulário do anúncio valida preço \"de\", cores e técnicas", () => {
-  const { colorPhotos: _ignored, ...form } = listingFieldsOf(withListing(SLUG, undefined)!);
+  const form = listingFormOf(withListing(SLUG, undefined)!);
   assert.ok(listingFormSchema.safeParse(form).success);
   assert.equal(listingFormSchema.safeParse({ ...form, compareAt: form.price }).success, false);
   assert.equal(listingFormSchema.safeParse({ ...form, colors: ["preto", "preto"] }).success, false);
@@ -86,4 +86,110 @@ test("pedido de ajuste abre o WhatsApp do cliente com a mensagem pronta", () => 
   assert.ok(msg.includes("Maria"));
   assert.ok(msg.includes("EU-261116-ABCDE"));
   assert.ok(msg.includes("PNG com fundo transparente"));
+});
+
+test("categoria renomeada e criada no painel: os produtos continuam ligados", () => {
+  try {
+    applyCatalogEdits({ ...NO_EDITS, categories: { camisetas: { name: "Camisetas Premium" }, escolar: { name: "Uniforme escolar", created: true } } });
+    assert.equal(getCategory("camisetas")?.name, "Camisetas Premium");
+    assert.equal(getProduct(SLUG)?.category, "camisetas");
+    assert.equal(getCategory("escolar")?.name, "Uniforme escolar");
+    assert.equal(categories.at(-1)?.slug, "escolar");
+    // produto movido para a categoria nova
+    applyCatalogEdits({
+      ...NO_EDITS,
+      categories: { escolar: { name: "Uniforme escolar", created: true } },
+      listings: { [SLUG]: { category: "escolar" } },
+    });
+    assert.equal(getProduct(SLUG)?.category, "escolar");
+    // categoria apagada: o produto volta para a de origem
+    applyCatalogEdits({ ...NO_EDITS, listings: { [SLUG]: { category: "escolar" } } });
+    assert.equal(getCategory("escolar"), undefined);
+    assert.equal(getProduct(SLUG)?.category, "camisetas");
+  } finally {
+    applyCatalogEdits(NO_EDITS);
+  }
+  assert.equal(getCategory("camisetas")?.name, "Camisetas");
+});
+
+test("anúncio cadastrado no painel: rascunho fica fora da loja; publicado entra com galeria e preço", () => {
+  const total = products.length;
+  try {
+    const created = { "polo-dry": { name: "Polo Dry", kind: "stock" as const, category: "polos", published: false } };
+    applyCatalogEdits({ ...NO_EDITS, created });
+    assert.equal(getProduct("polo-dry"), undefined);
+    assert.ok(withListing("polo-dry", undefined));
+    applyCatalogEdits({
+      ...NO_EDITS,
+      created: { "polo-dry": { ...created["polo-dry"], published: true } },
+      listings: { "polo-dry": { price: 39.9, description: "Polo leve.", photos: ["/images/a.webp", "/images/b.webp"] } },
+    });
+    const p = getProduct("polo-dry")!;
+    assert.equal(products.length, total + 1);
+    assert.ok(stockProducts.includes(p));
+    assert.equal(p.price, 39.9);
+    assert.deepEqual(p.photos, ["/images/a.webp", "/images/b.webp"]);
+    // sem foto da peça, a capa faz as vezes da peça
+    assert.equal(p.image, "/images/a.webp");
+  } finally {
+    applyCatalogEdits(NO_EDITS);
+  }
+  assert.equal(products.length, total);
+  assert.equal(getProduct("polo-dry"), undefined);
+});
+
+test("galeria: ao menos a capa, sem repetir e só imagens do site ou do Blob", () => {
+  assert.ok(galleryPhotosSchema.safeParse(["/images/a.webp", "https://abc.public.blob.vercel-storage.com/produtos/x.webp"]).success);
+  assert.equal(galleryPhotosSchema.safeParse([]).success, false);
+  assert.equal(galleryPhotosSchema.safeParse(["/images/a.webp", "/images/a.webp"]).success, false);
+  assert.equal(galleryPhotosSchema.safeParse(["https://evil.example.com/x.webp"]).success, false);
+});
+
+test("preço da personalização por técnica e posição (editável no anúncio)", async () => {
+  const { feeFor, positionFees } = await import("../lib/catalog.ts");
+  const sizes = { M: 10 };
+  try {
+    applyCatalogEdits({ ...NO_EDITS, listings: { [SLUG]: { price: 20, fees: { Bordado: { frente: 9, costas: 15 }, Silk: { frente: 4 } } } } });
+    const p = getProduct(SLUG)!;
+    assert.equal(feeFor(p, "Bordado", "frente"), 9);
+    assert.equal(feeFor(p, "Silk", "frente"), 4);
+    // posição sem preço próprio usa a tabela padrão
+    assert.equal(feeFor(p, "Silk", "costas"), positionFees.costas.fee);
+    assert.equal(unitPrice({ slug: SLUG, positions: ["frente", "costas"], sizes, technique: "Bordado" }), 20 + 9 + 15);
+    assert.equal(unitPrice({ slug: SLUG, positions: ["frente"], sizes, technique: "Silk" }), 24);
+    // sem técnica escolhida: preço da primeira técnica do anúncio
+    assert.equal(unitPrice({ slug: SLUG, positions: ["frente"], sizes }), 20 + feeFor(p, p.techniques[0], "frente"));
+  } finally {
+    applyCatalogEdits(NO_EDITS);
+  }
+});
+
+test("bordado nas costas: logo até 27 × 5 cm", async () => {
+  const { logoSpots, maxLogoCm } = await import("../lib/mockup.ts");
+  const silk = logoSpots(getProduct(SLUG)!, "Silk").costas!;
+  const bordado = logoSpots(getProduct(SLUG)!, "Bordado").costas!;
+  assert.equal(maxLogoCm(silk, 1), 28);
+  assert.equal(maxLogoCm(bordado, 1), 5); // logo quadrada: a altura de 5 cm limita
+  assert.equal(maxLogoCm(bordado, 10), 27); // logo bem larga: até 27 cm
+  assert.equal(logoSpots(getProduct(SLUG)!, "Bordado").frente!.cap, undefined);
+});
+
+test("ficha técnica: texto editado, linha escondida e linhas extras", async () => {
+  const { specRows } = await import("../lib/specs.ts");
+  try {
+    applyCatalogEdits({
+      ...NO_EDITS,
+      listings: { [SLUG]: { specs: { grade: "", cuidados: "Lavar à mão." }, extraSpecs: [{ label: "Gramatura", value: "160 g/m²" }] } },
+    });
+    const rows = Object.fromEntries(specRows(getProduct(SLUG)!));
+    assert.equal(rows["Grade"], undefined);
+    assert.equal(rows["Cuidados"], "Lavar à mão.");
+    assert.equal(rows["Gramatura"], "160 g/m²");
+    assert.ok(rows["Fabricante"]);
+  } finally {
+    applyCatalogEdits(NO_EDITS);
+  }
+  const form = listingFormOf(withListing(SLUG, undefined)!);
+  assert.equal(listingFormSchema.safeParse({ ...form, fees: { Bordado: { frente: -1 } } }).success, false);
+  assert.equal(listingFormSchema.safeParse({ ...form, extraSpecs: [{ label: "", value: "x" }] }).success, false);
 });

@@ -2,7 +2,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { inStock, tintFor, type Position, type Product } from "@/lib/catalog";
+import { inStock, tintFor, type Position, type Product, type Technique } from "@/lib/catalog";
 import type { Placement, Placements, View } from "@/lib/mockup";
 import { SafeImage } from "@/components/ui/primitives";
 import { LogoMockup } from "./LogoMockup";
@@ -26,6 +26,7 @@ export function Gallery({
   onViewChange,
   color,
   models = false,
+  technique,
 }: {
   product: Product;
   positions?: Position[];
@@ -39,6 +40,8 @@ export function Gallery({
   color?: string;
   /** inclui as fotos da pessoa vestindo (na página do produto elas já estão na galeria de cima) */
   models?: boolean;
+  /** técnica escolhida: limita o tamanho da logo (ex.: bordado nas costas) */
+  technique?: Technique | null;
 }) {
   // fotos vestindo da cor escolhida (painel → Anúncios), quando houver
   const colorModels = (color && product.colorPhotos?.[color]?.filter(Boolean)) || [];
@@ -74,6 +77,7 @@ export function Gallery({
       logos={logos}
       placements={placements}
       onPlace={editable ? onPlace : undefined}
+      technique={technique}
       priority={priority}
       markers={!!positions.length}
     />

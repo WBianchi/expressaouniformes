@@ -27,6 +27,7 @@ import s from "./Header.module.css";
 
 export const navLinks = [
   { href: "/loja?tipo=stock", label: "Pronta-entrega" },
+  { href: "/loja?tipo=custom", label: "Uniformes sob encomenda" },
   { href: "/orcamento", label: "Monte seu pedido" },
   { href: "/contato", label: "Contato" },
 ];

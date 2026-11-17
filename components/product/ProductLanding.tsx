@@ -37,13 +37,9 @@ export async function ProductLanding({ product, source }: { product: Product; so
     ...products.filter((p) => p.slug !== product.slug && p.category !== product.category && p.kind === product.kind),
   ].slice(0, 8);
 
-  // galeria: as fotos do anúncio (na ordem do painel, capa primeiro) e a peça sozinha (muda de cor)
-  const images = [
-    ...media.photos.map((src, i) => ({ src, label: `foto ${i + 1}` })),
-    { src: media.image, label: "peça, frente", piece: true },
-    { src: media.back, label: "peça, costas", piece: true },
-    { src: media.side, label: "peça, lado", piece: true },
-  ].filter((im, i, all) => !!im.src && all.findIndex((x) => x.src === im.src) === i);
+  // galeria: só as fotos do anúncio (na ordem do painel, capa primeiro). Os mockups da peça sozinha
+  // (frente, costas, lado) aparecem só no simulador, a pedido do Neilson (17/11)
+  const images = media.photos.map((src, i) => ({ src, label: `foto ${i + 1}` })).filter((im, i, all) => !!im.src && all.findIndex((x) => x.src === im.src) === i);
 
   const jsonLd = {
     "@context": "https://schema.org",

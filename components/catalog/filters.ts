@@ -34,7 +34,7 @@ export const priceRanges: { value: PriceRange; label: string; min: number; max: 
 
 export const kindLabels: Record<SaleKind, string> = {
   stock: "Pronta-entrega",
-  custom: "Por orçamento",
+  custom: "Sob encomenda",
 };
 
 /** Modo de venda para filtro: com estoque compra online, o resto vai para o orçamento. */

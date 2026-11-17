@@ -35,6 +35,9 @@ export function CategoryGrid() {
             </button>
           </div>
         </div>
+      </div>
+      {/* quadros grandes, quase da largura da tela (5 por linha no computador), como pediu o Neilson */}
+      <div className={s.catsWrap}>
         <ul className={s.cats} ref={rail}>
           {categories.map((c) => {
             const m = catMedia(c);
@@ -63,7 +66,7 @@ export function ProductSection({ mode }: { mode: "stock" | "quote" }) {
         <div className={s.headRow}>
           <div>
             <h2 id={`prod-${mode}`} className={s.title}>
-              {mode === "stock" ? "Pronta-entrega: compra rápida pelo site" : "Modelos de fabricação"}
+              {mode === "stock" ? "Pronta-entrega: compra rápida pelo site" : "Uniformes sob encomenda"}
             </h2>
             <p className={s.sub}>
               {mode === "stock"
@@ -71,8 +74,8 @@ export function ProductSection({ mode }: { mode: "stock" | "quote" }) {
                 : `Produzidos na fábrica a partir de ${CUSTOM_MIN_QTY} peças, com tecido, gola e cores do seu jeito. Orçamento com um consultor.`}
             </p>
           </div>
-          <Link href={mode === "stock" ? "/loja?tipo=stock" : "/orcamento"} className={s.more}>
-            {mode === "stock" ? "Ver pronta-entrega" : "Montar pedido"} <ArrowRight size={15} />
+          <Link href={mode === "stock" ? "/loja?tipo=stock" : "/loja?tipo=custom"} className={s.more}>
+            {mode === "stock" ? "Ver pronta-entrega" : "Ver uniformes sob encomenda"} <ArrowRight size={15} />
           </Link>
         </div>
         <div className={s.products}>

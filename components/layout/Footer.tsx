@@ -14,6 +14,7 @@ const columns = (): Col[] => [
     title: "Institucional",
     links: [
       { href: "/loja?tipo=stock", label: "Pronta-entrega" },
+      { href: "/loja?tipo=custom", label: "Uniformes sob encomenda" },
       { href: "/orcamento", label: "Monte seu pedido" },
       { href: "/contato", label: "Fale conosco" },
       { href: "/privacidade", label: "Política de privacidade" },

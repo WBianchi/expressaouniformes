@@ -223,7 +223,7 @@ function ProductList({ items, view }: { items: Product[]; view: View }) {
 function CategoryHero({ filters }: { filters: Filters }) {
   const category = filters.categoria ? getCategory(filters.categoria) : undefined;
   const only = filters.tipos.length === 1 ? filters.tipos[0] : null;
-  const title = category?.name ?? (only === "custom" ? "Por orçamento" : only === "stock" ? "Pronta-entrega" : "Todos os produtos");
+  const title = category?.name ?? (only === "custom" ? "Uniformes sob encomenda" : only === "stock" ? "Pronta-entrega" : "Todos os produtos");
   // categoria criada no painel sem descrição: texto padrão (nada de linha vazia)
   const subtitle =
     category?.description ||

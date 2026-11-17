@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, ChevronRight, FileCheck2, Heart, LogIn, LogOut, Package, Sparkles, UserRound } from "lucide-react";
+import { Factory, ArrowRight, ChevronRight, FileCheck2, Heart, LogIn, LogOut, Package, Sparkles, UserRound } from "lucide-react";
 import { categories, company, whatsappLink } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
 import { Drawer } from "@/components/ui/Drawer";
@@ -45,6 +45,11 @@ export function MobileMenu() {
             <Package size={20} strokeWidth={1.75} />
             <b>Pronta-entrega</b>
             <small>A partir de 5 peças</small>
+          </Link>
+          <Link href="/loja?tipo=custom" className={s.mode} data-tone="custom" onClick={closeDrawer}>
+            <Factory size={20} strokeWidth={1.75} />
+            <b>Uniformes sob encomenda</b>
+            <small>A partir de 30 peças</small>
           </Link>
           <Link href="/orcamento" className={s.mode} data-tone="custom" onClick={closeDrawer}>
             <Sparkles size={20} strokeWidth={1.75} />

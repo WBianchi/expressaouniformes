@@ -66,6 +66,8 @@ export type Product = {
   photos: string[];
   /** galeria completa da landing page: modelo frente, modelo costas, peça frente, costas e lado */
   gallery: string[];
+  /** fotos de pessoa vestindo por cor (enviadas pelo painel): cor → [frente, costas] */
+  colorPhotos?: Record<string, string[]>;
 };
 
 const c = (id: string, name: string, hex: string, pattern?: Color["pattern"]): Color => ({ id, name, hex, ...(pattern ? { pattern } : {}) });
@@ -430,7 +432,7 @@ const featuresOf = (p: Base) => [
   `Tamanhos ${p.sizeChart.length > 1 ? `${p.sizeChart[0]} ao ${p.sizeChart[p.sizeChart.length - 1]}` : p.sizeChart[0].toLowerCase()}`,
 ];
 
-export const products: Product[] = base.map((p) => ({
+const build = (p: Base): Product => ({
   ...p,
   short: p.short ?? `${p.subtitle}. ${p.fabric}, ${p.composition}.`,
   features: featuresOf(p),
@@ -441,7 +443,54 @@ export const products: Product[] = base.map((p) => ({
   side: side(p.slug),
   photos: photos(p.slug),
   gallery: [...photos(p.slug), img(p.slug), back(p.slug), side(p.slug)],
-}));
+});
+
+export const products: Product[] = base.map(build);
+
+// ---------------------------------------------------------------- edições do painel (Anúncios)
+
+/** Campos do anúncio que o painel edita; o resto (modo de venda, categoria, fotos padrão) continua vindo daqui. */
+export type ListingFields = Pick<
+  Product,
+  "name" | "subtitle" | "description" | "fabric" | "composition" | "fabricNote" | "highlights" | "sizeChart" | "techniques" | "price" | "colors" | "sizes"
+> & {
+  /** preço "de" riscado; null = sem */
+  compareAt: number | null;
+  colorPhotos: Record<string, string[]>;
+};
+/** Edições do painel por produto (só os campos alterados). */
+export type ListingOverrides = Record<string, Partial<ListingFields>>;
+
+const baseBySlug = new Map(base.map((b) => [b.slug, b]));
+
+/** O produto com as edições do painel, sem mexer no catálogo. Sem edição = como está no código. */
+export function withListing(slug: string, o: Partial<ListingFields> | undefined): Product | undefined {
+  const b = baseBySlug.get(slug);
+  if (!b) return undefined;
+  if (!o) return build(b);
+  const { compareAt, ...rest } = o;
+  return build({ ...b, ...rest, compareAt: compareAt === undefined ? b.compareAt : (compareAt ?? undefined) });
+}
+
+let appliedSig = "{}";
+
+/**
+ * Aplica as edições do painel aos produtos do catálogo (os mesmos objetos, alterados no lugar),
+ * para que tudo que lê `products`/`getProduct` (páginas, carrinho, preço do checkout) veja o anúncio editado.
+ * No servidor: `syncCatalog()` (lib/listings-server.ts) no início de cada página e rota.
+ * No navegador: o StoreProvider aplica o que veio do servidor antes de desenhar a loja.
+ */
+export function applyListings(overrides: ListingOverrides) {
+  const sig = JSON.stringify(overrides);
+  if (sig === appliedSig) return;
+  appliedSig = sig;
+  for (const p of products) {
+    const next = withListing(p.slug, overrides[p.slug])!;
+    const target = p as Record<string, unknown>;
+    for (const k of Object.keys(target)) if (!(k in next)) delete target[k];
+    Object.assign(p, next);
+  }
+}
 
 export const stockProducts = products.filter((p) => p.kind === "stock");
 export const customProducts = products.filter((p) => p.kind === "custom");

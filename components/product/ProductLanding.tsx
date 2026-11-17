@@ -6,6 +6,7 @@ import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import { productFaq } from "@/lib/product-faq";
 import { getClientLogos, getPhotoOverrides } from "@/lib/site-media";
 import { withPhotos } from "@/lib/product-media";
+import { syncCatalog } from "@/lib/listings-server";
 import { QualifyFlow } from "@/components/qualify/QualifyFlow";
 import { ClientLogos, FactoryStrip, TwoPaths } from "@/components/home/FactorySections";
 import { LpGallery } from "@/components/lp/LpGallery";
@@ -28,7 +29,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://expressaouniformes.ver
 export async function ProductLanding({ product, source }: { product: Product; source: string }) {
   const category = getCategory(product.category);
   const available = inStock(product);
-  const [clientLogos, overrides] = await Promise.all([getClientLogos(), getPhotoOverrides()]);
+  const [clientLogos, overrides] = await Promise.all([getClientLogos(), getPhotoOverrides(), syncCatalog()]);
   // fotos trocadas no painel (pessoa vestindo e peça sozinha) valem aqui também
   const media = withPhotos(product, overrides[product.slug]);
   const related = [
@@ -113,7 +114,7 @@ export async function ProductLanding({ product, source }: { product: Product; so
           <div className={s.top}>
             {/* cartão principal: galeria + informações e variações */}
             <div className={`${s.card} ${s.main}`}>
-              <LpGallery images={images} name={product.name} />
+              <LpGallery images={images} name={product.name} colorPhotos={product.colorPhotos} />
               <div className={s.info}>
                 <span className={s.eyebrow}>
                   <Factory size={14} /> {available ? "Pronta-entrega" : "Fabricação"} · {category?.name}

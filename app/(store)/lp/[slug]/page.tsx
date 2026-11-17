@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProduct, products } from "@/lib/catalog";
+import { syncCatalog } from "@/lib/listings-server";
 import { ProductLanding } from "@/components/product/ProductLanding";
 
 // Landing page de anúncio (Google Ads, Meta): cada anúncio aponta para /lp/<produto>.
@@ -15,6 +16,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  await syncCatalog();
   const p = getProduct(slug);
   if (!p) return { title: "Produto não encontrado" };
   const description = `${p.name} (${p.subtitle.toLowerCase()}) em ${p.fabric.toLowerCase()} ${p.composition}. ${p.colors.length} cores, tamanhos ${p.sizeChart[0]} ao ${p.sizeChart[p.sizeChart.length - 1]}. Logo em ${p.techniques.join(", ").toLowerCase()}. Direto da fábrica.`;
@@ -28,6 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function LandingPage({ params }: Props) {
   const { slug } = await params;
+  await syncCatalog();
   const product = getProduct(slug);
   if (!product) notFound();
   return <ProductLanding product={product} source={`lp:${product.slug}`} />;

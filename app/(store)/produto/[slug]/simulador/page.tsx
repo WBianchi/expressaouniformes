@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ChevronRight, Wand2 } from "lucide-react";
 import { getCategory, getProduct, inStock, products } from "@/lib/catalog";
 import { STOCK_MIN_QTY } from "@/lib/quote";
+import { syncCatalog } from "@/lib/listings-server";
 import { ProductTop } from "@/components/product/ProductTop";
 import s from "@/components/lp/Landing.module.css";
 
@@ -17,6 +18,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  await syncCatalog();
   const p = getProduct(slug);
   if (!p) return { title: "Produto não encontrado" };
   return {
@@ -30,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SimulatorPage({ params }: Props) {
   const { slug } = await params;
+  await syncCatalog();
   const product = getProduct(slug);
   if (!product) notFound();
   // peça de fabricação não tem simulador: volta para o orçamento na página do produto

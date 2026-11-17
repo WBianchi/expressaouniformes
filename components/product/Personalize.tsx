@@ -78,7 +78,7 @@ export function Personalize({
               </button>
               {on && (
                 <div className={s.posSlot}>
-                  <LogoUpload value={logos[pos] ?? null} onChange={(v) => onLogo(pos, v)} label={`Logo da ${positionFees[pos].label.toLowerCase()}`} compact />
+                  <LogoUpload value={logos[pos] ?? null} onChange={(v) => onLogo(pos, v)} label={`Logo da ${positionFees[pos].label.toLowerCase()}`} compact keepOriginal />
                   {logos[pos] && (
                     <div className={s.posAdjust}>
                       <label className={s.posSize}>

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { quoteFreight } from "@/lib/frenet";
+import { syncCatalog } from "@/lib/listings-server";
 import { cartLineSchema } from "@/lib/validation";
 import type { CartLine } from "@/lib/pricing";
 
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
   const ip = (request.headers.get("x-vercel-forwarded-for") || request.headers.get("x-forwarded-for") || "local").split(",")[0].trim();
   if (rateLimited(ip)) return json({ error: "Muitas consultas de frete. Aguarde um minuto." }, 429);
 
+  await syncCatalog();
   let parsed;
   try {
     const raw = await request.text();

@@ -19,6 +19,7 @@ import {
   type QuoteLine,
   type ShopOrderRecord,
 } from "./orders";
+import { artStatuses, type ArtReview, type ArtStatus } from "./art";
 
 export type AdminOrder = {
   id: string;
@@ -51,6 +52,10 @@ export type AdminOrder = {
   address?: string;
   invoiceUrl?: string;
   asaasPaymentId?: string;
+  /** revisão da arte no painel (só pedidos do banco; sem registro = aguardando revisão) */
+  art?: ArtReview;
+  /** observações do cliente no pedido */
+  notes?: string;
   source: "db" | "asaas";
 };
 
@@ -82,9 +87,11 @@ async function sql() {
   return neon(process.env.DATABASE_URL!);
 }
 
-function fromRecord(r: ShopOrderRecord): AdminOrder {
+function fromRecord(r: ShopOrderRecord, art?: ArtReview): AdminOrder {
   const a = r.address;
   return {
+    art: art ?? { status: "revisao" },
+    notes: [r.notes, ...r.quote.lines.map((l) => (l.notes ? `${l.name}: ${l.notes}` : ""))].filter(Boolean).join(" · ") || undefined,
     id: r.id,
     createdAt: r.createdAt,
     status: r.status,
@@ -155,10 +162,28 @@ export async function listOrders(): Promise<OrdersResult> {
   if (hasDatabase()) {
     try {
       const db = await sql();
-      const rows =
-        await db`SELECT data FROM expressao.shop_orders ORDER BY created_at DESC LIMIT 300`;
+      type Row = { data: ShopOrderRecord; art_status?: string | null; art_note?: string | null; art_at?: string | Date | null };
+      // com a revisão das artes; se a tabela ainda não existe (migração 010), lê só os pedidos
+      const rows = (await db`
+        SELECT o.data, a.status AS art_status, a.note AS art_note, a.updated_at AS art_at
+          FROM expressao.shop_orders o
+          LEFT JOIN expressao.art_reviews a ON a.order_id = o.id
+         ORDER BY o.created_at DESC LIMIT 300`.catch(
+        () => db`SELECT data FROM expressao.shop_orders ORDER BY created_at DESC LIMIT 300`,
+      )) as Row[];
       return {
-        orders: rows.map((r) => fromRecord(r.data as ShopOrderRecord)),
+        orders: rows.map((r) =>
+          fromRecord(
+            r.data,
+            r.art_status && (artStatuses as readonly string[]).includes(r.art_status)
+              ? {
+                  status: r.art_status as ArtStatus,
+                  note: r.art_note ?? undefined,
+                  updatedAt: r.art_at ? new Date(r.art_at).toISOString() : undefined,
+                }
+              : undefined,
+          ),
+        ),
         source: "db",
       };
     } catch {

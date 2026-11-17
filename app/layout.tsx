@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import StoreProvider from "@/components/store/StoreProvider";
+import { getListings } from "@/lib/listings-server";
 import "./globals.css";
 
 const body = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
@@ -27,14 +28,15 @@ export const viewport: Viewport = {
 // Aplica o tema salvo antes da primeira pintura (evita flash claro/escuro).
 const themeScript = `try{var t=localStorage.getItem("eu-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const listings = await getListings();
   return (
     <html lang="pt-BR" className={`${body.variable} ${heading.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider listings={listings}>{children}</StoreProvider>
         <Toaster richColors closeButton position="bottom-right" offset={{ bottom: 96, right: 24 }} mobileOffset={{ bottom: 96 }} toastOptions={{ style: { fontFamily: "var(--font-sans)" } }} />
       </body>
     </html>

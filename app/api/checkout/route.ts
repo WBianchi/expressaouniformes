@@ -28,6 +28,7 @@ import {
 import type { CartLine } from "@/lib/pricing";
 import { PICKUP } from "@/lib/shipping";
 import { quoteFreight } from "@/lib/frenet";
+import { syncCatalog } from "@/lib/listings-server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -93,6 +94,8 @@ export async function POST(request: Request) {
   const ip = clientIp(request);
   if (rateLimited(ip ?? "local")) return fail("Muitas tentativas. Aguarde um minuto e tente novamente.", 429);
 
+  // preços, cores e tamanhos editados no painel valem para a validação e a cobrança
+  await syncCatalog();
   let parsed;
   try {
     const raw = await request.text();

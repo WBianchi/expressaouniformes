@@ -5,9 +5,9 @@ import { CategoryIcon } from "@/components/ui/primitives";
 import { applyFilters, categories, kindLabels, saleMode, priceRanges, SIZES, TECHNIQUES, toggle, type Filters } from "./filters";
 import s from "./Catalog.module.css";
 
-const usedColors = colors.filter((c) => products.some((p) => p.colors.includes(c.id)));
-
 export function FilterPanel({ filters, onChange }: { filters: Filters; onChange: (f: Filters) => void }) {
+  // calculado aqui (não ao carregar o arquivo) para valer com as cores editadas no painel
+  const usedColors = colors.filter((c) => products.some((p) => p.colors.includes(c.id)));
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const byCategory = applyFilters(filters, "categoria");
   const byKind = applyFilters(filters, "tipos");

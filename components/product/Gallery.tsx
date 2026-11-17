@@ -40,11 +40,14 @@ export function Gallery({
   /** inclui as fotos da pessoa vestindo (na página do produto elas já estão na galeria de cima) */
   models?: boolean;
 }) {
+  // fotos vestindo da cor escolhida (painel → Anúncios), quando houver
+  const colorModels = (color && product.colorPhotos?.[color]?.filter(Boolean)) || [];
+  const modelPhotos = colorModels.length ? colorModels : product.photos;
   const VIEWS: { id: Slide; label: string }[] = [
     { id: "front", label: "Frente" },
     { id: "back", label: "Costas" },
     { id: "side", label: "Lado" },
-    ...(models ? product.photos : []).slice(0, 2).map((_, i) => ({ id: `modelo-${i + 1}` as Slide, label: i ? "Vestindo, costas" : "Vestindo" })),
+    ...(models ? modelPhotos : []).slice(0, 2).map((_, i) => ({ id: `modelo-${i + 1}` as Slide, label: i ? "Vestindo, costas" : "Vestindo" })),
   ];
   const tint = tintFor(product, color);
   const [own, setOwn] = useState<Slide>(VIEWS[0].id);
@@ -61,7 +64,7 @@ export function Gallery({
 
   const render = (v: (typeof VIEWS)[number], priority?: boolean, editable?: boolean) =>
     !isView(v.id) ? (
-      <SafeImage className={s.model} src={product.photos[v.id === "modelo-2" ? 1 : 0]} alt={`${product.name}: ${v.label.toLowerCase()}`} />
+      <SafeImage className={s.model} src={modelPhotos[v.id === "modelo-2" ? 1 : 0] ?? product.photos[0]} alt={`${product.name}: ${v.label.toLowerCase()}`} />
     ) : (
     <LogoMockup
       product={product}

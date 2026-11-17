@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { colors, getProduct, inStock, type Size } from "./catalog.ts";
+import { isArtUrl } from "./art.ts";
 
 const sizeKeys = ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"] as const satisfies readonly Size[];
 const count = z.number().int().min(0).max(9999);
@@ -7,6 +8,8 @@ const count = z.number().int().min(0).max(9999);
 const logoSchema = z.object({
   name: z.string().max(200),
   thumb: z.string().max(300_000).refine((s) => s.startsWith("data:image/")),
+  /** arquivo original guardado no Blob (artes/) */
+  url: z.string().max(400).refine(isArtUrl).optional(),
 });
 
 export const cartLineSchema = z

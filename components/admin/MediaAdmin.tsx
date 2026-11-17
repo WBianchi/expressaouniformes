@@ -5,9 +5,9 @@ import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Palette, Pencil, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
-import type { Banner, PhotoOverrides } from "@/lib/banners";
+import type { Banner } from "@/lib/banners";
 import type { CategoryPhotos, ClientLogo } from "@/lib/site-media";
-import { categories, products } from "@/lib/catalog";
+import { categories, type Product } from "@/lib/catalog";
 import { defaultPhoto, PHOTO_SLOTS } from "@/lib/product-media";
 import { useRecolored } from "@/lib/recolor";
 import {
@@ -27,10 +27,10 @@ import {
 } from "@/app/admin/media-actions";
 import s from "./MediaAdmin.module.css";
 
-const ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
+export const ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
 const MAX_MB = 8;
 
-async function uploadImage(file: File, folder: "banners" | "produtos" | "categorias" | "clientes") {
+export async function uploadImage(file: File, folder: "banners" | "produtos" | "categorias" | "clientes") {
   if (!ACCEPT.split(",").includes(file.type)) throw new Error("Use JPG, PNG, WebP ou AVIF.");
   if (file.size > MAX_MB * 1024 * 1024) throw new Error(`Imagem acima de ${MAX_MB} MB.`);
   const name = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
@@ -55,7 +55,7 @@ const LINKS = [
   ["/contato", "Contato"],
 ] as const;
 
-function useAction() {
+export function useAction() {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -336,19 +336,19 @@ function PiecePreview({ src, test }: { src: string; test: boolean }) {
   );
 }
 
-export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides; enabled: boolean }) {
+/** Fotos de um produto: vestindo (vitrine) e peça sozinha (simulador e troca de cor). Cada envio já salva. */
+export function ProductPhotoSlots({ product: p, photos: o, enabled }: { product: Product; photos: (string | null)[]; enabled: boolean }) {
   const { pending, error, setError, run } = useAction();
-  const [busy, setBusy] = useState<string | null>(null);
-  const inputs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [busy, setBusy] = useState<number | null>(null);
+  const inputs = useRef<Record<number, HTMLInputElement | null>>({});
 
-  const onFile = async (slug: string, slot: number, file?: File) => {
+  const onFile = async (slot: number, file?: File) => {
     if (!file) return;
-    const key = `${slug}-${slot}`;
-    setBusy(key);
+    setBusy(slot);
     setError(null);
     try {
       const url = await uploadImage(file, "produtos");
-      run(() => setProductPhoto(slug, slot, url));
+      run(() => setProductPhoto(p.slug, slot, url));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no envio da imagem.");
     } finally {
@@ -356,101 +356,73 @@ export function ProductPhotosAdmin({ photos, enabled }: { photos: PhotoOverrides
     }
   };
 
-  return (
-    <div className="admin-panel">
-      <div className="panel-heading">
-        <div>
-          <h3>Fotos dos produtos</h3>
-          <p>
-            <b>Vestindo:</b> a foto 1 aparece na vitrine e abre a página do produto; a 2 aparece ao passar o mouse e na galeria. Use fotos verticais
-            (4:5) de pessoas vestindo a peça.
-          </p>
-          <p>
-            <b>Peça sozinha (frente, costas e lado):</b> aparecem na galeria do produto e no simulador da logo, e são as fotos que mudam de cor quando o
-            cliente escolhe outra cor. Use foto quadrada, só a peça, centralizada e no mesmo enquadramento da foto atual (para a logo cair no lugar
-            certo), em fundo liso e claro, sem pessoa nem cabide. Peça branca ou cinza claro: prefira um fundo um pouco mais escuro que a peça. Depois de
-            enviar, use <b>Testar cor</b> para conferir a troca de cor.
-          </p>
+  const slot = ({ slot, label, piece }: (typeof PHOTO_SLOTS)[number]) => {
+    const custom = o[slot];
+    const src = custom ?? defaultPhoto(p, slot);
+    return (
+      <div key={slot} className={s.slot}>
+        <span className={s.slotImg} data-piece={piece || undefined}>
+          {piece ? (
+            <PiecePreview key={src} src={src} test={!!custom} />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={src} alt="" loading="lazy" />
+          )}
+          {busy === slot && <span className={s.uploading}>Enviando…</span>}
+          <em>{custom ? "Personalizada" : "Padrão"}</em>
+        </span>
+        <small>{label}</small>
+        <div className={s.slotActions}>
+          <button type="button" className="button secondary small" disabled={!enabled || pending || busy !== null} onClick={() => inputs.current[slot]?.click()}>
+            <Upload size={14} /> Trocar
+          </button>
+          {custom && (
+            <button
+              type="button"
+              className="icon-button"
+              disabled={pending || busy !== null}
+              onClick={() => run(() => resetProductPhoto(p.slug, slot))}
+              aria-label="Voltar para a foto padrão"
+              title="Voltar para a foto padrão"
+            >
+              <RotateCcw size={15} />
+            </button>
+          )}
         </div>
+        <input
+          ref={(el) => {
+            inputs.current[slot] = el;
+          }}
+          type="file"
+          accept={ACCEPT}
+          hidden
+          onChange={(e) => {
+            onFile(slot, e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
       </div>
-      {!enabled && <p className={s.note}>Banco de dados não configurado: não é possível trocar as fotos.</p>}
-      {error && <p className={s.error}>{error}</p>}
+    );
+  };
 
-      <ul className={s.products} aria-busy={pending}>
-        {products.map((p) => {
-          const o = photos[p.slug] ?? [];
-          const slot = ({ slot, label, piece }: (typeof PHOTO_SLOTS)[number]) => {
-            const key = `${p.slug}-${slot}`;
-            const custom = o[slot];
-            const src = custom ?? defaultPhoto(p, slot);
-            return (
-              <div key={slot} className={s.slot}>
-                <span className={s.slotImg} data-piece={piece || undefined}>
-                  {piece ? (
-                    <PiecePreview key={src} src={src} test={!!custom} />
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={src} alt="" loading="lazy" />
-                  )}
-                  {busy === key && <span className={s.uploading}>Enviando…</span>}
-                  <em>{custom ? "Personalizada" : "Padrão"}</em>
-                </span>
-                <small>{label}</small>
-                <div className={s.slotActions}>
-                  <button
-                    type="button"
-                    className="button secondary small"
-                    disabled={!enabled || pending || !!busy}
-                    onClick={() => inputs.current[key]?.click()}
-                  >
-                    <Upload size={14} /> Trocar
-                  </button>
-                  {custom && (
-                    <button
-                      type="button"
-                      className="icon-button"
-                      disabled={pending || !!busy}
-                      onClick={() => run(() => resetProductPhoto(p.slug, slot))}
-                      aria-label="Voltar para a foto padrão"
-                      title="Voltar para a foto padrão"
-                    >
-                      <RotateCcw size={15} />
-                    </button>
-                  )}
-                </div>
-                <input
-                  ref={(el) => {
-                    inputs.current[key] = el;
-                  }}
-                  type="file"
-                  accept={ACCEPT}
-                  hidden
-                  onChange={(e) => {
-                    onFile(p.slug, slot, e.target.files?.[0]);
-                    e.target.value = "";
-                  }}
-                />
-              </div>
-            );
-          };
-          return (
-            <li key={p.slug} className={s.product}>
-              <div className={s.productHead}>
-                <strong>{p.name}</strong>
-                <a href={`/produto/${p.slug}`} target="_blank" rel="noreferrer">
-                  Ver na loja
-                </a>
-              </div>
-              <span className={s.groupLabel}>Vestindo (vitrine)</span>
-              <div className={s.slots}>{PHOTO_SLOTS.filter((x) => !x.piece).map(slot)}</div>
-              <span className={s.groupLabel}>Peça sozinha (simulador e troca de cor)</span>
-              <div className={s.slots} data-piece>
-                {PHOTO_SLOTS.filter((x) => x.piece).map(slot)}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+  return (
+    <div aria-busy={pending}>
+      {error && <p className={s.error}>{error}</p>}
+      <span className={s.groupLabel}>Vestindo (vitrine)</span>
+      <p className={s.note}>
+        A foto 1 aparece na vitrine e abre a página do produto; a 2 aparece ao passar o mouse e na galeria. Use fotos verticais (4:5) de pessoas vestindo
+        a peça.
+      </p>
+      <div className={s.slots}>{PHOTO_SLOTS.filter((x) => !x.piece).map(slot)}</div>
+      <span className={s.groupLabel}>Peça sozinha (simulador e troca de cor)</span>
+      <p className={s.note}>
+        Aparecem na galeria e no simulador da logo, e são as fotos que mudam de cor quando o cliente escolhe outra cor. Use foto quadrada, só a peça,
+        centralizada e no mesmo enquadramento da foto atual (para a logo cair no lugar certo), em fundo liso e claro, sem pessoa nem cabide. Peça branca
+        ou cinza claro: prefira um fundo um pouco mais escuro que a peça. Depois de enviar, use <b>Testar cor</b> para conferir.
+      </p>
+      <div className={s.slots} data-piece>
+        {PHOTO_SLOTS.filter((x) => x.piece).map(slot)}
+      </div>
     </div>
   );
 }

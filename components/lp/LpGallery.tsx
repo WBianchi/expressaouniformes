@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SafeImage } from "@/components/ui/primitives";
 import { useRecolored } from "@/lib/recolor";
@@ -18,14 +18,24 @@ function Photo({ im, alt, priority, tint }: { im: LpImage; alt: string; priority
  * Galeria da landing page (estilo marketplace): foto principal grande e miniaturas
  * embaixo. Modelo vestindo a peça (frente e costas) e a peça sozinha (frente, costas, lado).
  */
-export function LpGallery({ images, name }: { images: LpImage[]; name: string }) {
+export function LpGallery({ images: base, name, colorPhotos }: { images: LpImage[]; name: string; colorPhotos?: Record<string, string[]> }) {
   const [i, setI] = useState(0);
-  const tint = useLpColor()?.tint ?? null;
-  // ao escolher outra cor, mostra a peça sozinha (é ela que muda de cor)
+  const lp = useLpColor();
+  const tint = lp?.tint ?? null;
+  // cor com fotos vestindo próprias (enviadas no painel): entram no lugar das fotos vestindo padrão
+  const own = (lp && colorPhotos?.[lp.color]?.filter(Boolean)) || [];
+  const images = useMemo<LpImage[]>(
+    () => (own.length ? [...own.map((src, k) => ({ src, label: k ? "vestindo, costas" : "vestindo, frente" })), ...base.filter((im) => im.piece)] : base),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [own.join("|"), base],
+  );
+  const hasOwn = own.length > 0;
+  // ao escolher outra cor: com foto vestindo da cor, mostra ela; sem, mostra a peça sozinha (é ela que muda de cor)
   useEffect(() => {
+    if (hasOwn) return setI(0);
     if (!tint) return;
     setI((cur) => (images[cur]?.piece ? cur : Math.max(0, images.findIndex((im) => im.piece))));
-  }, [tint, images]);
+  }, [tint, images, hasOwn]);
   const touch = useRef<number | null>(null);
   const go = (d: number) => setI((cur) => (cur + d + images.length) % images.length);
   const current = images[i];

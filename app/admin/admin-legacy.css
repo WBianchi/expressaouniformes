@@ -2756,8 +2756,9 @@ footer {
 }
 .kanban {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  /* 5 etapas: pagamento, análise, arte, produção, cancelados */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
 }
 .kanban > section {
   background: #e9eff7;

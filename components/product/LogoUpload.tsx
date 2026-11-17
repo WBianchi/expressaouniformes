@@ -1,16 +1,30 @@
 "use client";
+import { upload } from "@vercel/blob/client";
 import { CheckCircle2, ImageUp, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { useId, useRef, useState, type DragEvent } from "react";
+import { artContentType, artPath } from "@/lib/art";
 import { formatBytes, makeLogoThumb, validateLogo } from "./logoThumb";
 import s from "./Product.module.css";
 
-export type LogoValue = { name: string; thumb: string; size?: number } | null;
+/** url: arquivo original guardado para a fábrica (só na compra pronta-entrega). */
+export type LogoValue = { name: string; thumb: string; size?: number; url?: string } | null;
+
+/** Guarda o arquivo original no Blob (a fábrica usa para imprimir ou bordar). */
+async function uploadOriginal(file: File) {
+  const blob = await upload(artPath(file.name, file.type), file, {
+    access: "public",
+    handleUploadUrl: "/api/artes/upload",
+    contentType: artContentType(file),
+  });
+  return blob.url;
+}
 
 export function LogoUpload({
   value,
   onChange,
   label = "logo",
   compact,
+  keepOriginal,
 }: {
   value: LogoValue;
   onChange: (v: LogoValue) => void;
@@ -18,12 +32,18 @@ export function LogoUpload({
   label?: string;
   /** versão menor, usada dentro de cada posição */
   compact?: boolean;
+  /** também guarda o arquivo original (compra pronta-entrega: vai para o pedido e para a fila de artes) */
+  keepOriginal?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const hintId = useId();
+  // valor mais recente: o envio do original termina depois e não pode grudar numa logo já trocada
+  const latest = useRef(value);
+  latest.current = value;
 
   async function handle(file: File | undefined) {
     if (!file) return;
@@ -36,7 +56,19 @@ export function LogoUpload({
     setBusy(true);
     try {
       const thumb = await makeLogoThumb(file);
-      onChange({ name: file.name.slice(0, 200), thumb, size: file.size });
+      const v = { name: file.name.slice(0, 200), thumb, size: file.size };
+      latest.current = v;
+      onChange(v);
+      if (keepOriginal) {
+        // em segundo plano: a prévia já aparece; sem o original, a fábrica usa a prévia ou pede o arquivo
+        setSending(true);
+        uploadOriginal(file)
+          .then((url) => {
+            if (latest.current?.thumb === thumb) onChange({ ...latest.current, url });
+          })
+          .catch(() => {})
+          .finally(() => setSending(false));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível processar a imagem.");
     } finally {
@@ -73,6 +105,7 @@ export function LogoUpload({
             <b><CheckCircle2 size={15} /> Logo anexada</b>
             <span title={value.name}>{value.name}</span>
             {value.size ? <small>{formatBytes(value.size)} · enviaremos o layout para sua aprovação</small> : null}
+            {keepOriginal && sending && !value.url ? <small>Guardando o arquivo original para a produção…</small> : null}
           </div>
           <div className={s.uploadActions}>
             <button type="button" className="icon-btn" onClick={() => input.current?.click()} aria-label={`Trocar ${label.toLowerCase()}`}><RefreshCw size={17} /></button>

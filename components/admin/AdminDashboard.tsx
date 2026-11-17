@@ -37,20 +37,21 @@ import {
   Building2,
   UserPlus,
 } from "lucide-react";
-import { products, money, getColor, getProduct, positionFees } from "@/lib/catalog";
-import { logoSpots, type View } from "@/lib/mockup";
-import { LogoMockup } from "@/components/product/LogoMockup";
+import { money, type ListingOverrides } from "@/lib/catalog";
+import { artStatusInfo } from "@/lib/art";
 import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
 import { logout } from "@/app/admin/actions";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
-import { BannersAdmin, CategoryPhotosAdmin, ClientLogosAdmin, ProductPhotosAdmin } from "./MediaAdmin";
+import { BannersAdmin, CategoryPhotosAdmin, ClientLogosAdmin } from "./MediaAdmin";
+import { ListingsAdmin } from "./ListingsAdmin";
+import { ArtQueue, ItemArt, artApproved, needsArt } from "./ArtQueue";
 import { LeadsAdmin } from "./LeadsAdmin";
 import type { AdminLead } from "@/lib/lead-admin-types";
 import type { CategoryPhotos, ClientLogo } from "@/lib/site-media";
 const navigation = [
   ["Visão geral", LayoutDashboard],
   ["Pedidos", ShoppingBag],
-  ["Produtos", Shirt],
+  ["Anúncios", Shirt],
   ["Personalizações", Palette],
   ["Produção", Factory],
   ["Leads", UserPlus],
@@ -85,6 +86,8 @@ const statusInfo: Record<string, [string, Row["tone"]]> = {
   aguardando_pagamento: ["Aguardando pagamento", "amber"],
   em_analise: ["Pagamento em análise", "blue"],
   pago: ["Pago · aguardando arte", "green"],
+  // pago e com a arte aprovada (ou sem logo): na produção
+  producao: ["Pago · em produção", "green"],
   vencido: ["Vencido", "red"],
   recusado: ["Recusado", "red"],
   cancelado: ["Cancelado", "red"],
@@ -93,7 +96,7 @@ const statusInfo: Record<string, [string, Row["tone"]]> = {
 const methodName = { pix: "Pix", boleto: "Boleto", cartao: "Cartão" } as const;
 
 const toRow = (o: AdminOrder): Row => {
-  const [status, tone] = statusInfo[o.status] ?? [o.status, "blue"];
+  const [status, tone] = statusInfo[o.status === "pago" && artApproved(o) ? "producao" : o.status] ?? [o.status, "blue"];
   const words = o.customer.name.trim().split(/\s+/);
   return {
     id: o.id,
@@ -207,6 +210,7 @@ export default function AdminDashboard({
   banners,
   photos,
   categoryPhotos,
+  listings,
   leads,
   clientLogos,
 }: {
@@ -217,6 +221,7 @@ export default function AdminDashboard({
   banners: Banner[] | null;
   photos: PhotoOverrides;
   categoryPhotos: CategoryPhotos;
+  listings: ListingOverrides;
   leads: AdminLead[] | null;
   clientLogos: ClientLogo[] | null;
 }) {
@@ -243,7 +248,8 @@ export default function AdminDashboard({
       items: allOrders.filter((o) => o.status === "em_analise"),
       color: "#5698f4",
     },
-    { label: "Pago · aguardando arte", items: paid, color: "#55b5a6" },
+    { label: "Pago · aguardando arte", items: paid.filter((o) => !artApproved(o)), color: "#55b5a6" },
+    { label: "Arte aprovada · produção", items: paid.filter(artApproved), color: "#2f9e5b" },
     {
       label: "Cancelado ou vencido",
       items: allOrders.filter((o) =>
@@ -521,10 +527,10 @@ export default function AdminDashboard({
                     Clock,
                   ],
                   [
-                    "Pagos · aguardando arte",
-                    String(paid.length),
+                    "Artes para revisar",
+                    String(allOrders.filter((o) => o.source === "db" && needsArt(o) && (o.art?.status ?? "revisao") === "revisao" && !["vencido", "recusado", "cancelado", "estornado"].includes(o.status)).length),
                     "",
-                    "prontos para enviar o layout",
+                    `${paid.filter((o) => !artApproved(o)).length} pago(s) aguardando arte`,
                     Palette,
                   ],
                 ].map(([label, value, change, note, Icon]) => {
@@ -604,7 +610,7 @@ export default function AdminDashboard({
                   <div className="panel-heading">
                     <div>
                       <h3>Situação dos pedidos</h3>
-                      <p>Do pagamento ao layout.</p>
+                      <p>Do pagamento à produção.</p>
                     </div>
                   </div>
                   {lanes.map(({ label, items, color }) => (
@@ -670,49 +676,10 @@ export default function AdminDashboard({
             <BannersAdmin banners={banners} />
           ) : active === "Categorias" ? (
             <CategoryPhotosAdmin photos={categoryPhotos} enabled={integrations.database} />
-          ) : active === "Produtos" ? (
-            <ProductPhotosAdmin photos={photos} enabled={integrations.database} />
+          ) : active === "Anúncios" ? (
+            <ListingsAdmin listings={listings} photos={photos} enabled={integrations.database} />
           ) : active === "Personalizações" ? (
-            <div className="admin-panel">
-              <div className="panel-heading">
-                <div>
-                  <h3>
-                    Modelos do estúdio
-                  </h3>
-                  <p>
-                    O mesmo editor atende a criação do cliente e a revisão
-                    interna.
-                  </p>
-                </div>
-              </div>
-              <div className="admin-product-list">
-                {products.map((p) => (
-                  <div key={p.slug}>
-                    <span
-                      className="product-color"
-                      style={{ background: getColor(p.colors[0])?.hex }}
-                    >
-                      <Shirt size={24} />
-                    </span>
-                    <div>
-                      <strong>{p.name}</strong>
-                      <small>
-                        {p.category} ·{" "}
-                        {p.kind === "stock"
-                          ? money(p.price) + " / un."
-                          : "Orçamento"}
-                      </small>
-                    </div>
-                    <a
-                      className="button secondary small"
-                      href={"/produto/" + p.slug}
-                    >
-                      <Palette size={15} /> Ver na loja
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ArtQueue orders={allOrders} enabled={integrations.database && source === "db"} />
           ) : active === "Produção" ? (
             <div className="kanban">
               {lanes.map(({ label, items }) => (
@@ -836,42 +803,31 @@ export default function AdminDashboard({
               )}
             </p>
             <span className={"status " + detail.tone}>{detail.status}</span>
+            {detail.order.source === "db" && needsArt(detail.order) && (
+              <p>
+                Arte: <span className={"status " + artStatusInfo[detail.order.art?.status ?? "revisao"].tone}>{artStatusInfo[detail.order.art?.status ?? "revisao"].label}</span>{" "}
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setActive("Personalizações");
+                    setDetail(null);
+                  }}
+                >
+                  Abrir na fila de artes <ArrowRight size={14} />
+                </button>
+              </p>
+            )}
             <hr />
             <h3>Itens</h3>
             {detail.order.items.length ? (
               <ul className="drawer-items">
-                {detail.order.items.map((i, k) => {
-                  const product = i.slug ? getProduct(i.slug) : undefined;
-                  const positions = i.positions ?? [];
-                  const thumbs = Object.fromEntries(Object.entries(i.logos ?? {}).map(([p, l]) => [p, l?.thumb]));
-                  // uma prévia por lado da peça que tem logo
-                  const views = product
-                    ? (["front", "back", "side"] as View[]).filter((v) => positions.some((p) => logoSpots(product)[p]?.view === v))
-                    : [];
-                  return (
-                    <li key={k}>
-                      {i.qty}x {i.name}
-                      {i.color ? ` · ${i.color}` : ""}
-                      {positions.length > 0 && (
-                        <small className="drawer-positions">
-                          {positions
-                            .map((p) => positionFees[p].label + (i.placements?.[p] ? " (ajustada pelo cliente)" : "") + (i.logos?.[p] ? `: ${i.logos[p]!.name}` : ": sem logo"))
-                            .join(" · ")}
-                          {` · Aplicação: ${i.technique ?? "a definir"}`}
-                        </small>
-                      )}
-                      {product && views.length > 0 && (
-                        <span className="drawer-mockups">
-                          {views.map((v) => (
-                            <span key={v} className="drawer-mockup">
-                              <LogoMockup product={product} view={v} positions={positions} logos={thumbs} placements={i.placements} markers={false} />
-                            </span>
-                          ))}
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
+                {detail.order.items.map((i, k) => (
+                  <li key={k}>
+                    {i.qty}x {i.name}
+                    {i.color ? ` · ${i.color}` : ""}
+                    {(i.positions ?? []).length > 0 && <ItemArt item={i} />}
+                  </li>
+                ))}
               </ul>
             ) : (
               <p>{detail.order.summary}</p>

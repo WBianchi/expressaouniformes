@@ -6,6 +6,7 @@ import { getColor, getProduct, positionFees, type Position, type Size } from "./
 import {
   type CartLine,
   type Coupon,
+  type LogoRef,
   type ShippingOption,
   lineLogos,
   lineQuantity,
@@ -163,7 +164,7 @@ export type QuoteLine = {
   unitPrice: number;
   total: number;
   /** logo de cada posição */
-  logos?: Partial<Record<Position, { name: string; thumb: string }>>;
+  logos?: Partial<Record<Position, LogoRef>>;
   /** posição/tamanho ajustados pelo cliente (centro em % da foto, escala) */
   placements?: CartLine["placements"];
   technique?: CartLine["technique"];

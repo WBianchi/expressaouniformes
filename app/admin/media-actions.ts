@@ -1,41 +1,11 @@
 "use server";
 // Edição de banners da home e fotos dos produtos (vitrine e peça sozinha) pelo painel.
-import { del } from "@vercel/blob";
-import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
-import { isAdmin } from "@/lib/admin-auth";
 import { safeHref, safeImage } from "@/lib/banners";
 import { getCategory, getProduct } from "@/lib/catalog";
-import { MEDIA_TAG } from "@/lib/site-media";
+import { adminDb as db, dropBlob, runAction as run, type MediaResult } from "./action-utils";
 
-export type MediaResult = { ok: true } | { ok: false; error: string };
-
-async function db() {
-  if (!(await isAdmin())) throw new Error("Sessão expirada. Entre no painel novamente.");
-  if (!process.env.DATABASE_URL) throw new Error("Banco de dados não configurado.");
-  const { neon } = await import("@neondatabase/serverless");
-  return neon(process.env.DATABASE_URL);
-}
-
-function refresh() {
-  updateTag(MEDIA_TAG);
-  revalidatePath("/", "layout");
-}
-
-/** Apaga do Blob imagens enviadas pelo painel que não são mais usadas. */
-async function dropBlob(url: string | undefined) {
-  if (url && /\.public\.blob\.vercel-storage\.com\//.test(url)) await del(url).catch(() => {});
-}
-
-async function run(fn: () => Promise<void>): Promise<MediaResult> {
-  try {
-    await fn();
-    refresh();
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e instanceof z.ZodError ? (e.issues[0]?.message ?? "Dados inválidos.") : e instanceof Error ? e.message : "Erro ao salvar." };
-  }
-}
+export type { MediaResult };
 
 const bannerSchema = z.object({
   id: z.string().uuid().optional(),

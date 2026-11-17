@@ -34,6 +34,8 @@ import {
   newOrderId,
 } from "@/lib/orders";
 import { useStore } from "@/components/store/StoreProvider";
+import { useBrandLogos } from "@/components/product/useBrandLogo";
+import type { CartLine } from "@/lib/pricing";
 import { CardPreview } from "./CardPreview";
 import { OrderSummary } from "./OrderSummary";
 import { maskCard, maskCep, maskCnpj, maskCpf, maskExpiry, maskPhone, onlyDigits } from "./masks";
@@ -69,6 +71,22 @@ const newKey = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-$
 export function CheckoutFlow() {
   const router = useRouter();
   const store = useStore();
+  // logo enviada pouco antes de ir para o carrinho: o arquivo original terminou de subir depois
+  const [brandLogos] = useBrandLogos();
+  const withOriginals = (lines: CartLine[]) =>
+    lines.map((l) =>
+      l.logos
+        ? {
+            ...l,
+            logos: Object.fromEntries(
+              Object.entries(l.logos).map(([pos, logo]) => {
+                const url = logo.url ?? Object.values(brandLogos).find((b) => b.thumb === logo.thumb)?.url;
+                return [pos, url ? { ...logo, url } : logo];
+              }),
+            ),
+          }
+        : l,
+    );
   const { cart, ready, coupon, cep: storeCep, setCep, shippingOptions, shippingLoading, shippingError, shipping, selectShipping, clearCart } = store;
 
   const [step, setStep] = useState(0);
@@ -291,7 +309,7 @@ export function CheckoutFlow() {
       idempotencyKey: idemKey.current,
       customer: { ...customer, company: customer.company || undefined },
       address: { ...address, complement: address.complement || undefined },
-      lines: cart,
+      lines: withOriginals(cart),
       coupon: coupon?.code ?? null,
       shippingId: shipping.id,
       payment: {

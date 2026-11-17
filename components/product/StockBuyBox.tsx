@@ -67,7 +67,9 @@ export function StockBuyBox({ product, color, onColor: setColor, positions, onPo
       color,
       sizes: clean,
       positions,
-      logos: Object.fromEntries(positions.flatMap((p) => (logos[p] ? [[p, { name: logos[p]!.name, thumb: logos[p]!.thumb }]] : []))),
+      logos: Object.fromEntries(
+        positions.flatMap((p) => (logos[p] ? [[p, { name: logos[p]!.name, thumb: logos[p]!.thumb, ...(logos[p]!.url ? { url: logos[p]!.url } : {}) }]] : [])),
+      ),
       placements: Object.fromEntries(positions.flatMap((p) => (placements[p] ? [[p, placements[p]!]] : []))),
       technique: positions.length && technique ? technique : undefined,
       notes: notes.trim() || undefined,

@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { getProduct } from "@/lib/catalog";
+import { applyListings, getProduct, type ListingOverrides } from "@/lib/catalog";
 import { cartLineSchema, localStoreSchema } from "@/lib/validation";
 import {
   type CartLine,
@@ -61,7 +61,10 @@ export function useStore() {
 const KEY = "eu-store-v2";
 export const THEME_KEY = "eu-theme";
 
-export default function StoreProvider({ children }: { children: ReactNode }) {
+export default function StoreProvider({ listings, children }: { listings: ListingOverrides; children: ReactNode }) {
+  // anúncios editados no painel: aplicados ao catálogo antes de desenhar qualquer coisa da loja
+  // (nomes, preços, cores e tamanhos que o carrinho e as páginas leem de lib/catalog)
+  applyListings(listings);
   const [ready, setReady] = useState(false);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);

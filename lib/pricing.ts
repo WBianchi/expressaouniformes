@@ -3,6 +3,9 @@
 import { getProduct, positionFees, type Position, type Size, type Technique } from "./catalog.ts";
 import type { Placements } from "./mockup.ts";
 
+/** Logo de uma posição: miniatura para a prévia e, quando enviado, o arquivo original (Blob, pasta artes/). */
+export type LogoRef = { name: string; thumb: string; url?: string };
+
 export type CartLine = {
   id: string;
   slug: string;
@@ -10,13 +13,13 @@ export type CartLine = {
   sizes: Partial<Record<Size, number>>;
   positions: Position[];
   /** logo de cada posição: miniatura (dataURL ≤ ~150 KB) e nome do arquivo */
-  logos?: Partial<Record<Position, { name: string; thumb: string }>>;
+  logos?: Partial<Record<Position, LogoRef>>;
   /** técnica de aplicação escolhida (silk, bordado, DTF, sublimação); vazio = decidir no layout */
   technique?: Technique;
   /** posição/tamanho da logo ajustados pelo cliente na prévia (sem ajuste = posição padrão) */
   placements?: Placements;
   /** formato antigo (uma logo para todas as posições); lido só para carrinhos já salvos */
-  logo?: { name: string; thumb: string };
+  logo?: LogoRef;
   notes?: string;
 };
 
@@ -114,7 +117,7 @@ const brl = (n: number) =>
 
 /** Logo de cada posição da linha (com o formato antigo, a mesma logo vale para todas). */
 export function lineLogos(l: Pick<CartLine, "positions" | "logos" | "logo">) {
-  const out: Partial<Record<Position, { name: string; thumb: string }>> = {};
+  const out: Partial<Record<Position, LogoRef>> = {};
   for (const p of l.positions) {
     const logo = l.logos?.[p] ?? l.logo;
     if (logo) out[p] = logo;

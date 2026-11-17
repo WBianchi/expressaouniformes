@@ -72,15 +72,13 @@ export type Product = {
   colorPhotos?: Record<string, string[]>;
   /** anúncio cadastrado pelo painel (não existe no código) */
   created?: boolean;
-  /** preço da personalização por técnica e posição (R$ por peça); vazio = tabela padrão (positionFees) */
-  fees?: CustomizationFees;
   /** ficha técnica: textos editados das linhas fixas (vazio = esconde a linha) */
   specs?: Partial<Record<string, string>>;
   /** ficha técnica: linhas extras criadas no painel */
   extraSpecs?: { label: string; value: string }[];
 };
 
-/** Preço da personalização: técnica → posição → R$ por peça. */
+/** Preço da personalização no simulador (vale para todas as peças): técnica → posição → R$ por peça. */
 export type CustomizationFees = Partial<Record<Technique, Partial<Record<Position, number>>>>;
 
 const c = (id: string, name: string, hex: string, pattern?: Color["pattern"]): Color => ({ id, name, hex, ...(pattern ? { pattern } : {}) });
@@ -484,7 +482,6 @@ export type ListingFields = Pick<
   Product,
   "name" | "subtitle" | "description" | "fabric" | "composition" | "fabricNote" | "highlights" | "sizeChart" | "techniques" | "price" | "colors" | "sizes" | "category"
 > & {
-  fees: CustomizationFees;
   specs: Partial<Record<string, string>>;
   extraSpecs: { label: string; value: string }[];
   /** preço "de" riscado; null = sem */
@@ -504,8 +501,17 @@ export type CategoryEdits = Record<string, CategoryEdit>;
 export type CreatedProduct = { name: string; kind: SaleKind; category: string; published: boolean };
 export type CreatedProducts = Record<string, CreatedProduct>;
 
-export type CatalogEdits = { listings: ListingOverrides; categories: CategoryEdits; created: CreatedProducts };
-export const NO_EDITS: CatalogEdits = { listings: {}, categories: {}, created: {} };
+export type CatalogEdits = {
+  listings: ListingOverrides;
+  categories: CategoryEdits;
+  created: CreatedProducts;
+  /** tabela de preços da personalização do simulador (painel → Preços do simulador) */
+  fees: CustomizationFees;
+};
+export const NO_EDITS: CatalogEdits = { listings: {}, categories: {}, created: {}, fees: {} };
+
+/** Tabela de preços da personalização em uso (aplicada com as edições do painel). */
+let customizationFees: CustomizationFees = {};
 
 const baseBySlug = new Map(base.map((b) => [b.slug, b]));
 const codeSlugs = new Set(base.map((b) => b.slug));
@@ -572,6 +578,7 @@ export function applyCatalogEdits(e: CatalogEdits) {
   const sig = JSON.stringify(e);
   if (sig === appliedSig) return;
   appliedSig = sig;
+  customizationFees = e.fees ?? {};
 
   // categorias: nome e descrição editados; as criadas no painel entram no fim
   const cats: Category[] = baseCategories.map((b) => {
@@ -628,11 +635,18 @@ export const positionFees: Record<Position, { label: string; fee: number }> = {
 /** Técnica usada no preço quando o cliente ainda não escolheu: a primeira do anúncio. */
 export const defaultTechnique = (p: Pick<Product, "techniques">): Technique | undefined => p.techniques[0];
 
-/** Preço da personalização de uma posição na técnica escolhida (R$ por peça). */
-export function feeFor(p: Pick<Product, "fees" | "techniques">, technique: Technique | null | undefined, position: Position): number {
+/**
+ * Preço da personalização de uma posição na técnica escolhida (R$ por peça), pela tabela do
+ * simulador (painel → Preços do simulador). Vale para todas as peças de pronta-entrega; sem preço
+ * na tabela, a taxa padrão da posição. Sem técnica escolhida, a primeira do anúncio.
+ */
+export function feeFor(p: Pick<Product, "techniques">, technique: Technique | null | undefined, position: Position): number {
   const t = technique ?? defaultTechnique(p);
-  return (t && p.fees?.[t]?.[position]) ?? positionFees[position].fee;
+  return (t && customizationFees[t]?.[position]) ?? positionFees[position].fee;
 }
+
+/** Preço de uma técnica numa posição pela tabela do simulador (sem cair na primeira técnica do anúncio). */
+export const tableFee = (technique: Technique, position: Position) => customizationFees[technique]?.[position] ?? positionFees[position].fee;
 
 export const company = {
   name: "Expressão Uniformes",

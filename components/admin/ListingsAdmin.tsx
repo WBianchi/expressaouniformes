@@ -12,11 +12,8 @@ import {
   getColor,
   money,
   NO_PHOTO,
-  positionFees,
   products,
   withListing,
-  type Position,
-  type Technique,
   type CatalogEdits,
   type Color,
   type Product,
@@ -25,7 +22,7 @@ import {
 import type { PhotoOverrides } from "@/lib/banners";
 import { withPhotos } from "@/lib/product-media";
 import { listingFormOf, SIZE_OPTIONS, TECHNIQUE_OPTIONS, type ListingForm } from "@/lib/listing";
-import { availablePositions, TECHNIQUE_CAPS } from "@/lib/mockup";
+
 import { defaultSpecs, EDITABLE_SPECS, type SpecKey } from "@/lib/specs";
 import { createProduct, deleteProduct, resetListing, saveListing, setColorPhoto, setPublished } from "@/app/admin/listing-actions";
 import { ACCEPT, ProductPhotoSlots, uploadImage, useAction } from "./MediaAdmin";
@@ -257,15 +254,9 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
   const [price, setPrice] = useState(moneyText(initial.price));
   const [compareAt, setCompareAt] = useState(moneyText(initial.compareAt));
   const [chart, setChart] = useState(initial.sizeChart.join(", "));
-  // preço da personalização (técnica × posição) e textos da ficha técnica, como aparecem no site
-  const positions = useMemo(() => availablePositions(current), [current]);
+  // textos automáticos da ficha técnica, como aparecem no site
   const autoSpecs = useMemo(() => defaultSpecs(current), [current]);
-  const feeTextOf = (f: ListingForm) =>
-    Object.fromEntries(
-      TECHNIQUE_OPTIONS.flatMap((t) => positions.map((pos) => [`${t}|${pos}`, moneyText(f.fees[t]?.[pos] ?? positionFees[pos].fee)])),
-    ) as Record<string, string>;
   const specTextOf = (f: ListingForm) => Object.fromEntries(EDITABLE_SPECS.map(({ key }) => [key, f.specs[key] ?? autoSpecs[key]])) as Record<SpecKey, string>;
-  const [feeText, setFeeText] = useState(() => feeTextOf(initial));
   const [specText, setSpecText] = useState(() => specTextOf(initial));
   const [saved, setSaved] = useState(false);
   const [confirm, setConfirm] = useState<"reset" | "delete" | null>(null);
@@ -284,15 +275,7 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
     const c = parseMoney(compareAt);
     if (stock && (p === null || Number.isNaN(p))) return "Informe o preço de venda (ex.: 24,90).";
     if (Number.isNaN(c ?? 0)) return 'Preço "de" inválido (ex.: 29,90).';
-    // só guarda o que difere do padrão (tabela padrão de personalização e textos automáticos da ficha)
-    const fees: ListingForm["fees"] = {};
-    if (stock)
-      for (const t of d.techniques)
-        for (const pos of positions) {
-          const v = parseMoney(feeText[`${t}|${pos}`] ?? "");
-          if (v === null || Number.isNaN(v)) return `Preço da personalização inválido: ${t}, ${positionFees[pos].label.toLowerCase()}.`;
-          if (Math.abs(v - positionFees[pos].fee) > 0.001) (fees[t] ??= {})[pos] = v;
-        }
+    // só guarda o que difere dos textos automáticos da ficha técnica
     const specs: ListingForm["specs"] = {};
     for (const { key } of EDITABLE_SPECS) if (specText[key].trim() !== autoSpecs[key]) specs[key] = specText[key].trim();
     return {
@@ -305,7 +288,6 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
         .filter(Boolean),
       highlights: d.highlights.filter((h) => h.title.trim() || h.text.trim()),
       extraSpecs: d.extraSpecs.filter((r) => r.label.trim() || r.value.trim()),
-      fees,
       specs,
     };
   };
@@ -320,7 +302,6 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
     setPrice(moneyText(f.price));
     setCompareAt(moneyText(f.compareAt));
     setChart(f.sizeChart.join(", "));
-    setFeeText(feeTextOf(f));
     setSpecText(specTextOf(f));
   };
 
@@ -492,60 +473,9 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
               </label>
             </div>
             <p className={s.hint}>
-              Valor da peça lisa. A personalização soma por posição da logo e os descontos por quantidade continuam valendo. É este valor que o checkout
-              cobra.
+              Valor da peça lisa. A personalização (logo) soma conforme a técnica e a posição, pela tabela do painel em &quot;Preços do simulador&quot;, e
+              os descontos por quantidade continuam valendo. É este valor que o checkout cobra.
             </p>
-          </section>
-        )}
-
-        {stock && d.techniques.length > 0 && positions.length > 0 && (
-          <section className="admin-panel">
-            <h3 className={s.sectionTitle}>Preço da personalização (por peça)</h3>
-            <p className={s.hint}>
-              Quanto soma ao preço da peça cada posição da logo, em cada técnica. No simulador, o cliente escolhe a técnica e vê o valor de cada posição.
-            </p>
-            <div className={s.feeTable} role="table" aria-label="Preço da personalização por técnica e posição">
-              <div role="row" className={s.feeRow}>
-                <span role="columnheader">Técnica</span>
-                {positions.map((pos) => (
-                  <span key={pos} role="columnheader">
-                    {positionFees[pos].label}
-                  </span>
-                ))}
-              </div>
-              {TECHNIQUE_OPTIONS.filter((t) => d.techniques.includes(t)).map((t: Technique) => (
-                <div key={t} role="row" className={s.feeRow}>
-                  <span role="rowheader">
-                    <b>{t}</b>
-                  </span>
-                  {positions.map((pos: Position) => {
-                    const cap = TECHNIQUE_CAPS[t]?.[pos];
-                    return (
-                      <label key={pos} role="cell" className={s.feeCell}>
-                        <span className={s.feeInput}>
-                          R$
-                          <input
-                            value={feeText[`${t}|${pos}`] ?? ""}
-                            onChange={(e) => {
-                              setSaved(false);
-                              const v = e.target.value;
-                              setFeeText((x) => ({ ...x, [`${t}|${pos}`]: v }));
-                            }}
-                            inputMode="decimal"
-                            aria-label={`Preço de ${t} na ${positionFees[pos].label.toLowerCase()}`}
-                          />
-                        </span>
-                        {cap && (
-                          <small>
-                            até {cap.w} × {cap.h} cm
-                          </small>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
           </section>
         )}
 

@@ -634,3 +634,11 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+.stack > .hint {
+  margin: 0;
+}

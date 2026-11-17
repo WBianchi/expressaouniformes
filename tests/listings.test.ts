@@ -145,15 +145,17 @@ test("galeria: ao menos a capa, sem repetir e só imagens do site ou do Blob", (
   assert.equal(galleryPhotosSchema.safeParse(["https://evil.example.com/x.webp"]).success, false);
 });
 
-test("preço da personalização por técnica e posição (editável no anúncio)", async () => {
+test("preço da personalização: tabela única do simulador, por técnica e posição", async () => {
   const { feeFor, positionFees } = await import("../lib/catalog.ts");
   const sizes = { M: 10 };
   try {
-    applyCatalogEdits({ ...NO_EDITS, listings: { [SLUG]: { price: 20, fees: { Bordado: { frente: 9, costas: 15 }, Silk: { frente: 4 } } } } });
+    applyCatalogEdits({ ...NO_EDITS, listings: { [SLUG]: { price: 20 } }, fees: { Bordado: { frente: 9, costas: 15 }, Silk: { frente: 4 } } });
     const p = getProduct(SLUG)!;
     assert.equal(feeFor(p, "Bordado", "frente"), 9);
     assert.equal(feeFor(p, "Silk", "frente"), 4);
-    // posição sem preço próprio usa a tabela padrão
+    // vale para qualquer peça
+    assert.equal(feeFor(getProduct("calca-brim-elastico-total")!, "Bordado", "costas"), 15);
+    // posição sem preço na tabela usa a taxa padrão
     assert.equal(feeFor(p, "Silk", "costas"), positionFees.costas.fee);
     assert.equal(unitPrice({ slug: SLUG, positions: ["frente", "costas"], sizes, technique: "Bordado" }), 20 + 9 + 15);
     assert.equal(unitPrice({ slug: SLUG, positions: ["frente"], sizes, technique: "Silk" }), 24);
@@ -162,6 +164,7 @@ test("preço da personalização por técnica e posição (editável no anúncio
   } finally {
     applyCatalogEdits(NO_EDITS);
   }
+  assert.equal(feeFor(getProduct(SLUG)!, "Bordado", "frente"), positionFees.frente.fee);
 });
 
 test("bordado nas costas: logo até 27 × 5 cm", async () => {
@@ -190,6 +193,7 @@ test("ficha técnica: texto editado, linha escondida e linhas extras", async () 
     applyCatalogEdits(NO_EDITS);
   }
   const form = listingFormOf(withListing(SLUG, undefined)!);
-  assert.equal(listingFormSchema.safeParse({ ...form, fees: { Bordado: { frente: -1 } } }).success, false);
+  const { feesSchema } = await import("../lib/listing.ts");
+  assert.equal(feesSchema.safeParse({ Bordado: { frente: -1 } }).success, false);
   assert.equal(listingFormSchema.safeParse({ ...form, extraSpecs: [{ label: "", value: "x" }] }).success, false);
 });

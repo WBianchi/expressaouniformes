@@ -4,7 +4,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { z } from "zod";
 import { applyCatalogEdits, NO_EDITS, type CatalogEdits, type CategoryEdits, type CreatedProducts, type ListingOverrides } from "./catalog";
-import { listingOverrideSchema } from "./listing";
+import { feesSchema, listingOverrideSchema } from "./listing";
 import { MEDIA_TAG } from "./site-media";
 
 const categoryRow = z.object({
@@ -26,11 +26,13 @@ export async function listCatalogEdits(): Promise<CatalogEdits> {
   if (!process.env.DATABASE_URL) return NO_EDITS;
   const { neon } = await import("@neondatabase/serverless");
   const sql = neon(process.env.DATABASE_URL);
-  const [l, c, p] = await Promise.all([
+  const [l, c, p, st] = await Promise.all([
     rows(sql, "select slug, data from expressao.product_listings"),
     rows(sql, "select slug, name, description, icon, created from expressao.category_edits order by sort, updated_at"),
     rows(sql, "select slug, name, kind, category, published from expressao.created_products order by created_at"),
+    rows(sql, "select data from expressao.site_settings where key = 'customization_fees'"),
   ]);
+  const feesRow = feesSchema.safeParse((st[0] as { data?: unknown } | undefined)?.data ?? {});
   const categories: CategoryEdits = {};
   for (const r of c) {
     const v = categoryRow.safeParse(r);
@@ -53,7 +55,7 @@ export async function listCatalogEdits(): Promise<CatalogEdits> {
     if (v.success) listings[r.slug] = v.data;
     else console.error(`[anúncios] edição inválida ignorada: ${r.slug}`);
   }
-  return { listings, categories, created };
+  return { listings, categories, created, fees: feesRow.success ? feesRow.data : {} };
 }
 
 export const getCatalogEdits = unstable_cache(

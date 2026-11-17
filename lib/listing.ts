@@ -10,8 +10,8 @@ export const TECHNIQUE_OPTIONS = ["Bordado", "Silk", "DTF", "Sublimação"] as c
 export const POSITION_OPTIONS = ["frente", "costas", "manga"] as const;
 const SPEC_KEYS = EDITABLE_SPECS.map((s) => s.key) as [string, ...string[]];
 
-/** Preço da personalização: técnica → posição → R$ por peça. */
-const feesSchema = z.partialRecord(z.enum(TECHNIQUE_OPTIONS), z.partialRecord(z.enum(POSITION_OPTIONS), z.number().min(0, "Preço inválido.").max(999, "Preço muito alto.")));
+/** Preço da personalização do simulador: técnica → posição → R$ por peça. */
+export const feesSchema = z.partialRecord(z.enum(TECHNIQUE_OPTIONS), z.partialRecord(z.enum(POSITION_OPTIONS), z.number().min(0, "Preço inválido.").max(999, "Preço muito alto.")));
 /** Textos editados das linhas fixas da ficha técnica (vazio esconde a linha). */
 const specsSchema = z.partialRecord(z.enum(SPEC_KEYS), z.string().trim().max(400, "Texto da ficha técnica muito longo (máx. 400)."));
 const extraSpecsSchema = z
@@ -51,7 +51,6 @@ export const listingFormSchema = z
       .min(1, "Escolha ao menos uma cor.")
       .max(100),
     sizes: z.array(z.enum(SIZE_OPTIONS)),
-    fees: feesSchema,
     specs: specsSchema,
     extraSpecs: extraSpecsSchema,
   })
@@ -91,7 +90,6 @@ export const listingOverrideSchema = z
     // categoria que deixou de existir é ignorada ao aplicar (o anúncio volta para a do código)
     category: z.string().max(60),
     photos: z.array(z.string().refine(safeImage)).max(MAX_PHOTOS),
-    fees: feesSchema,
     specs: specsSchema,
     extraSpecs: extraSpecsSchema,
   })
@@ -122,7 +120,6 @@ export function listingFieldsOf(p: Product): ListingFields {
     colors: [...p.colors],
     sizes: [...p.sizes],
     photos: [...p.photos],
-    fees: structuredClone(p.fees ?? {}),
     specs: { ...(p.specs ?? {}) },
     extraSpecs: (p.extraSpecs ?? []).map((r) => ({ ...r })),
     colorPhotos: p.colorPhotos ?? {},

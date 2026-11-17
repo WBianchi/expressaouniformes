@@ -36,6 +36,7 @@ import {
   Globe,
   Building2,
   UserPlus,
+  Tags,
 } from "lucide-react";
 import { money, type CatalogEdits } from "@/lib/catalog";
 import { artStatusInfo } from "@/lib/art";
@@ -44,6 +45,7 @@ import { logout } from "@/app/admin/actions";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
 import { BannersAdmin, ClientLogosAdmin } from "./MediaAdmin";
 import { CategoriesAdmin } from "./CategoriesAdmin";
+import { CustomizationPricesAdmin } from "./CustomizationPricesAdmin";
 import { ListingsAdmin } from "./ListingsAdmin";
 import { ArtQueue, ItemArt, artApproved, needsArt } from "./ArtQueue";
 import { LeadsAdmin } from "./LeadsAdmin";
@@ -54,6 +56,7 @@ const navigation = [
   ["Pedidos", ShoppingBag],
   ["Anúncios", Shirt],
   ["Personalizações", Palette],
+  ["Preços do simulador", Tags],
   ["Produção", Factory],
   ["Leads", UserPlus],
   ["Clientes", Users],
@@ -679,6 +682,8 @@ export default function AdminDashboard({
             <CategoriesAdmin photos={categoryPhotos} edits={edits} enabled={integrations.database} />
           ) : active === "Anúncios" ? (
             <ListingsAdmin edits={edits} photos={photos} enabled={integrations.database} />
+          ) : active === "Preços do simulador" ? (
+            <CustomizationPricesAdmin key={JSON.stringify(edits.fees)} fees={edits.fees} enabled={integrations.database} />
           ) : active === "Personalizações" ? (
             <ArtQueue orders={allOrders} enabled={integrations.database && source === "db"} />
           ) : active === "Produção" ? (

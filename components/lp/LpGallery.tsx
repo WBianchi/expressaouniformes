@@ -19,7 +19,7 @@ const ZOOM = 2.5;
 
 /**
  * Galeria da landing page (estilo marketplace): foto principal grande e miniaturas
- * embaixo. Fotos do anúncio (na ordem do painel) e a peça sozinha (frente, costas, lado).
+ * embaixo. Fotos do anúncio, na ordem do painel; a foto vestindo da cor escolhida vem primeiro.
  * Clique (ou toque) na foto abre a foto ampliada, com zoom para ver os detalhes.
  */
 export function LpGallery({ images: base, name, colorPhotos }: { images: LpImage[]; name: string; colorPhotos?: Record<string, string[]> }) {
@@ -27,19 +27,23 @@ export function LpGallery({ images: base, name, colorPhotos }: { images: LpImage
   const [open, setOpen] = useState(false);
   const lp = useLpColor();
   const tint = lp?.tint ?? null;
-  // cor com fotos vestindo próprias (enviadas no painel): entram no lugar das fotos do anúncio
+  // cor com fotos vestindo próprias (enviadas no painel): elas vão para a frente da galeria e
+  // as outras fotos do anúncio continuam depois delas (só a foto principal muda)
   const own = (lp && colorPhotos?.[lp.color]?.filter(Boolean)) || [];
   const images = useMemo<LpImage[]>(
-    () => (own.length ? [...own.map((src, k) => ({ src, label: k ? "vestindo, costas" : "vestindo, frente" })), ...base.filter((im) => im.piece)] : base),
+    () =>
+      own.length
+        ? [...own.map((src, k) => ({ src, label: k ? "vestindo, costas" : "vestindo, frente" })), ...base.filter((im) => !own.includes(im.src))]
+        : base,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [own.join("|"), base],
   );
   const hasOwn = own.length > 0;
-  // ao escolher outra cor: com foto vestindo da cor, mostra ela; sem, mostra a peça sozinha (é ela que muda de cor)
+  // ao escolher outra cor: com foto vestindo da cor, mostra ela; sem, mostra a peça sozinha (quando houver; é ela que muda de cor)
   useEffect(() => {
     if (hasOwn) return setI(0);
     if (!tint) return;
-    setI((cur) => (images[cur]?.piece ? cur : Math.max(0, images.findIndex((im) => im.piece))));
+    setI((cur) => (images[cur]?.piece || !images.some((im) => im.piece) ? cur : images.findIndex((im) => im.piece)));
   }, [tint, images, hasOwn]);
   const touch = useRef<number | null>(null);
   const thumbs = useRef<HTMLUListElement>(null);

@@ -1,6 +1,7 @@
 // Onde a logo aparece na foto do produto (prévia ilustrativa sobre as fotos reais).
 // Cada posição tem uma área de aplicação com tamanho real (cm): a logo nasce centralizada
-// nela, não sai dela ao arrastar e não cresce além dela. Coordenadas em % da foto quadrada.
+// nela (nas costas, no alto da área, que é o padrão da fábrica), não sai dela ao arrastar
+// e não cresce além dela. Coordenadas em % da foto quadrada.
 import { getProduct, type Position, type Product, type Technique } from "./catalog.ts";
 
 /** "side" é a vista lateral (onde fica a manga) */
@@ -19,6 +20,8 @@ export type Spot = {
   cm: number;
   /** tamanho máximo da logo (cm) menor que a área, por limite da técnica (ex.: bordado nas costas) */
   cap?: { w: number; h: number };
+  /** a logo nasce no alto da área (costas: perto da gola, não no meio das costas) */
+  top?: boolean;
 };
 
 /** Limites de tamanho por técnica e posição: a fábrica não faz bordado grande nas costas. */
@@ -63,21 +66,50 @@ const PEITO = [10, 10] as const;
 const COSTAS = [28, 35] as const;
 const MANGA = [8, 8] as const;
 
-type Layout = Partial<Record<Position, { view: View; x: number; y: number; size: readonly [number, number] }>>;
+type Layout = Partial<Record<Position, { view: View; x: number; y: number; size: readonly [number, number]; top?: boolean }>>;
+
+// manga: centro da manga na foto de lado (a manga fica um pouco atrás do meio da foto)
+const SIDE = { view: "side", x: 55, y: 28, size: MANGA } as const;
 
 // Centro de cada área, medido nas fotos de cada categoria (peito do lado esquerdo de quem veste).
 const byCategory: Record<string, Layout> = {
-  camisetas: { frente: { view: "front", x: 61, y: 31, size: PEITO }, costas: { view: "back", x: 50, y: 38, size: COSTAS }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
-  polos: { frente: { view: "front", x: 63, y: 34, size: PEITO }, costas: { view: "back", x: 50, y: 38, size: COSTAS }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
-  camisas: { frente: { view: "front", x: 62, y: 32, size: PEITO }, costas: { view: "back", x: 50, y: 36, size: COSTAS }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
-  operacional: { frente: { view: "front", x: 64, y: 34, size: PEITO }, costas: { view: "back", x: 50, y: 34, size: COSTAS }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
-  jalecos: { frente: { view: "front", x: 62, y: 33, size: PEITO }, costas: { view: "back", x: 50, y: 32, size: COSTAS }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
+  camisetas: { frente: { view: "front", x: 61, y: 31, size: PEITO }, costas: { view: "back", x: 50, y: 38, size: COSTAS, top: true }, manga: SIDE },
+  polos: { frente: { view: "front", x: 63, y: 34, size: PEITO }, costas: { view: "back", x: 50, y: 38, size: COSTAS, top: true }, manga: SIDE },
+  camisas: { frente: { view: "front", x: 62, y: 32, size: PEITO }, costas: { view: "back", x: 50, y: 36, size: COSTAS, top: true }, manga: SIDE },
+  operacional: { frente: { view: "front", x: 64, y: 34, size: PEITO }, costas: { view: "back", x: 50, y: 34, size: COSTAS, top: true }, manga: SIDE },
+  jalecos: { frente: { view: "front", x: 62, y: 33, size: PEITO }, costas: { view: "back", x: 50, y: 32, size: COSTAS, top: true }, manga: SIDE },
   // moletom: logo grande no centro do peito
-  moletons: { frente: { view: "front", x: 50, y: 40, size: [25, 15] }, costas: { view: "back", x: 50, y: 40, size: COSTAS }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
+  moletons: { frente: { view: "front", x: 50, y: 40, size: [25, 15] }, costas: { view: "back", x: 50, y: 40, size: COSTAS, top: true }, manga: SIDE },
   // calça: frente perto do bolso; costas no cós
   calcas: { frente: { view: "front", x: 38, y: 27, size: PEITO }, costas: { view: "back", x: 50, y: 17, size: [20, 8] } },
-  alimenticia: { frente: { view: "front", x: 63, y: 32, size: PEITO }, costas: { view: "back", x: 50, y: 35, size: COSTAS }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
-  "alta-visibilidade": { frente: { view: "front", x: 62, y: 31, size: PEITO }, costas: { view: "back", x: 50, y: 29, size: [30, 20] }, manga: { view: "side", x: 50, y: 28, size: MANGA } },
+  alimenticia: { frente: { view: "front", x: 63, y: 32, size: PEITO }, costas: { view: "back", x: 50, y: 35, size: COSTAS, top: true }, manga: SIDE },
+  "alta-visibilidade": { frente: { view: "front", x: 62, y: 31, size: PEITO }, costas: { view: "back", x: 50, y: 29, size: [30, 20], top: true }, manga: SIDE },
+};
+
+// Centro da manga (x, y em %) medido na foto de lado de cada peça: a logo fica no meio da manga.
+const SLEEVE: Record<string, readonly [number, number]> = {
+  "camiseta-malha-pv": [54, 28],
+  "camiseta-malha-pv-manga-longa": [53.5, 28],
+  "camiseta-baby-look": [55, 23.5],
+  "polo-masculina-piquet": [55, 28],
+  "polo-feminina-piquet": [54, 27],
+  "camisa-social-masculina": [55, 29],
+  "camisa-social-masculina-manga-longa": [55, 29],
+  "camisa-social-feminina": [55, 29],
+  // foto virada para o outro lado: a manga fica à esquerda do meio
+  "camisa-social-feminina-manga-longa": [46.5, 27],
+  "jaleco-gola-italiana": [54.5, 28],
+  "jaleco-gola-italiana-manga-longa": [54, 29],
+  "jaleco-com-botoes": [55, 29],
+  "jaleco-com-botoes-manga-longa": [55.5, 28],
+  "jaleco-guarda-po": [54, 26],
+  "jaleco-guarda-po-manga-longa": [53.5, 27],
+  "jaleco-limpeza": [55, 29],
+  "jaleco-tradicional": [55.5, 27],
+  "jaleco-tradicional-manga-longa": [54.5, 27],
+  "jaleco-privativo": [55.5, 27],
+  "blusa-moletom": [53, 29],
+  "moletom-canguru": [53.5, 31],
 };
 
 // Ajuste fino por produto.
@@ -93,11 +125,13 @@ const bySlug: Record<string, Layout> = {
  */
 export function logoSpots(p: Pick<Product, "category"> & { slug?: string }, technique?: Technique | null): Partial<Record<Position, Spot>> {
   const cm = (p.slug && SCALE_BY_SLUG[p.slug]) || SCALE[p.category] || SCALE.camisetas;
-  const layout = { ...(byCategory[p.category] ?? byCategory.camisetas), ...(p.slug ? bySlug[p.slug] : undefined) };
+  const layout: Layout = { ...(byCategory[p.category] ?? byCategory.camisetas), ...(p.slug ? bySlug[p.slug] : undefined) };
+  const sleeve = p.slug ? SLEEVE[p.slug] : undefined;
+  if (layout.manga && sleeve) layout.manga = { ...layout.manga, x: sleeve[0], y: sleeve[1] };
   const out: Partial<Record<Position, Spot>> = {};
   for (const [pos, l] of Object.entries(layout) as [Position, NonNullable<Layout[Position]>][]) {
     const cap = technique ? TECHNIQUE_CAPS[technique]?.[pos] : undefined;
-    out[pos] = { ...spot(l.view, l.x, l.y, l.size[0], l.size[1], cm), ...(cap ? { cap } : {}) };
+    out[pos] = { ...spot(l.view, l.x, l.y, l.size[0], l.size[1], cm), ...(cap ? { cap } : {}), ...(l.top ? { top: true } : {}) };
   }
   for (const pos of (p.slug && getProduct(p.slug)?.noPositions) || []) delete out[pos];
   return out;
@@ -144,10 +178,23 @@ export function maxLogoCm(s: Spot, aspect = 1) {
 }
 export const minLogoCm = (s: Spot, aspect = 1) => Math.min(MIN_LOGO_CM, maxLogoCm(s, aspect));
 
-/** Posição inicial: centralizada na área, num tamanho que cabe com folga. */
+/** Posição inicial: centralizada na área (nas costas, encostada no alto dela), num tamanho que cabe com folga. */
 export function defaultPlacement(s: Spot, aspect = 1): Placement {
   const max = maxLogoCm(s, aspect);
-  return { x: (s.area.x0 + s.area.x1) / 2, y: (s.area.y0 + s.area.y1) / 2, w: Math.max(minLogoCm(s, aspect), Math.floor(max * START * 2) / 2) };
+  const w = Math.max(minLogoCm(s, aspect), Math.floor(max * START * 2) / 2);
+  const y = s.top ? s.area.y0 + w / aspect / s.cm / 2 : (s.area.y0 + s.area.y1) / 2;
+  return { x: (s.area.x0 + s.area.x1) / 2, y, w };
+}
+
+/**
+ * Troca o tamanho da logo sem tirar ela do lugar: cresce a partir do centro e, nas costas,
+ * mantém o alto da logo onde está (ela cresce para baixo).
+ */
+export function resizePlacement(p: PlacementInput | undefined, w: number, s: Spot, aspect = 1): Placement {
+  const box = logoBox(s, p, aspect);
+  const next = clamp(w, minLogoCm(s, aspect), maxLogoCm(s, aspect));
+  const y = s.top ? box.y - box.hPct / 2 + next / aspect / s.cm / 2 : box.y;
+  return clampPlacement({ x: box.x, y, w: next }, s, aspect);
 }
 
 /**

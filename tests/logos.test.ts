@@ -117,3 +117,54 @@ test("checkout aceita posição ajustada e recusa valores fora do limite", () =>
   assert.equal(cartLineSchema.safeParse({ ...base, placements: { frente: { x: 40, y: 30, w: 500 } } }).success, false);
   assert.equal(cartLineSchema.safeParse({ ...base, placements: { frente: { x: 40, y: 30 } } }).success, false);
 });
+
+test("costas: a logo nasce no alto da área (padrão da fábrica) e cresce para baixo", async () => {
+  const { resizePlacement } = await import("../lib/mockup.ts");
+  const spot = logoSpots(camiseta).costas!;
+  assert.ok(spot.top);
+  for (const aspect of [1, 4, 0.5]) {
+    const box = logoBox(spot, undefined, aspect);
+    assert.equal(box.x, (spot.area.x0 + spot.area.x1) / 2);
+    // o alto da logo encosta no alto da área
+    assert.ok(Math.abs(box.y - box.hPct / 2 - spot.area.y0) < 0.01);
+    // aumentar e diminuir não tira o alto da logo do lugar
+    for (const w of [box.w + 4, box.w - 4]) {
+      const r = logoBox(spot, resizePlacement(undefined, w, spot, aspect), aspect);
+      assert.ok(Math.abs(r.y - r.hPct / 2 - spot.area.y0) < 0.01);
+      assert.ok(inside(r, spot.area));
+    }
+  }
+  // frente e manga continuam centralizadas; o cós da calça também
+  assert.ok(!logoSpots(camiseta).frente!.top);
+  assert.ok(!logoSpots({ category: "calcas", slug: "calca-brim-elastico-total" }).costas!.top);
+});
+
+test("manga: área no meio da manga de cada foto, não no meio da imagem", () => {
+  assert.equal(logoSpots(camiseta).manga!.x, 54);
+  // foto virada para o outro lado
+  assert.ok(logoSpots({ category: "camisas", slug: "camisa-social-feminina-manga-longa" }).manga!.x < 50);
+  // produto cadastrado no painel (sem medida própria) usa o padrão da categoria
+  assert.equal(logoSpots({ category: "camisetas", slug: "produto-novo" }).manga!.x, 55);
+});
+
+test("bordas vazias da logo são cortadas: fundo transparente ou branco", async () => {
+  const { contentBox } = await import("../lib/logo-trim.ts");
+  // imagem 20 × 20 com um desenho de 10 × 2 no meio
+  const img = (bg: [number, number, number, number], ink: [number, number, number, number] = [10, 40, 120, 255]) => {
+    const px = new Uint8ClampedArray(20 * 20 * 4);
+    for (let y = 0; y < 20; y++)
+      for (let x = 0; x < 20; x++) px.set(x >= 5 && x < 15 && y >= 9 && y < 11 ? ink : bg, (y * 20 + x) * 4);
+    return px;
+  };
+  const near = (b: { x: number; y: number; w: number; h: number } | null) => !!b && b.x >= 3 && b.x <= 5 && b.w >= 10 && b.w <= 13 && b.h >= 2 && b.h <= 5;
+  assert.ok(near(contentBox(img([0, 0, 0, 0]), 20, 20)), "fundo transparente");
+  assert.ok(near(contentBox(img([255, 255, 255, 255]), 20, 20)), "fundo branco (JPG)");
+  // fundo colorido pode ser parte da logo: não corta
+  assert.equal(contentBox(img([200, 0, 0, 255]), 20, 20), null);
+  // imagem sem sobra: nada a cortar
+  assert.equal(contentBox(img([10, 40, 120, 255]), 20, 20), null);
+  // logo larga cortada: no bordado das costas (até 27 × 5 cm) ela chega bem mais larga que 5 cm
+  const bordado = logoSpots(camiseta, "Bordado").costas!;
+  assert.equal(maxLogoCm(bordado, 1), 5);
+  assert.equal(maxLogoCm(bordado, 4), 20);
+});

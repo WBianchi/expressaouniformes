@@ -24,6 +24,14 @@ export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: s
   const list = items.map((i) => i.src);
   const busy = items.some((i) => i.uploading);
   const dirty = JSON.stringify(list) !== JSON.stringify(saved);
+  // a versão salva mudou (depois de salvar ou de outra ação do painel): sem mudanças pendentes aqui,
+  // a tela passa a mostrar ela; o aviso "Galeria salva" continua à vista
+  const savedKey = saved.join("|");
+  const [prevKey, setPrevKey] = useState(savedKey);
+  if (savedKey !== prevKey) {
+    setPrevKey(savedKey);
+    if (list.join("|") === prevKey || list.join("|") === savedKey) setItems(saved.map((src) => ({ src })));
+  }
 
   const change = (fn: (cur: Item[]) => Item[]) => {
     setDone(false);

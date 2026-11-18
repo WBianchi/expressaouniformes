@@ -133,9 +133,29 @@ export function listingFormOf(p: Product): ListingForm {
 }
 
 /** Só o que mudou em relação ao catálogo do código (o resto segue o código, inclusive correções futuras). */
+const canon = (v: unknown): unknown =>
+  typeof v === "string"
+    ? v.trim()
+    : Array.isArray(v)
+      ? v.map(canon)
+      : v && typeof v === "object"
+        ? Object.fromEntries(
+            Object.keys(v)
+              .filter((k) => (v as Record<string, unknown>)[k] !== undefined)
+              .sort()
+              .map((k) => [k, canon((v as Record<string, unknown>)[k])]),
+          )
+        : v;
+
+/**
+ * Mesmo conteúdo? Ignora a ordem das chaves (o banco devolve os objetos com as chaves em outra
+ * ordem) e espaço nas pontas dos textos (o servidor apara ao salvar).
+ */
+export const sameData = (a: unknown, b: unknown) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
+
 export function listingDiff(base: Partial<ListingFields>, next: Partial<ListingFields>): Partial<ListingFields> {
   const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(next)) if (v !== undefined && JSON.stringify(v) !== JSON.stringify(base[k as keyof ListingFields])) out[k] = v;
+  for (const [k, v] of Object.entries(next)) if (v !== undefined && !sameData(v, base[k as keyof ListingFields])) out[k] = v;
   return out as Partial<ListingFields>;
 }
 

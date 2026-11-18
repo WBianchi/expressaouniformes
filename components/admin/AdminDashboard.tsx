@@ -683,7 +683,7 @@ export default function AdminDashboard({
           ) : active === "Anúncios" ? (
             <ListingsAdmin edits={edits} photos={photos} enabled={integrations.database} />
           ) : active === "Preços do simulador" ? (
-            <CustomizationPricesAdmin key={JSON.stringify(edits.fees)} fees={edits.fees} enabled={integrations.database} />
+            <CustomizationPricesAdmin fees={edits.fees} enabled={integrations.database} />
           ) : active === "Personalizações" ? (
             <ArtQueue orders={allOrders} enabled={integrations.database && source === "db"} />
           ) : active === "Produção" ? (

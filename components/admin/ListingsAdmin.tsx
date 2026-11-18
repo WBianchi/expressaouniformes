@@ -21,7 +21,7 @@ import {
 } from "@/lib/catalog";
 import type { PhotoOverrides } from "@/lib/banners";
 import { withPhotos } from "@/lib/product-media";
-import { listingFormOf, SIZE_OPTIONS, TECHNIQUE_OPTIONS, type ListingForm } from "@/lib/listing";
+import { listingFormOf, sameData, SIZE_OPTIONS, TECHNIQUE_OPTIONS, type ListingForm } from "@/lib/listing";
 
 import { defaultSpecs, EDITABLE_SPECS, type SpecKey } from "@/lib/specs";
 import { createProduct, deleteProduct, resetListing, saveListing, setColorPhoto, setPublished } from "@/app/admin/listing-actions";
@@ -293,7 +293,8 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
   };
   const dirty = (() => {
     const v = draft();
-    return typeof v === "string" || JSON.stringify(v) !== JSON.stringify(initial);
+    // compara o conteúdo: depois de salvar, o que volta do banco vem com as chaves em outra ordem
+    return typeof v === "string" || !sameData(v, initial);
   })();
   const edited = Object.keys(override ?? {}).some((k) => k !== "colorPhotos" && k !== "photos");
 
@@ -759,7 +760,7 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
       <section className="admin-panel">
         <h3 className={s.sectionTitle}>Galeria do anúncio</h3>
         <p className={s.hint}>Fotos comerciais (pessoa vestindo, detalhes, ambiente). Elas não mudam de cor; quem muda de cor é a peça sozinha, logo abaixo.</p>
-        <GalleryEditor key={gallery.join("|")} slug={slug} saved={gallery} enabled={enabled} />
+        <GalleryEditor slug={slug} saved={gallery} enabled={enabled} />
       </section>
 
       <section className="admin-panel">
@@ -802,8 +803,8 @@ function ColorPhotos({ slug, colors, photos, enabled }: { slug: string; colors: 
     <section className="admin-panel" aria-busy={pending}>
       <h3 className={s.sectionTitle}>Fotos vestindo por cor (opcional)</h3>
       <p className={s.hint}>
-        Quando o cliente escolhe uma cor na página do produto, as fotos de pessoa vestindo dessa cor aparecem no lugar das fotos da galeria. Cor sem foto
-        própria continua mostrando a galeria, e a peça sozinha muda de cor. Use fotos verticais (4:5), no mesmo estilo das fotos da vitrine.
+        Quando o cliente escolhe uma cor na página do produto, a foto vestindo dessa cor passa a ser a primeira da galeria; as outras fotos do
+        anúncio continuam lá, depois dela. Cor sem foto própria mostra a galeria normal. Use fotos verticais (4:5), no mesmo estilo das fotos da vitrine.
       </p>
       {error && <p className={m.error}>{error}</p>}
       <div className={s.colorRows}>

@@ -41,7 +41,11 @@ export function CustomizationPricesAdmin({ fees, enabled }: { fees: Customizatio
     setSaved(false);
     run(
       () => saveCustomizationFees(next),
-      () => setSaved(true),
+      () => {
+        // mostra os valores como ficaram salvos (ex.: "5" vira "5,00") e mantém o aviso de salvo
+        setText(textOf(next));
+        setSaved(true);
+      },
     );
   };
 

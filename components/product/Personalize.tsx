@@ -3,7 +3,7 @@ import { Check, Copy, Crosshair, Minus, Move, Plus } from "lucide-react";
 import { useState } from "react";
 import { feeFor, money, positionFees, type Position, type Product, type Technique } from "@/lib/catalog";
 import { artTechniques } from "@/lib/qualify";
-import { areaCm, availablePositions, clampPlacement, cmText, logoBox, logoSpots, maxLogoCm, minLogoCm, type Placement, type Placements, type Spot } from "@/lib/mockup";
+import { areaCm, availablePositions, cmText, logoBox, logoSpots, maxLogoCm, minLogoCm, resizePlacement, type Placement, type Placements, type Spot } from "@/lib/mockup";
 import { LogoUpload, type LogoValue } from "./LogoUpload";
 import type { LogoSet } from "./useBrandLogo";
 import { useLogoAspects } from "./useLogoAspect";
@@ -46,7 +46,8 @@ function SizeControl({ label, spot, aspect, placement, onPlace }: { label: strin
   const min = minLogoCm(spot, aspect);
   const max = maxLogoCm(spot, aspect);
   const [text, setText] = useState<string | null>(null);
-  const set = (w: number) => onPlace(clampPlacement({ x: box.x, y: box.y, w }, spot, aspect));
+  // a logo cresce sem sair do lugar (nas costas, o alto dela fica onde está)
+  const set = (w: number) => onPlace(resizePlacement(placement, w, spot, aspect));
   const commit = () => {
     if (text === null) return;
     const n = parseCm(text);
@@ -158,7 +159,7 @@ export function Personalize({
                       />
                       {placements[pos] ? (
                         <button type="button" className={s.posCopyBtn} onClick={() => onPlace(pos, null)}>
-                          <Crosshair size={13} /> Centralizar na área
+                          <Crosshair size={13} /> {spots[pos]?.top ? "Voltar para o alto das costas" : "Centralizar na área"}
                         </button>
                       ) : (
                         <span className={s.posHint}>

@@ -30,8 +30,13 @@ export function refreshSite() {
   revalidatePath("/", "layout");
 }
 
-/** Apaga do Blob imagens enviadas pelo painel que não são mais usadas. */
+/**
+ * Apaga do Blob imagens enviadas pelo painel que não são mais usadas.
+ * Só no site publicado: no computador (next dev) o Blob é o mesmo da loja, e um teste local
+ * apagaria fotos de verdade.
+ */
 export async function dropBlob(url: string | undefined) {
+  if (process.env.NODE_ENV !== "production") return;
   if (url && /\.public\.blob\.vercel-storage\.com\//.test(url)) await del(url).catch(() => {});
 }
 

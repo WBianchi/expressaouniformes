@@ -197,3 +197,26 @@ test("ficha técnica: texto editado, linha escondida e linhas extras", async () 
   assert.equal(feesSchema.safeParse({ Bordado: { frente: -1 } }).success, false);
   assert.equal(listingFormSchema.safeParse({ ...form, extraSpecs: [{ label: "", value: "x" }] }).success, false);
 });
+
+test("salvar e reabrir: a mesma ficha com as chaves em outra ordem (como volta do banco) não conta como mudança", async () => {
+  const { sameData } = await import("../lib/listing.ts");
+  const form = { specs: { posicoes: "Frente", disponibilidade: "Pronta", cuidados: "." }, highlights: [{ title: "A", text: "B" }], description: "Texto " };
+  const fromDb = { description: "Texto", highlights: [{ text: "B", title: "A" }], specs: { cuidados: ".", posicoes: "Frente", disponibilidade: "Pronta" } };
+  assert.ok(sameData(form, fromDb));
+  assert.ok(!sameData(form, { ...fromDb, specs: { ...fromDb.specs, cuidados: "Lavar à mão." } }));
+  // o servidor também não grava campo igual ao original só porque as chaves vieram em outra ordem
+  const base = listingFieldsOf(withListing(SLUG, undefined)!);
+  const reordered = base.highlights.map((h) => ({ text: h.text, title: h.title }));
+  assert.deepEqual(listingDiff(base, { ...base, highlights: reordered }), {});
+});
+
+test("galeria com mais de 2 fotos: os mockups da peça não tomam o lugar das fotos do anúncio", async () => {
+  const { withPhotos } = await import("../lib/product-media.ts");
+  const p = { image: "/peca.webp", back: "/costas.webp", side: "/lado.webp", photos: ["/1.webp", "/2.webp", "/3.webp", "/4.webp", "/5.webp", "/6.webp"] };
+  const out = withPhotos(p, [null, null, "/mock-frente.png", "/mock-costas.png", "/mock-lado.png"]);
+  assert.deepEqual(out.photos, p.photos);
+  assert.equal(out.image, "/mock-frente.png");
+  assert.equal(out.side, "/mock-lado.png");
+  // fotos antigas de vitrine (posições 0 e 1) continuam valendo
+  assert.equal(withPhotos(p, ["/vitrine.png"]).photos![0], "/vitrine.png");
+});

@@ -21,6 +21,8 @@ type WithMedia = Pick<Product, "image" | "back" | "side"> & { photos?: string[];
 export function withPhotos<P extends WithMedia>(p: P, o: (string | null)[] | undefined): P {
   if (!o?.some(Boolean)) return p;
   const image = o[2] ?? p.image, back = o[3] ?? p.back, side = o[4] ?? p.side;
-  const photos = p.photos?.map((src, i) => o[i] ?? src);
+  // só as posições 0 e 1 (vestindo, da época em que o anúncio tinha 2 fotos) trocam fotos da galeria;
+  // 2–4 são a peça sozinha: com a galeria maior, elas tomavam o lugar da 3ª, 4ª e 5ª foto do anúncio
+  const photos = p.photos?.map((src, i) => (i < 2 ? (o[i] ?? src) : src));
   return { ...p, image, back, side, ...(photos ? { photos, gallery: [...photos, image, back, side] } : {}) };
 }

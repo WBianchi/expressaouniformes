@@ -52,7 +52,7 @@ export function ProductTop({ product }: { product: Product }) {
   const onLogo: typeof setLogo = (position, next) => {
     const spot = next && logoSpots(product)[position];
     if (spot) setView(spot.view);
-    // logo nova (ou trocada) começa centralizada na área, num tamanho que cabe
+    // logo nova (ou trocada) começa na posição padrão da área (centro; nas costas, no alto), num tamanho que cabe
     if (next?.thumb !== logos[position]?.thumb)
       setPlacements((cur) => {
         const rest = { ...cur };

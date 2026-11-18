@@ -1,0 +1,173 @@
+/* Simulador "estúdio": as vistas da peça lado a lado, cada uma com os controles da sua logo */
+.studio {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.bar {
+  display: grid;
+  gap: 16px 40px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .bar {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+}
+.colorStep,
+.logoStep,
+.techStep {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+.tip svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* vistas lado a lado (no celular, uma por vez, deslizando para o lado) */
+.views {
+  --n: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+/* uma ou duas vistas (avental, calça) não ficam gigantes */
+.views[data-count="1"] {
+  max-width: 520px;
+}
+.views[data-count="2"] {
+  max-width: 920px;
+}
+@media (max-width: 759px) {
+  .views,
+  .views[data-count] {
+    display: flex;
+    max-width: none;
+    margin-inline: calc(var(--gutter, 16px) * -1);
+    padding-inline: var(--gutter, 16px);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter, 16px);
+    scrollbar-width: none;
+  }
+  .views::-webkit-scrollbar {
+    display: none;
+  }
+  .view {
+    flex: 0 0 86%;
+    scroll-snap-align: start;
+  }
+  .views[data-count="1"] .view {
+    flex-basis: 100%;
+  }
+}
+
+.view {
+  display: grid;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.view[data-on] {
+  border-color: var(--line-strong);
+}
+.stage {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--surface-2);
+  isolation: isolate;
+}
+.viewLabel {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  pointer-events: none;
+}
+/* vista sem logo: botão para colocar uma */
+.addBtn {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 14px;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  background: rgb(12 26 46 / 0.86);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--dur-fast) var(--ease);
+}
+.addBtn:hover {
+  background: rgb(12 26 46 / 1);
+}
+
+.panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+}
+.panel > button {
+  width: 100%;
+}
+/* nome da posição em cima e o tamanho máximo embaixo (o card é estreito) */
+.posText {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+.panelBody {
+  display: grid;
+  gap: 10px;
+}
+.panelBody > button {
+  justify-self: start;
+}
+
+/* página do simulador: título e preço, estúdio e compra embaixo */
+.sim {
+  display: grid;
+  gap: clamp(22px, 3vw, 32px);
+  min-width: 0;
+}
+.simHead {
+  display: grid;
+  gap: 16px 40px;
+  align-items: end;
+}
+@media (min-width: 900px) {
+  .simHead {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+  }
+}

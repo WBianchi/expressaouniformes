@@ -765,6 +765,10 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
 
       <section className="admin-panel">
         <h3 className={s.sectionTitle}>Mockups da peça (simulador e troca de cor)</h3>
+        <p className={s.hint}>
+          Valem para todas as cores: o site pinta a peça na cor que o cliente escolhe. Para uma cor ter foto própria (ex.: só o laranja), envie em
+          &quot;Fotos por cor&quot;, logo abaixo.
+        </p>
         <div className={s.gallery}>
           <ProductPhotoSlots product={catalog} photos={photos} enabled={enabled} pieceOnly />
         </div>
@@ -775,7 +779,16 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
   );
 }
 
-/* ---------------- Fotos vestindo por cor ---------------- */
+/* ---------------- Fotos por cor ---------------- */
+
+/** Posições das fotos de uma cor (as mesmas das fotos do produto): peça sozinha primeiro, que é a do simulador. */
+const COLOR_SLOTS = [
+  { index: 2, label: "Peça: frente", group: "piece" },
+  { index: 3, label: "Peça: costas", group: "piece" },
+  { index: 4, label: "Peça: lado", group: "piece" },
+  { index: 0, label: "Vestindo 1 (frente)", group: "model" },
+  { index: 1, label: "Vestindo 2 (costas)", group: "model" },
+] as const;
 
 function ColorPhotos({ slug, colors, photos, enabled }: { slug: string; colors: string[]; photos: Record<string, string[]>; enabled: boolean }) {
   const { pending, error, setError, run } = useAction();
@@ -785,7 +798,7 @@ function ColorPhotos({ slug, colors, photos, enabled }: { slug: string; colors: 
   const rows = [...Object.keys(photos), ...extra.filter((c) => !photos[c])];
   const free = colors.filter((c) => !rows.includes(c));
 
-  const onFile = async (color: string, index: 0 | 1, file?: File) => {
+  const onFile = async (color: string, index: number, file?: File) => {
     if (!file) return;
     setBusy(`${color}-${index}`);
     setError(null);
@@ -801,10 +814,12 @@ function ColorPhotos({ slug, colors, photos, enabled }: { slug: string; colors: 
 
   return (
     <section className="admin-panel" aria-busy={pending}>
-      <h3 className={s.sectionTitle}>Fotos vestindo por cor (opcional)</h3>
+      <h3 className={s.sectionTitle}>Fotos por cor (opcional)</h3>
       <p className={s.hint}>
-        Quando o cliente escolhe uma cor na página do produto, a foto vestindo dessa cor passa a ser a primeira da galeria; as outras fotos do
-        anúncio continuam lá, depois dela. Cor sem foto própria mostra a galeria normal. Use fotos verticais (4:5), no mesmo estilo das fotos da vitrine.
+        Para uma cor ter fotos próprias. <b>Peça (frente, costas, lado):</b> no simulador, quando o cliente escolhe esta cor, aparecem estas fotos no
+        lugar dos mockups acima pintados na cor; as outras cores continuam como estão. Use o mesmo enquadramento dos mockups (foto quadrada, só a
+        peça, fundo liso). <b>Vestindo:</b> na página do produto, a foto vestindo da cor escolhida passa a ser a primeira da galeria. Escolha a cor
+        em &quot;Adicionar fotos de uma cor&quot; e envie só as fotos que quiser.
       </p>
       {error && <p className={m.error}>{error}</p>}
       <div className={s.colorRows}>
@@ -818,7 +833,7 @@ function ColorPhotos({ slug, colors, photos, enabled }: { slug: string; colors: 
                 {!colors.includes(color) && <small>(cor fora da lista à venda)</small>}
               </span>
               <div className={m.slots}>
-                {([0, 1] as const).map((index) => {
+                {COLOR_SLOTS.map(({ index, label }) => {
                   const src = list[index];
                   const key = `${color}-${index}`;
                   return (
@@ -834,7 +849,7 @@ function ColorPhotos({ slug, colors, photos, enabled }: { slug: string; colors: 
                         )}
                         {busy === key && <span className={m.uploading}>Enviando…</span>}
                       </span>
-                      <small>{index ? "Vestindo 2 (costas)" : "Vestindo 1 (frente)"}</small>
+                      <small>{label}</small>
                       <div className={m.slotActions}>
                         <button type="button" className="button secondary small" disabled={!enabled || pending || !!busy} onClick={() => inputs.current[key]?.click()}>
                           <Upload size={14} /> {src ? "Trocar" : "Enviar"}

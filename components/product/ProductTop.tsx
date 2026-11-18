@@ -1,58 +1,53 @@
 "use client";
 import { useEffect, useState } from "react";
-import { inStock, type Position, type Product, type Technique } from "@/lib/catalog";
+import { inStock, money, type Position, type Product, type Technique } from "@/lib/catalog";
+import { PIX_DISCOUNT } from "@/lib/pricing";
 import { toCatalogTechnique, type ArtTechnique } from "@/lib/qualify";
-import { availablePositions, logoSpots, type Placement, type Placements } from "@/lib/mockup";
-import { Gallery, type Slide } from "./Gallery";
-
-export type ColorProps = { color: string; onColor: (id: string) => void };
+import { availablePositions, type Placement, type Placements } from "@/lib/mockup";
+import { Price } from "@/components/ui/primitives";
+import { ProductHead } from "./ProductHead";
 import { QuoteBuyBox } from "./QuoteBuyBox";
 import { StockBuyBox } from "./StockBuyBox";
-import { logoThumbs, useBrandLogos } from "./useBrandLogo";
+import { Studio } from "./Studio";
+import { useBrandLogos } from "./useBrandLogo";
 import s from "./Product.module.css";
+import st from "./Studio.module.css";
+
+/** O que o estúdio do simulador escolhe e a compra usa. */
+export type CustomProps = {
+  color: string;
+  positions: Position[];
+  logos: ReturnType<typeof useBrandLogos>[0];
+  placements: Placements;
+  technique: Technique | null;
+};
 
 /**
- * Simulador: galeria + caixa de compra. As duas compartilham a logo e as posições:
- * o que o cliente escolhe aparece na foto da peça, na cor escolhida.
+ * Simulador: título e preço, o estúdio (cor, vistas da peça com a logo e técnica) e, embaixo,
+ * tamanhos e compra. O estúdio e a compra compartilham cor, logos, posições e técnica.
  */
 export function ProductTop({ product }: { product: Product }) {
   const [logos, setLogo] = useBrandLogos();
-  const [positions, setPositionsState] = useState<Position[]>(() => availablePositions(product).slice(0, 1));
-  const [view, setView] = useState<Slide>("front");
+  const [positions, setPositions] = useState<Position[]>(() => availablePositions(product).slice(0, 1));
   // posição/tamanho que o cliente ajustou em cada lugar (sem ajuste = posição padrão)
   const [placements, setPlacements] = useState<Placements>({});
   // a técnica define o preço da personalização: começa na primeira do anúncio
   const [technique, setTechnique] = useState<Technique | null>(product.techniques[0] ?? null);
-  const [color, setColorState] = useState(product.colors[0]);
-  const setColor = (id: string) => {
-    setColorState(id);
-    // a foto da pessoa vestindo não muda de cor: mostra a peça
-    setView((v) => (v === "front" || v === "back" || v === "side" ? v : "front"));
-  };
+  const [color, setColor] = useState(product.colors[0]);
+  const available = inStock(product);
 
   // vindo da página do produto (?cor=mescla) ou do questionário (?tecnica=bordado),
   // já abre na cor escolhida e com a técnica marcada
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const c = q.get("cor");
-    if (c && product.colors.includes(c)) setColorState(c);
+    if (c && product.colors.includes(c)) setColor(c);
     const t = toCatalogTechnique(q.get("tecnica") as ArtTechnique | null);
     if (t && product.techniques.includes(t)) setTechnique(t);
   }, [product.colors, product.techniques]);
 
-  // ao marcar uma posição, a galeria vira para o lado onde ela fica
-  const setPositions = (next: Position[]) => {
-    const added = next.find((p) => !positions.includes(p));
-    const spot = added && logoSpots(product)[added];
-    if (spot) setView(spot.view);
-    setPositionsState(next);
-  };
-
-  // ao enviar a logo de uma posição, a galeria mostra o lado onde ela fica
   const onLogo: typeof setLogo = (position, next) => {
-    const spot = next && logoSpots(product)[position];
-    if (spot) setView(spot.view);
-    // logo nova (ou trocada) começa na posição padrão da área (centro; nas costas, no alto), num tamanho que cabe
+    // logo nova (ou trocada) começa na posição padrão (centro; nas costas, no alto), num tamanho que cabe
     if (next?.thumb !== logos[position]?.thumb)
       setPlacements((cur) => {
         const rest = { ...cur };
@@ -62,32 +57,43 @@ export function ProductTop({ product }: { product: Product }) {
     setLogo(position, next);
   };
 
-  const onPlace = (position: Position, placement: Placement | null) => {
-    const spot = logoSpots(product)[position];
-    if (spot) setView(spot.view);
+  const onPlace = (position: Position, placement: Placement | null) =>
     setPlacements((cur) => {
       const next = { ...cur };
       if (placement) next[position] = placement;
       else delete next[position];
       return next;
     });
-  };
 
-  const custom = { color, onColor: setColor, positions, onPositions: setPositions, logos, onLogo, placements, onPlace, technique, onTechnique: setTechnique };
+  const custom: CustomProps = { color, positions, logos, placements, technique };
   return (
-    <div className={s.top}>
-      <Gallery
+    <div className={st.sim}>
+      <div className={st.simHead}>
+        <ProductHead product={product} />
+        {available && (
+          <div className={s.priceBlock}>
+            <Price value={product.price} compareAt={product.compareAt} prefix="Peça lisa a partir de" size="lg" />
+            <span className={s.muted}>
+              ou {money(product.price * (1 - PIX_DISCOUNT))} no Pix · pedido mínimo de {product.minQty} peças
+            </span>
+          </div>
+        )}
+      </div>
+      <Studio
         product={product}
+        fees={available}
+        color={color}
+        onColor={setColor}
         positions={positions}
-        logos={logoThumbs(logos)}
+        onPositions={setPositions}
+        logos={logos}
+        onLogo={onLogo}
         placements={placements}
         onPlace={onPlace}
-        view={view}
-        onViewChange={setView}
-        color={color}
         technique={technique}
+        onTechnique={setTechnique}
       />
-      {inStock(product) ? <StockBuyBox product={product} {...custom} /> : <QuoteBuyBox product={product} {...custom} />}
+      {available ? <StockBuyBox product={product} {...custom} step={positions.length ? 4 : 3} /> : <QuoteBuyBox product={product} {...custom} step={positions.length ? 4 : 3} />}
     </div>
   );
 }

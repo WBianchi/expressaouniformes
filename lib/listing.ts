@@ -63,10 +63,14 @@ export const listingFormSchema = z
   });
 export type ListingForm = z.infer<typeof listingFormSchema>;
 
-/** Até 2 fotos de pessoa vestindo por cor (frente e costas); posição vazia = "". */
+/**
+ * Fotos próprias de cada cor, nas mesmas posições das fotos do produto: 0–1 pessoa vestindo
+ * (página do produto) e 2–4 a peça sozinha (frente, costas e lado, no simulador). Posição vazia = "".
+ */
+export const COLOR_PHOTO_SLOTS = 5;
 export const colorPhotosSchema = z.record(
   z.string().refine((id) => colors.some((c) => c.id === id)),
-  z.array(z.string().refine((u) => !u || safeImage(u))).max(2),
+  z.array(z.string().refine((u) => !u || safeImage(u))).max(COLOR_PHOTO_SLOTS),
 );
 
 /** Edição gravada no banco: só os campos alterados. */
@@ -159,9 +163,16 @@ export function listingDiff(base: Partial<ListingFields>, next: Partial<ListingF
   return out as Partial<ListingFields>;
 }
 
-/** Fotos por cor sem posições vazias e sem cores sem foto. */
+/** Fotos por cor sem cores sem foto e sem posições vazias no fim (as do meio ficam "", para não mudar de lugar). */
 export function cleanColorPhotos(map: Record<string, string[]>): Record<string, string[]> {
   const out: Record<string, string[]> = {};
-  for (const [color, list] of Object.entries(map)) if (list.some(Boolean)) out[color] = [list[0] ?? "", list[1] ?? ""];
+  for (const [color, list] of Object.entries(map)) {
+    const l = Array.from({ length: COLOR_PHOTO_SLOTS }, (_, i) => list[i] ?? "");
+    while (l.length && !l[l.length - 1]) l.pop();
+    if (l.length) out[color] = l;
+  }
   return out;
 }
+
+/** Fotos de pessoa vestindo de uma cor (página do produto). */
+export const colorModelPhotos = (list: readonly string[] | undefined) => (list ?? []).slice(0, 2).filter(Boolean);

@@ -3,6 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { ChevronLeft, ChevronRight, Expand, X, ZoomIn, ZoomOut } from "lucide-react";
 import { SafeImage } from "@/components/ui/primitives";
+import { colorModelPhotos } from "@/lib/listing";
 import { useRecolored } from "@/lib/recolor";
 import { useLpColor } from "./LpParts";
 import s from "./Landing.module.css";
@@ -29,7 +30,7 @@ export function LpGallery({ images: base, name, colorPhotos }: { images: LpImage
   const tint = lp?.tint ?? null;
   // cor com fotos vestindo próprias (enviadas no painel): elas vão para a frente da galeria e
   // as outras fotos do anúncio continuam depois delas (só a foto principal muda)
-  const own = (lp && colorPhotos?.[lp.color]?.filter(Boolean)) || [];
+  const own = lp ? colorModelPhotos(colorPhotos?.[lp.color]) : [];
   const images = useMemo<LpImage[]>(
     () =>
       own.length

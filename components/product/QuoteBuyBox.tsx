@@ -5,15 +5,16 @@ import { ClipboardList, MessageCircle } from "lucide-react";
 import { getColor, whatsappLink, type Product } from "@/lib/catalog";
 import { CUSTOM_MIN_QTY } from "@/lib/quote";
 import { useQuote } from "@/components/quote/useQuote";
-import { Stepper, Swatches } from "@/components/ui/primitives";
-import { Personalize, type PersonalizeProps } from "./Personalize";
-import { ProductHead } from "./ProductHead";
+import { Stepper } from "@/components/ui/primitives";
 import { StickyBar } from "./StickyBar";
 import s from "./Product.module.css";
-import type { ColorProps } from "./ProductTop";
+import type { CustomProps } from "./ProductTop";
 
-/** Itens sem estoque ou sob encomenda: entram no orçamento para empresas (30+ peças no pedido). */
-export function QuoteBuyBox({ product, color, onColor: setColor, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
+/**
+ * Itens sem estoque ou sob encomenda: entram no orçamento para empresas (30+ peças no pedido).
+ * Cor, logo e técnica vêm do estúdio do simulador, logo acima.
+ */
+export function QuoteBuyBox({ product, color, positions, placements, technique, step }: CustomProps & { product: Product; step: number }) {
   const { add, items, total } = useQuote();
   const [qty, setQty] = useState(CUSTOM_MIN_QTY);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -29,8 +30,6 @@ export function QuoteBuyBox({ product, color, onColor: setColor, positions, onPo
 
   return (
     <div className={s.buy}>
-      <ProductHead product={product} />
-
       <div className={s.quoteNotice}>
         <b>{outOfStock ? "Sob cotação" : "Sob encomenda"}</b>
         <p>
@@ -39,25 +38,15 @@ export function QuoteBuyBox({ product, color, onColor: setColor, positions, onPo
         </p>
       </div>
 
-      <section className={s.step} aria-labelledby="qb-color">
-        <h2 id="qb-color" className={s.stepTitle}>
-          <span className={s.stepNum}>1</span> Cor <span className={s.stepValue}>{colorName}</span>
-        </h2>
-        <Swatches ids={product.colors} value={color} onChange={setColor} size="lg" />
-        <p className={s.note}>Outras cores sob consulta.</p>
-      </section>
-
       <section className={s.step} aria-labelledby="qb-qty">
         <h2 id="qb-qty" className={s.stepTitle}>
-          <span className={s.stepNum}>2</span> Quantidade estimada
+          <span className={s.stepNum}>{step}</span> Quantidade estimada
         </h2>
         <div className={s.qtyRow}>
           <Stepper value={qty} onChange={(n) => setQty(Math.max(1, n))} max={100000} label="quantidade" />
           <span className={s.muted}>peças · a grade de tamanhos é definida com o consultor</span>
         </div>
       </section>
-
-      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} placements={placements} onPlace={onPlace} technique={technique} onTechnique={onTechnique} fees={false} step={3} />
 
       <div className={s.actions} ref={actionsRef}>
         <button type="button" className="btn btn-primary btn-lg btn-block" onClick={addToQuote}>

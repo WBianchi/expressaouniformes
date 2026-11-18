@@ -3,15 +3,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Factory, Loader2, MapPin, MessageCircle, PackageCheck, ShoppingCart, Truck } from "lucide-react";
-import { getColor, money, positionFees, whatsappLink, type Product, type Size } from "@/lib/catalog";
+import { getColor, money, whatsappLink, type Product, type Size } from "@/lib/catalog";
 import { CUSTOM_MIN_QTY } from "@/lib/quote";
 import { lineFees, maxInstallments, PIX_DISCOUNT, unitPrice, type ShippingOption, volumeDiscount, volumeTiers } from "@/lib/pricing";
 import { useStore } from "@/components/store/StoreProvider";
 import { fetchShippingQuote } from "@/lib/shipping-client";
-import { Price, Stepper, Swatches } from "@/components/ui/primitives";
-import { Personalize, type PersonalizeProps } from "./Personalize";
-import { ProductHead } from "./ProductHead";
-import type { ColorProps } from "./ProductTop";
+import { Stepper } from "@/components/ui/primitives";
+import type { CustomProps } from "./ProductTop";
 import { StickyBar } from "./StickyBar";
 import s from "./Product.module.css";
 
@@ -21,7 +19,8 @@ const maskCep = (v: string) => {
 };
 
 /** Compra online da linha pronta-entrega (a partir de 5 peças). */
-export function StockBuyBox({ product, color, onColor: setColor, positions, onPositions, logos, onLogo, placements, onPlace, technique, onTechnique }: PersonalizeProps & ColorProps & { product: Product }) {
+/** Tamanhos, preço e compra (cor, logo e técnica vêm do estúdio do simulador, logo acima). */
+export function StockBuyBox({ product, color, positions, logos, placements, technique, step }: CustomProps & { product: Product; step: number }) {
   const router = useRouter();
   const { addToCart, openDrawer, cep: savedCep, setCep } = useStore();
   const [sizes, setSizes] = useState<Partial<Record<Size, number>>>({});
@@ -96,24 +95,11 @@ export function StockBuyBox({ product, color, onColor: setColor, positions, onPo
   }
 
   return (
-    <div className={s.buy}>
-      <ProductHead product={product} />
-
-      <div className={s.priceBlock}>
-        <Price value={product.price} compareAt={product.compareAt} prefix="Peça lisa a partir de" size="lg" />
-        <span className={s.muted}>ou {money(product.price * (1 - PIX_DISCOUNT))} no Pix · pedido mínimo de {product.minQty} peças</span>
-      </div>
-
-      <section className={s.step} aria-labelledby="st-color">
-        <h2 id="st-color" className={s.stepTitle}>
-          <span className={s.stepNum}>1</span> Cor <span className={s.stepValue}>{colorName}</span>
-        </h2>
-        <Swatches ids={product.colors} value={color} onChange={setColor} size="lg" />
-      </section>
-
+    <div className={s.buyGrid}>
+      <div className={s.buyMain}>
       <section className={s.step} aria-labelledby="st-sizes" ref={sizesRef}>
         <h2 id="st-sizes" className={s.stepTitle}>
-          <span className={s.stepNum}>2</span> Tamanhos e quantidades
+          <span className={s.stepNum}>{step}</span> Tamanhos e quantidades
           <span className={s.stepValue}>
             {qty} {qty === 1 ? "peça" : "peças"}
           </span>
@@ -156,7 +142,6 @@ export function StockBuyBox({ product, color, onColor: setColor, positions, onPo
         )}
       </section>
 
-      <Personalize product={product} positions={positions} onPositions={onPositions} logos={logos} onLogo={onLogo} placements={placements} onPlace={onPlace} technique={technique} onTechnique={onTechnique} fees step={3} />
 
       <details className={s.notesBox}>
         <summary>Adicionar observações</summary>
@@ -170,7 +155,9 @@ export function StockBuyBox({ product, color, onColor: setColor, positions, onPo
           aria-label="Observações"
         />
       </details>
+      </div>
 
+      <div className={s.buySide}>
       <section className={s.calc} aria-labelledby="st-calc">
         <h2 id="st-calc" className="sr-only">Resumo do preço</h2>
         <p className="sr-only" aria-live="polite">{qty > 0 ? `Total de ${money(total)} para ${qty} peças, ${money(unit)} por peça.` : ""}</p>
@@ -262,6 +249,7 @@ export function StockBuyBox({ product, color, onColor: setColor, positions, onPo
       <p className={s.crossSell}>
         Pedido para empresa, acima de 30 peças ou com vários modelos? <Link href="/orcamento">Monte seu pedido e peça um orçamento</Link>
       </p>
+      </div>
 
       <StickyBar watch={actionsRef}>
         <div className={s.stickyInfo}>

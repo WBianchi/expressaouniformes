@@ -86,6 +86,11 @@ function prepare(src: string): Promise<Prepared> {
   return p;
 }
 
+/** Máscara peça × fundo da foto (a mesma usada na troca de cor), para o simulador medir o contorno da peça. */
+export function pieceMask(src: string): Promise<{ w: number; h: number; m: Float32Array }> {
+  return prepare(src).then(({ w, h, m }) => ({ w, h, m }));
+}
+
 // ruído determinístico (mesmo granulado sempre, sem "chiar" ao trocar de cor)
 const hash = (x: number, y: number, seed: number) => {
   let v = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(seed, 1442695041)) >>> 0;

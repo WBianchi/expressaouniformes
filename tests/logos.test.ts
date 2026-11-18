@@ -66,19 +66,21 @@ test("logo nova entra centralizada na área, num tamanho que cabe", () => {
   }
 });
 
-test("tamanho em cm mantém a proporção da logo e respeita o máximo da área", () => {
+test("tamanho em cm mantém a proporção da logo e respeita o máximo da posição", () => {
   const spot = logoSpots(camiseta).frente!;
-  // logo 2:1 numa área de 10 × 10 cm: até 10 cm de largura (5 de altura)
   const box = logoBox(spot, { x: 50, y: 50, w: 8 }, 2);
   assert.equal(box.w, 8);
   assert.equal(box.hCm, 4);
   assert.ok(Math.abs(box.wPct / box.hPct - 2) < 1e-9);
-  assert.equal(clampPlacement({ x: 0, y: 0, w: 40 }, spot, 2).w, maxLogoCm(spot, 2));
-  // logo alta (1:2): a altura limita, até 5 cm de largura
-  assert.equal(maxLogoCm(spot, 0.5), 5);
+  assert.equal(clampPlacement({ x: 0, y: 0, w: 400 }, spot, 2).w, maxLogoCm(spot, 2));
+  // tamanho livre: a logo do peito pode virar estampa grande na frente, até 28 × 35 cm
+  assert.equal(maxLogoCm(spot, 2), 28);
+  // logo alta (1:2): a altura limita, até 17,5 cm de largura (35 de altura)
+  assert.equal(maxLogoCm(spot, 0.5), 17.5);
+  assert.equal(maxLogoCm(logoSpots(camiseta).manga!, 1), 10);
 });
 
-test("arrastar não deixa a logo inteira sair da área (peito, costas e manga), nem depois de aumentar", () => {
+test("a logo inteira fica dentro da vista (e a da manga perto da manga), mesmo no tamanho máximo", () => {
   const spots = logoSpots(camiseta);
   for (const pos of ["frente", "costas", "manga"] as const) {
     const spot = spots[pos]!;
@@ -90,7 +92,7 @@ test("arrastar não deixa a logo inteira sair da área (peito, costas e manga), 
     ])
       for (const aspect of [1, 2.5, 0.5]) {
         const p = clampPlacement({ x, y, w: 1000 }, spot, aspect);
-        assert.ok(inside(logoBox(spot, p, aspect), spot.area), `${pos} ${x},${y} ${aspect}`);
+        assert.ok(inside(logoBox(spot, p, aspect), spot.bounds), `${pos} ${x},${y} ${aspect}`);
       }
   }
 });
@@ -131,7 +133,7 @@ test("costas: a logo nasce no alto da área (padrão da fábrica) e cresce para 
     for (const w of [box.w + 4, box.w - 4]) {
       const r = logoBox(spot, resizePlacement(undefined, w, spot, aspect), aspect);
       assert.ok(Math.abs(r.y - r.hPct / 2 - spot.area.y0) < 0.01);
-      assert.ok(inside(r, spot.area));
+      assert.ok(inside(r, spot.bounds));
     }
   }
   // frente e manga continuam centralizadas; o cós da calça também
@@ -167,4 +169,83 @@ test("bordas vazias da logo são cortadas: fundo transparente ou branco", async 
   const bordado = logoSpots(camiseta, "Bordado").costas!;
   assert.equal(maxLogoCm(bordado, 1), 5);
   assert.equal(maxLogoCm(bordado, 4), 20);
+});
+
+// peça de mentira para os testes: um retângulo (x 20–80, y 10–90) é a peça, o resto é fundo
+const piece = (a: { x0: number; x1: number; y0: number; y1: number }) => a.x0 >= 20 && a.x1 <= 80 && a.y0 >= 10 && a.y1 <= 90;
+
+test("arrastar: a logo vai para qualquer lugar da peça, mas não sai dela (desliza pela borda)", async () => {
+  const { moveWithin } = await import("../lib/mockup.ts");
+  const spot = logoSpots(camiseta).frente!;
+  const from = { x: 50, y: 40, w: 10 };
+  // dentro da peça: vai exatamente para onde foi arrastada (longe da área padrão do peito)
+  assert.deepEqual(moveWithin(from, { x: 35, y: 70 }, spot, 1, piece), { x: 35, y: 70, w: 10 });
+  // arrastou para o fundo, à direita: para na borda da peça, na mesma altura
+  const r = moveWithin(from, { x: 95, y: 40 }, spot, 1, piece);
+  const half = 10 / spot.cm / 2;
+  assert.ok(r.x + half <= 80 + 1e-6 && r.x + half > 79, `parou na borda (${r.x})`);
+  assert.equal(r.y, 40);
+  // na diagonal para fora: desliza pela borda, seguindo o movimento que cabe
+  const d = moveWithin(from, { x: 95, y: 60 }, spot, 1, piece);
+  assert.ok(piece({ x0: d.x - half, x1: d.x + half, y0: d.y - half, y1: d.y + half }));
+  assert.ok(Math.abs(d.y - 60) < 0.01, `seguiu até a altura pedida (${d.y})`);
+});
+
+test("puxar o canto: o canto oposto fica parado e a logo não passa da peça nem do máximo", async () => {
+  const { resizeFromCorner } = await import("../lib/mockup.ts");
+  const spot = logoSpots(camiseta).frente!;
+  const from = { x: 50, y: 40, w: 10 };
+  const h = 10 / spot.cm / 2;
+  const nw = { x: 50 - h, y: 40 - h };
+  // puxa o canto de baixo à direita: cresce para baixo e para a direita
+  const big = resizeFromCorner(from, "se", { x: 50 + h + 5, y: 40 + h + 5 }, spot, 1, piece);
+  assert.ok(big.w > 10);
+  const bh = big.w / spot.cm / 2;
+  assert.ok(Math.abs(big.x - bh - nw.x) < 0.02 && Math.abs(big.y - bh - nw.y) < 0.02, "canto de cima à esquerda parado");
+  // puxa muito para fora: para na borda da peça (x até 80)
+  const edge = resizeFromCorner(from, "se", { x: 99, y: 99 }, spot, 1, piece);
+  const eh = edge.w / spot.cm / 2;
+  assert.ok(edge.x + eh <= 80 + 1e-6, "não passa da peça");
+  assert.ok(edge.w <= maxLogoCm(spot, 1));
+  // diminuir pelo canto de cima à esquerda: o de baixo à direita fica parado
+  const small = resizeFromCorner(from, "nw", { x: 50, y: 40 }, spot, 1, piece);
+  const sh = small.w / spot.cm / 2;
+  assert.ok(small.w < 10 && Math.abs(small.x + sh - (50 + h)) < 0.02);
+});
+
+test("botões de tamanho: se não cabe no lugar, a logo anda o mínimo para dentro da peça", async () => {
+  const { resizePlacement } = await import("../lib/mockup.ts");
+  const spot = logoSpots(camiseta).frente!;
+  // logo encostada na borda direita da peça
+  const half = 10 / spot.cm / 2;
+  const at = { x: 80 - half - 0.1, y: 50, w: 10 };
+  const r = resizePlacement(at, 20, spot, 1, piece);
+  assert.equal(r.w, 20);
+  const rh = 20 / spot.cm / 2;
+  assert.ok(piece({ x0: r.x - rh, x1: r.x + rh, y0: r.y - rh, y1: r.y + rh }));
+  assert.ok(Math.abs(r.x - at.x) < 8, "andou pouco");
+});
+
+test("contorno da peça: a grade diz se a logo cai só em cima da peça", async () => {
+  const { buildFitMap, fitsInside } = await import("../lib/fit-map.ts");
+  // foto 200 × 200 com a peça num retângulo de 40 a 160 (x) e 20 a 180 (y)
+  const m = new Float32Array(200 * 200);
+  for (let y = 20; y < 180; y++) for (let x = 40; x < 160; x++) m[y * 200 + x] = 1;
+  const f = buildFitMap(m, 200, 200)!;
+  assert.ok(f);
+  assert.ok(fitsInside(f, { x0: 25, x1: 75, y0: 15, y1: 85 }));
+  assert.ok(!fitsInside(f, { x0: 15, x1: 30, y0: 40, y1: 50 }), "metade no fundo");
+  assert.ok(!fitsInside(f, { x0: 50, x1: 60, y0: 85, y1: 95 }), "passou da barra");
+  // máscara vazia (não deu para medir): sem contorno
+  assert.equal(buildFitMap(new Float32Array(100), 10, 10), null);
+});
+
+test("logo que ficou fora da peça volta para dentro ao ser arrastada e não cresce lá fora", async () => {
+  const { moveWithin, resizeFromCorner } = await import("../lib/mockup.ts");
+  const spot = logoSpots(camiseta).frente!;
+  const out = { x: 10, y: 95, w: 10 };
+  const half = 10 / spot.cm / 2;
+  const r = moveWithin(out, { x: 12, y: 96 }, spot, 1, piece);
+  assert.ok(piece({ x0: r.x - half, x1: r.x + half, y0: r.y - half, y1: r.y + half }), `voltou para a peça (${r.x}, ${r.y})`);
+  assert.equal(resizeFromCorner(out, "se", { x: 40, y: 99 }, spot, 1, piece).w, 10);
 });

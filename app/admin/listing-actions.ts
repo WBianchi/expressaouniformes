@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { safeImage } from "@/lib/banners";
 import { catalogHas, colors, getCategory, NO_PHOTO, withListing, type ListingFields, type SaleKind } from "@/lib/catalog";
-import { cleanColorPhotos, galleryPhotosSchema, listingDiff, listingFieldsOf, listingFormSchema, listingOverrideSchema, type ListingForm } from "@/lib/listing";
+import { cleanColorPhotos, COLOR_PHOTO_SLOTS, galleryPhotosSchema, listingDiff, listingFieldsOf, listingFormSchema, listingOverrideSchema, type ListingForm } from "@/lib/listing";
 import { adminCatalog, dropBlob, runAction, type MediaResult } from "./action-utils";
 
 type Sql = Awaited<ReturnType<typeof adminCatalog>>;
@@ -87,18 +87,18 @@ export async function saveGallery(slug: string, photos: string[]) {
 const colorPhotoSchema = z.object({
   slug: slugSchema,
   color: z.string().refine((c) => colors.some((x) => x.id === c), "Cor inválida."),
-  index: z.union([z.literal(0), z.literal(1)]),
+  index: z.number().int().min(0).max(COLOR_PHOTO_SLOTS - 1),
   url: z.string().refine(safeImage, "Envie uma imagem.").nullable(),
 });
 
-/** Troca (url) ou remove (null) a foto de pessoa vestindo de uma cor: 0 = frente, 1 = costas. */
+/** Troca (url) ou remove (null) uma foto própria de uma cor: 0–1 pessoa vestindo, 2–4 peça (frente, costas, lado). */
 export async function setColorPhoto(slug: string, color: string, index: number, url: string | null) {
   return runAction(async () => {
     const sql = await adminCatalog();
     const k = colorPhotoSchema.parse({ slug, color, index, url });
     const old = await readOverride(sql, k.slug);
     const map = { ...(old.colorPhotos ?? {}) };
-    const list = [...(map[k.color] ?? ["", ""])];
+    const list = Array.from({ length: COLOR_PHOTO_SLOTS }, (_, i) => map[k.color]?.[i] ?? "");
     const prev = list[k.index];
     list[k.index] = k.url ?? "";
     map[k.color] = list;

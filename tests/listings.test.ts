@@ -220,3 +220,15 @@ test("galeria com mais de 2 fotos: os mockups da peça não tomam o lugar das fo
   // fotos antigas de vitrine (posições 0 e 1) continuam valendo
   assert.equal(withPhotos(p, ["/vitrine.png"]).photos![0], "/vitrine.png");
 });
+
+test("fotos por cor: até 5 por cor (vestindo e peça), sem cor vazia e sem vazio no fim", async () => {
+  const { cleanColorPhotos, colorModelPhotos, listingOverrideSchema } = await import("../lib/listing.ts");
+  const peca = "/images/products/camiseta-malha-pv.webp";
+  // só a foto da frente da peça laranja: as posições de antes ficam vazias, para não mudar de lugar
+  assert.deepEqual(cleanColorPhotos({ laranja: ["", "", peca, "", ""], royal: ["", ""] }), { laranja: ["", "", peca] });
+  assert.ok(listingOverrideSchema.safeParse({ colorPhotos: { laranja: ["", "", peca, peca, peca] } }).success);
+  assert.ok(!listingOverrideSchema.safeParse({ colorPhotos: { laranja: ["", "", peca, peca, peca, peca] } }).success);
+  // a página do produto usa só as fotos vestindo da cor
+  assert.deepEqual(colorModelPhotos(["", "", peca]), []);
+  assert.deepEqual(colorModelPhotos([peca, "", peca]), [peca]);
+});

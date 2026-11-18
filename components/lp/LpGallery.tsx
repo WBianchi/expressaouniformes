@@ -1,7 +1,7 @@
 "use client";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
-import { ChevronLeft, ChevronRight, Expand, X, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { SafeImage } from "@/components/ui/primitives";
 import { colorModelPhotos } from "@/lib/listing";
 import { useRecolored } from "@/lib/recolor";
@@ -23,7 +23,18 @@ const ZOOM = 2.5;
  * embaixo. Fotos do anúncio, na ordem do painel; a foto vestindo da cor escolhida vem primeiro.
  * Clique (ou toque) na foto abre a foto ampliada, com zoom para ver os detalhes.
  */
-export function LpGallery({ images: base, name, colorPhotos }: { images: LpImage[]; name: string; colorPhotos?: Record<string, string[]> }) {
+export function LpGallery({
+  images: base,
+  name,
+  colorPhotos,
+  photoColors,
+}: {
+  images: LpImage[];
+  name: string;
+  colorPhotos?: Record<string, string[]>;
+  /** cor marcada em cada foto da galeria (painel): escolher a cor leva para a foto dela */
+  photoColors?: Record<string, string>;
+}) {
   const [i, setI] = useState(0);
   const [open, setOpen] = useState(false);
   const lp = useLpColor();
@@ -40,12 +51,20 @@ export function LpGallery({ images: base, name, colorPhotos }: { images: LpImage
     [own.join("|"), base],
   );
   const hasOwn = own.length > 0;
-  // ao escolher outra cor: com foto vestindo da cor, mostra ela; sem, mostra a peça sozinha (quando houver; é ela que muda de cor)
+  const color = lp?.color;
+  // ao escolher outra cor (não ao abrir a página): a foto vestindo da cor, se houver; senão a foto da
+  // galeria marcada com essa cor no painel; senão a peça sozinha (quando houver; é ela que muda de cor)
+  const lastColor = useRef(color);
   useEffect(() => {
+    if (lastColor.current === color) return;
+    lastColor.current = color;
     if (hasOwn) return setI(0);
+    const tagged = color ? images.findIndex((im) => photoColors?.[im.src] === color) : -1;
+    if (tagged >= 0) return setI(tagged);
     if (!tint) return;
     setI((cur) => (images[cur]?.piece || !images.some((im) => im.piece) ? cur : images.findIndex((im) => im.piece)));
-  }, [tint, images, hasOwn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color]);
   const touch = useRef<number | null>(null);
   const thumbs = useRef<HTMLUListElement>(null);
   const go = (d: number) => setI((cur) => (cur + d + images.length) % images.length);
@@ -84,19 +103,13 @@ export function LpGallery({ images: base, name, colorPhotos }: { images: LpImage
             <Photo im={im} alt={`${name}: ${im.label}`} priority={k === 0} tint={tint} />
           </button>
         ))}
-        <span className={s.counter}>
-          {index + 1}/{images.length}
-        </span>
-        <button type="button" className={s.expand} onClick={() => setOpen(true)} aria-label="Ampliar foto">
-          <Expand size={16} />
-        </button>
         {images.length > 1 && (
           <>
             <button type="button" className={s.nav} data-dir="prev" onClick={() => go(-1)} aria-label="Foto anterior">
-              <ChevronLeft size={20} />
+              <ChevronLeft size={30} strokeWidth={2.4} />
             </button>
             <button type="button" className={s.nav} data-dir="next" onClick={() => go(1)} aria-label="Próxima foto">
-              <ChevronRight size={20} />
+              <ChevronRight size={30} strokeWidth={2.4} />
             </button>
           </>
         )}

@@ -5,6 +5,7 @@ import { inStock, money, type Product } from "@/lib/catalog";
 import { useStore } from "@/components/store/StoreProvider";
 import { useProductPhotos } from "@/components/store/MediaProvider";
 import { SafeImage, Swatches } from "./primitives";
+import { offPercent } from "@/lib/pricing";
 import s from "./ui.module.css";
 
 /** Card de produto: pronta-entrega com preço; sob cotação ou sob encomenda, por orçamento. */
@@ -13,6 +14,7 @@ export function ProductCard({ product, priority }: { product: Product; priority?
   const fav = isFavorite(product.slug);
   const photos = useProductPhotos()(product);
   const available = inStock(product);
+  const off = offPercent(product.price, product.compareAt);
   const href = `/produto/${product.slug}`;
   const status = available ? "Pronta-entrega" : product.kind === "custom" ? "Sob encomenda" : "Sob cotação";
   return (
@@ -37,9 +39,14 @@ export function ProductCard({ product, priority }: { product: Product; priority?
           {product.name}
         </Link>
         {available ? (
-          <p className={s.cardPrice}>
+          <p className={s.cardPrice} data-sale={off > 0 || undefined}>
             <small>a partir de</small> <b>{money(product.price)}</b>
-            {product.compareAt && <del>{money(product.compareAt)}</del>}
+            {off > 0 && (
+              <>
+                <del>{money(product.compareAt!)}</del>
+                <em className={s.off}>{off}% OFF</em>
+              </>
+            )}
           </p>
         ) : (
           <p className={s.cardPrice}>

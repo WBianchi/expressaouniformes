@@ -2,6 +2,7 @@
 import { Minus, Plus, Star, Shirt, Ruler, Stethoscope, CloudSun, HardHat, ChefHat, TriangleAlert, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { getColor, money } from "@/lib/catalog";
+import { offPercent } from "@/lib/pricing";
 import s from "./ui.module.css";
 
 export const categoryIcons: Record<string, LucideIcon> = { Shirt, Ruler, Stethoscope, CloudSun, HardHat, ChefHat, TriangleAlert };
@@ -85,12 +86,17 @@ export function Swatches({
 
 export function Price({ value, compareAt, unit = "un.", size = "md", prefix }: { value: number; compareAt?: number; unit?: string; size?: "sm" | "md" | "lg"; prefix?: string }) {
   return (
-    <div className={s.price} data-size={size}>
+    <div className={s.price} data-size={size} data-sale={offPercent(value, compareAt) > 0 || undefined}>
       {prefix && <small className={s.pricePrefix}>{prefix}</small>}
       <div className={s.priceRow}>
         <strong>{money(value)}</strong>
         {unit && <span>/{unit}</span>}
-        {compareAt && compareAt > value && <del>{money(compareAt)}</del>}
+        {offPercent(value, compareAt) > 0 && (
+          <>
+            <del>{money(compareAt!)}</del>
+            <em className={s.off}>{offPercent(value, compareAt)}% OFF</em>
+          </>
+        )}
       </div>
     </div>
   );

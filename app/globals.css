@@ -18,6 +18,8 @@
   --gold-400: #f4c45a;
   --gold-100: #fdf3dc;
   --success: #16a34a;
+  /* preço em promoção: verde mais escuro, para ler bem em texto pequeno */
+  --sale: #15803d;
   --success-soft: #e8f7ee;
   --danger: #dc2626;
   --danger-soft: #fdecec;
@@ -117,6 +119,7 @@
     --primary-hover: #4a84ec;
     --link: #6ea2ff;
     --success-soft: rgb(22 163 74 / 0.14);
+    --sale: #4ade80;
     --danger-soft: rgb(220 38 38 / 0.14);
     --info-soft: rgb(29 95 209 / 0.16);
     --gold-100: rgb(232 172 44 / 0.14);
@@ -156,6 +159,7 @@
   --accent-fg: #0b1220;
   --link: #9fb9e6;
   --success-soft: rgb(22 163 74 / 0.14);
+  --sale: #4ade80;
   --danger-soft: rgb(220 38 38 / 0.14);
   --info-soft: rgb(29 95 209 / 0.16);
   --gold-100: rgb(232 172 44 / 0.14);

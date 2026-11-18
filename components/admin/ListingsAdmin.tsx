@@ -296,7 +296,7 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
     // compara o conteúdo: depois de salvar, o que volta do banco vem com as chaves em outra ordem
     return typeof v === "string" || !sameData(v, initial);
   })();
-  const edited = Object.keys(override ?? {}).some((k) => k !== "colorPhotos" && k !== "photos");
+  const edited = Object.keys(override ?? {}).some((k) => k !== "colorPhotos" && k !== "photos" && k !== "photoColors");
 
   const load = (f: ListingForm) => {
     setD(f);
@@ -760,7 +760,7 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
       <section className="admin-panel">
         <h3 className={s.sectionTitle}>Galeria do anúncio</h3>
         <p className={s.hint}>Fotos comerciais (pessoa vestindo, detalhes, ambiente). Elas não mudam de cor; quem muda de cor é a peça sozinha, logo abaixo.</p>
-        <GalleryEditor slug={slug} saved={gallery} enabled={enabled} />
+        <GalleryEditor slug={slug} saved={gallery} savedColors={current.photoColors ?? {}} colors={current.colors} enabled={enabled} />
       </section>
 
       <section className="admin-panel">

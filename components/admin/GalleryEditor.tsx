@@ -1,19 +1,36 @@
 "use client";
 // Galeria do anúncio no painel: enviar várias fotos de uma vez, escolher a capa, mudar a ordem
-// (arrastando ou pelas setas), trocar ou tirar cada foto e ver tudo antes de salvar.
+// (arrastando ou pelas setas), trocar ou tirar cada foto, marcar a cor da peça em cada foto
+// (na página do produto, escolher a cor mostra a foto dela) e ver tudo antes de salvar.
 import { useRef, useState, type DragEvent } from "react";
 import { ArrowLeft, ArrowRight, ImagePlus, RefreshCw, Star, Trash2, Upload } from "lucide-react";
+import { getColor } from "@/lib/catalog";
 import { MAX_PHOTOS } from "@/lib/listing";
 import { saveGallery } from "@/app/admin/listing-actions";
 import { ACCEPT, uploadImage, useAction } from "./MediaAdmin";
 import m from "./MediaAdmin.module.css";
 import s from "./ListingsAdmin.module.css";
 
-type Item = { src: string; uploading?: boolean; name?: string };
+type Item = { src: string; uploading?: boolean; name?: string; /** cor da peça nesta foto (id) */ color?: string };
 
-export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: string[]; enabled: boolean }) {
+export function GalleryEditor({
+  slug,
+  saved,
+  savedColors = {},
+  colors = [],
+  enabled,
+}: {
+  slug: string;
+  saved: string[];
+  /** cor marcada em cada foto salva (endereço → id da cor) */
+  savedColors?: Record<string, string>;
+  /** cores à venda do anúncio (opções da marcação) */
+  colors?: string[];
+  enabled: boolean;
+}) {
   const { pending, error, setError, run } = useAction();
-  const [items, setItems] = useState<Item[]>(() => saved.map((src) => ({ src })));
+  const fromSaved = () => saved.map((src) => ({ src, color: savedColors[src] }));
+  const [items, setItems] = useState<Item[]>(fromSaved);
   const [over, setOver] = useState(false);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [done, setDone] = useState(false);
@@ -22,15 +39,18 @@ export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: s
   const replacing = useRef<number | null>(null);
 
   const list = items.map((i) => i.src);
+  const tags = Object.fromEntries(items.flatMap((i) => (i.color ? [[i.src, i.color]] : [])));
   const busy = items.some((i) => i.uploading);
-  const dirty = JSON.stringify(list) !== JSON.stringify(saved);
+  const keyOf = (l: string[], t: Record<string, string>) => l.map((src) => `${src}=${t[src] ?? ""}`).join("|");
+  const dirty = keyOf(list, tags) !== keyOf(saved, savedColors);
   // a versão salva mudou (depois de salvar ou de outra ação do painel): sem mudanças pendentes aqui,
   // a tela passa a mostrar ela; o aviso "Galeria salva" continua à vista
-  const savedKey = saved.join("|");
+  const savedKey = keyOf(saved, savedColors);
   const [prevKey, setPrevKey] = useState(savedKey);
   if (savedKey !== prevKey) {
     setPrevKey(savedKey);
-    if (list.join("|") === prevKey || list.join("|") === savedKey) setItems(saved.map((src) => ({ src })));
+    const now = keyOf(list, tags);
+    if (now === prevKey || now === savedKey) setItems(fromSaved());
   }
 
   const change = (fn: (cur: Item[]) => Item[]) => {
@@ -52,7 +72,7 @@ export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: s
         return next;
       });
       uploadImage(file, "produtos")
-        .then((url) => change((cur) => cur.map((i) => (i.src === temp ? { src: url } : i))))
+        .then((url) => change((cur) => cur.map((i) => (i.src === temp ? { src: url, color: i.color } : i))))
         .catch((e) => {
           setError(`${file.name}: ${e instanceof Error ? e.message : "falha no envio."}`);
           change((cur) => cur.filter((i) => i.src !== temp));
@@ -155,6 +175,26 @@ export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: s
                 <Trash2 size={14} />
               </button>
             </div>
+            {colors.length > 1 && (
+              <label className={s.photoColor}>
+                <span>Cor da peça</span>
+                <select
+                  value={it.color ?? ""}
+                  onChange={(e) => {
+                    const color = e.target.value || undefined;
+                    change((cur) => cur.map((x, k) => (k === i ? { ...x, color } : x)));
+                  }}
+                  aria-label={`Cor da peça na foto ${i + 1}`}
+                >
+                  <option value="">Todas / não marcar</option>
+                  {[...colors, ...(it.color && !colors.includes(it.color) ? [it.color] : [])].map((id) => (
+                    <option key={id} value={id}>
+                      {getColor(id)?.name ?? id}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </li>
         ))}
         {items.length < MAX_PHOTOS && (
@@ -203,7 +243,8 @@ export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: s
       />
       <p className={s.hint}>
         A primeira foto é a capa (vitrine e topo da página do produto); a segunda aparece ao passar o mouse na vitrine. Use fotos verticais (4:5), de até 8
-        MB, em JPG, PNG, WebP ou AVIF. Arraste as fotos para mudar a ordem ou use as setas.
+        MB, em JPG, PNG, WebP ou AVIF. Arraste as fotos para mudar a ordem ou use as setas. Em &quot;Cor da peça&quot;, marque a cor de cada foto: na página
+        do produto, quando o cliente escolhe uma cor (ex.: laranja), a galeria vai para a foto dessa cor.
       </p>
       <div className={s.saveBar} data-dirty={dirty || undefined}>
         <span>
@@ -211,7 +252,7 @@ export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: s
         </span>
         <div className="button-row">
           {dirty && (
-            <button type="button" className="button secondary small" disabled={pending} onClick={() => change(() => saved.map((src) => ({ src })))}>
+            <button type="button" className="button secondary small" disabled={pending} onClick={() => change(() => fromSaved())}>
               Descartar
             </button>
           )}
@@ -219,7 +260,7 @@ export function GalleryEditor({ slug, saved, enabled }: { slug: string; saved: s
             type="button"
             className="button primary small"
             disabled={!enabled || pending || busy || !dirty || !items.length}
-            onClick={() => run(() => saveGallery(slug, list), () => setDone(true))}
+            onClick={() => run(() => saveGallery(slug, list, tags), () => setDone(true))}
           >
             <Upload size={14} /> {pending ? "Salvando…" : "Salvar galeria"}
           </button>

@@ -131,3 +131,6 @@ export function lineLogos(l: Pick<CartLine, "positions" | "logos" | "logo">) {
   }
   return out;
 }
+
+/** Desconto do preço "de" (riscado) para o preço de venda, em % inteiro; 0 sem promoção. Ex.: de 57,90 por 46,90 → 19. */
+export const offPercent = (price: number, compareAt?: number | null) => (compareAt && compareAt > price ? Math.round((1 - price / compareAt) * 100) : 0);

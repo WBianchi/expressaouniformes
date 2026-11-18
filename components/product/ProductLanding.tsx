@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BadgeCheck, ChevronRight, ClipboardList, Factory, MessageCircle, ShoppingBag, Truck } from "lucide-react";
 import { company, fabricText, getCategory, getColor, inStock, money, products, whatsappLink, type Product } from "@/lib/catalog";
-import { PIX_DISCOUNT } from "@/lib/pricing";
+import { offPercent, PIX_DISCOUNT } from "@/lib/pricing";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import { productFaq } from "@/lib/product-faq";
 import { getClientLogos, getPhotoOverrides } from "@/lib/site-media";
@@ -29,6 +29,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://expressaouniformes.ver
 export async function ProductLanding({ product, source }: { product: Product; source: string }) {
   const category = getCategory(product.category);
   const available = inStock(product);
+  const off = offPercent(product.price, product.compareAt);
   const [clientLogos, overrides] = await Promise.all([getClientLogos(), getPhotoOverrides(), syncCatalog()]);
   // fotos trocadas no painel (pessoa vestindo e peça sozinha) valem aqui também
   const media = withPhotos(product, overrides[product.slug]);
@@ -110,7 +111,7 @@ export async function ProductLanding({ product, source }: { product: Product; so
           <div className={s.top}>
             {/* cartão principal: galeria + informações e variações */}
             <div className={`${s.card} ${s.main}`}>
-              <LpGallery images={images} name={product.name} colorPhotos={product.colorPhotos} />
+              <LpGallery images={images} name={product.name} colorPhotos={product.colorPhotos} photoColors={product.photoColors} />
               <div className={s.info}>
                 <span className={s.eyebrow}>
                   <Factory size={14} /> {available ? "Pronta-entrega" : "Fabricação"} · {category?.name}
@@ -139,10 +140,14 @@ export async function ProductLanding({ product, source }: { product: Product; so
 
             {/* cartão de compra: preço, ações e qualificação */}
             <aside className={`${s.card} ${s.buy}`} aria-label="Comprar ou pedir orçamento">
-              <div className={s.price}>
+              <div className={s.price} data-sale={(available && off > 0) || undefined}>
                 {available ? (
                   <>
-                    {product.compareAt && <del className={s.muted}>{money(product.compareAt)}</del>}
+                    {off > 0 && (
+                      <span className={s.was}>
+                        <del className={s.muted}>{money(product.compareAt!)}</del> <em className={s.off}>{off}% OFF</em>
+                      </span>
+                    )}
                     <p>
                       <b>{money(product.price * (1 - PIX_DISCOUNT))}</b> <small>no Pix</small>
                     </p>

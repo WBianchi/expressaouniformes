@@ -70,6 +70,8 @@ export type Product = {
   gallery: string[];
   /** fotos de pessoa vestindo por cor (enviadas pelo painel): cor → [frente, costas] */
   colorPhotos?: Record<string, string[]>;
+  /** cor de cada foto da galeria (endereço da foto → id da cor): ao escolher a cor, a página mostra a foto dela */
+  photoColors?: Record<string, string>;
   /** anúncio cadastrado pelo painel (não existe no código) */
   created?: boolean;
   /** ficha técnica: textos editados das linhas fixas (vazio = esconde a linha) */
@@ -489,6 +491,8 @@ export type ListingFields = Pick<
   /** fotos do anúncio, na ordem da galeria (a primeira é a capa) */
   photos: string[];
   colorPhotos: Record<string, string[]>;
+  /** cor de cada foto da galeria (endereço → id da cor) */
+  photoColors: Record<string, string>;
 };
 /** Edições do painel por produto (só os campos alterados). */
 export type ListingOverrides = Record<string, Partial<ListingFields>>;

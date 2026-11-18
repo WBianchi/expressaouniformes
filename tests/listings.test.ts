@@ -232,3 +232,21 @@ test("fotos por cor: até 5 por cor (vestindo e peça), sem cor vazia e sem vazi
   assert.deepEqual(colorModelPhotos(["", "", peca]), []);
   assert.deepEqual(colorModelPhotos([peca, "", peca]), [peca]);
 });
+
+test("promoção: % de desconto do preço riscado (de 57,90 por 46,90 = 19% OFF)", async () => {
+  const { offPercent } = await import("../lib/pricing.ts");
+  assert.equal(offPercent(46.9, 57.9), 19);
+  assert.equal(offPercent(24.9, 29.9), 17);
+  assert.equal(offPercent(46.9, undefined), 0);
+  assert.equal(offPercent(46.9, 40), 0);
+});
+
+test("cor de cada foto da galeria: só cores da paleta e fotos válidas", async () => {
+  const { listingOverrideSchema, listingFormOf } = await import("../lib/listing.ts");
+  const foto = "/images/products/camiseta-malha-pv.webp";
+  assert.ok(listingOverrideSchema.safeParse({ photoColors: { [foto]: "laranja" } }).success);
+  assert.ok(!listingOverrideSchema.safeParse({ photoColors: { [foto]: "cor-que-nao-existe" } }).success);
+  assert.ok(!listingOverrideSchema.safeParse({ photoColors: { "javascript:alert(1)": "laranja" } }).success);
+  // a marcação tem botão próprio (galeria): não entra no formulário do anúncio
+  assert.ok(!("photoColors" in listingFormOf(getProduct(SLUG)!)));
+});

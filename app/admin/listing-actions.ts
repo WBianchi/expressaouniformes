@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { safeImage } from "@/lib/banners";
 import { catalogHas, colors, getCategory, NO_PHOTO, withListing, type ListingFields, type SaleKind } from "@/lib/catalog";
-import { cleanColorPhotos, COLOR_PHOTO_SLOTS, galleryPhotosSchema, listingDiff, listingFieldsOf, listingFormSchema, listingOverrideSchema, type ListingForm } from "@/lib/listing";
+import { cleanColorPhotos, COLOR_PHOTO_SLOTS, galleryPhotosSchema, photoColorsSchema, listingDiff, listingFieldsOf, listingFormSchema, listingOverrideSchema, type ListingForm } from "@/lib/listing";
 import { adminCatalog, dropBlob, runAction, type MediaResult } from "./action-utils";
 
 type Sql = Awaited<ReturnType<typeof adminCatalog>>;
@@ -45,9 +45,10 @@ export async function saveListing(slug: string, input: ListingForm) {
     }
     const old = await readOverride(sql, k);
     const next = listingDiff(base, fields);
-    // a galeria e as fotos por cor têm botões próprios e continuam como estão
+    // a galeria (com a cor de cada foto) e as fotos por cor têm botões próprios e continuam como estão
     if (old.photos) next.photos = old.photos;
     if (old.colorPhotos) next.colorPhotos = old.colorPhotos;
+    if (old.photoColors) next.photoColors = old.photoColors;
     await writeOverride(sql, k, next);
   });
 }
@@ -58,7 +59,11 @@ export async function resetListing(slug: string) {
     const sql = await adminCatalog();
     const k = slugSchema.parse(slug);
     const old = await readOverride(sql, k);
-    await writeOverride(sql, k, { ...(old.photos ? { photos: old.photos } : {}), ...(old.colorPhotos ? { colorPhotos: old.colorPhotos } : {}) });
+    await writeOverride(sql, k, {
+      ...(old.photos ? { photos: old.photos } : {}),
+      ...(old.colorPhotos ? { colorPhotos: old.colorPhotos } : {}),
+      ...(old.photoColors ? { photoColors: old.photoColors } : {}),
+    });
   });
 }
 
@@ -66,7 +71,7 @@ export async function resetListing(slug: string) {
  * Salva a galeria do anúncio: as fotos na ordem escolhida (a primeira é a capa).
  * As fotos que saíram da galeria são apagadas do Blob.
  */
-export async function saveGallery(slug: string, photos: string[]) {
+export async function saveGallery(slug: string, photos: string[], photoColors: Record<string, string> = {}) {
   return runAction(async () => {
     const sql = await adminCatalog();
     const k = slugSchema.parse(slug);
@@ -79,6 +84,10 @@ export async function saveGallery(slug: string, photos: string[]) {
     const next = { ...old };
     if (JSON.stringify(list) === JSON.stringify(base.photos)) delete next.photos;
     else next.photos = list;
+    // cor de cada foto: só das fotos que ficaram na galeria
+    const tags = photoColorsSchema.parse(Object.fromEntries(Object.entries(photoColors).filter(([url, c]) => list.includes(url) && !!c)));
+    if (Object.keys(tags).length) next.photoColors = tags;
+    else delete next.photoColors;
     await writeOverride(sql, k, next);
     for (const url of new Set(before)) if (!list.includes(url)) await dropBlob(url);
   });

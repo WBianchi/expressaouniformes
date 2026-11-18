@@ -73,6 +73,12 @@ export const colorPhotosSchema = z.record(
   z.array(z.string().refine((u) => !u || safeImage(u))).max(COLOR_PHOTO_SLOTS),
 );
 
+/** Cor de cada foto da galeria (endereço da foto → id da cor da paleta). */
+export const photoColorsSchema = z.record(
+  z.string().refine(safeImage),
+  z.string().refine((id) => colors.some((c) => c.id === id)),
+);
+
 /** Edição gravada no banco: só os campos alterados. */
 export const listingOverrideSchema = z
   .object({
@@ -91,6 +97,7 @@ export const listingOverrideSchema = z
     colors: z.array(z.string()).transform((l) => l.filter((id) => colors.some((c) => c.id === id))).pipe(z.array(z.string()).min(1)),
     sizes: z.array(z.enum(SIZE_OPTIONS)),
     colorPhotos: colorPhotosSchema,
+    photoColors: photoColorsSchema,
     // categoria que deixou de existir é ignorada ao aplicar (o anúncio volta para a do código)
     category: z.string().max(60),
     photos: z.array(z.string().refine(safeImage)).max(MAX_PHOTOS),
@@ -127,12 +134,13 @@ export function listingFieldsOf(p: Product): ListingFields {
     specs: { ...(p.specs ?? {}) },
     extraSpecs: (p.extraSpecs ?? []).map((r) => ({ ...r })),
     colorPhotos: p.colorPhotos ?? {},
+    photoColors: p.photoColors ?? {},
   };
 }
 
 /** Os campos do formulário (sem a galeria e as fotos por cor, que têm botões próprios). */
 export function listingFormOf(p: Product): ListingForm {
-  const { photos: _photos, colorPhotos: _colors, ...form } = listingFieldsOf(p);
+  const { photos: _photos, colorPhotos: _colors, photoColors: _photoColors, ...form } = listingFieldsOf(p);
   return form;
 }
 

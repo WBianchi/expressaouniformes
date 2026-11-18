@@ -41,7 +41,8 @@ export default async function SimulatorPage({ params }: Props) {
 
   return (
     <div className={s.page}>
-      <div className="container">
+      {/* mais largo que o resto do site: a peça do simulador ocupa a altura da tela */}
+      <div className="container" style={{ ["--container" as string]: "1640px" }}>
         <nav className={s.crumbs} aria-label="Você está em">
           <Link href="/">Início</Link>
           <ChevronRight size={13} />

@@ -1,17 +1,17 @@
 "use client";
 // Simulador da logo (página /produto/[slug]/simulador), no formato "estúdio":
-// - à esquerda: nome, preço, cores e as vistas da peça (frente, costas, manga esquerda e direita);
+// - à esquerda: nome, descrição, cores e as vistas da peça (frente, costas, manga esquerda e direita);
 // - no meio: a peça grande na vista escolhida, com a logo livre (arrasta, puxa os cantos, zoom);
 // - à direita: abas "Personalizar" (área, logo, tamanho e técnica) e "Pedido" (tamanhos, frete)
 //   e o rodapé com o valor por peça, o total e o botão de compra.
+// No computador ocupa a altura da tela: a peça fica parada e só as duas laterais rolam.
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
-import { getColor, inStock, money, tintFor, type Position, type Product, type Technique } from "@/lib/catalog";
-import { PIX_DISCOUNT } from "@/lib/pricing";
+import { getColor, inStock, tintFor, type Position, type Product, type Technique } from "@/lib/catalog";
 import { toCatalogTechnique, type ArtTechnique } from "@/lib/qualify";
 import { availablePositions, logoSpots, type Placement, type Placements } from "@/lib/mockup";
-import { Price, Swatches } from "@/components/ui/primitives";
+import { Swatches } from "@/components/ui/primitives";
 import { LogoMockup, usePiecePhoto } from "./LogoMockup";
 import type { LogoValue } from "./LogoUpload";
 import { QuoteBuyBox } from "./QuoteBuyBox";
@@ -34,6 +34,9 @@ export type CustomProps = {
 
 type Tab = "custom" | "order";
 
+/** Descrição curta sem os marcadores de lista ("• Manga longa • Modelagem…" → "Manga longa · Modelagem…"). */
+const cleanShort = (t: string) => t.replace(/^\s*[•·]\s*/, "").replace(/\s*[•·]\s*/g, " · ").trim();
+
 export function ProductTop({ product }: { product: Product }) {
   const available = availablePositions(product);
   const [logos, setLogo] = useBrandLogos();
@@ -48,6 +51,31 @@ export function ProductTop({ product }: { product: Product }) {
   const [color, setColor] = useState(product.colors[0]);
   const [tab, setTab] = useState<Tab>("custom");
   const online = inStock(product);
+  const root = useRef<HTMLDivElement>(null);
+
+  // no computador a página não rola em cima do simulador: a peça fica parada e a roda do mouse
+  // só rola a lateral (ou a foto com zoom) que tiver o que rolar. Ctrl + roda segue sendo o zoom do navegador.
+  // Tela baixa (o simulador não cabe inteiro): a página rola até ele caber.
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onWheel = (e: WheelEvent) => {
+      if (!desktop.matches || e.ctrlKey) return;
+      // inteiro na tela: abaixo do cabeçalho fixo e acima do pé da janela
+      const r = el.getBoundingClientRect();
+      const top = document.querySelector("header")?.getBoundingClientRect().bottom ?? 0;
+      if (r.top < top - 1 || r.bottom > window.innerHeight + 1) return;
+      for (let n = e.target as HTMLElement | null; n && n !== el; n = n.parentElement) {
+        const { overflowY, overflowX } = getComputedStyle(n);
+        const rolls = (/auto|scroll/.test(overflowY) && n.scrollHeight > n.clientHeight + 1) || (/auto|scroll/.test(overflowX) && n.scrollWidth > n.clientWidth + 1);
+        if (rolls) return; // essa parte rola (e não passa a rolagem para a página)
+      }
+      e.preventDefault();
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   // vindo da página do produto (?cor=mescla) ou do questionário (?tecnica=bordado),
   // já abre na cor escolhida e com a técnica marcada
@@ -91,32 +119,25 @@ export function ProductTop({ product }: { product: Product }) {
   const colorName = getColor(color)?.name ?? "";
 
   return (
-    <div className={x.sim}>
-      <div className={x.info}>
-        <Link href={`/produto/${product.slug}`} className={x.back}>
-          <ArrowLeft size={16} /> Voltar
-        </Link>
-        <div className={x.head}>
-          <h1 className={x.title}>{product.name}</h1>
-          {product.short && <p className={x.short}>{product.short}</p>}
-          {online && (
-            <div className={x.price}>
-              <Price value={product.price} compareAt={product.compareAt} prefix="Peça lisa a partir de" />
-              <small>
-                ou {money(product.price * (1 - PIX_DISCOUNT))} no Pix · mínimo de {product.minQty} peças
-              </small>
-            </div>
-          )}
+    <div className={x.sim} ref={root}>
+      {/* coluna da esquerda (no celular, os blocos vão para cima e para baixo da peça) */}
+      <div className={x.side}>
+        <div className={x.info}>
+          <Link href={`/produto/${product.slug}`} className={x.back}>
+            <ArrowLeft size={16} /> Voltar
+          </Link>
+          <div className={x.head}>
+            <h1 className={x.title}>{product.name}</h1>
+            {product.short && <p className={x.short}>{cleanShort(product.short)}</p>}
+          </div>
+          <div className={x.colors}>
+            <h2 className={x.label}>Cores disponíveis</h2>
+            <Swatches ids={product.colors} value={color} onChange={setColor} size="lg" />
+            <span className={x.colorName}>{colorName}</span>
+          </div>
         </div>
-        <div className={x.colors}>
-          <h2 className={x.label}>
-            Cores disponíveis <span>{colorName}</span>
-          </h2>
-          <Swatches ids={product.colors} value={color} onChange={setColor} size="lg" />
-        </div>
-      </div>
 
-      <nav className={x.views} aria-label="Visualização">
+        <nav className={x.views} aria-label="Visualização">
         <h2 className={x.label}>Visualização</h2>
         <div className={x.viewList} data-count={available.length}>
           {available.map((pos) => {
@@ -148,8 +169,10 @@ export function ProductTop({ product }: { product: Product }) {
             );
           })}
         </div>
-      </nav>
+        </nav>
+      </div>
 
+      <div className={x.center}>
       <SimStage
         key={active}
         product={product}
@@ -167,6 +190,7 @@ export function ProductTop({ product }: { product: Product }) {
         onInclude={() => include(active)}
         onRemoveLogo={() => onLogo(active, null)}
       />
+      </div>
 
       <section className={x.panel} aria-label="Personalização e pedido">
         <div className={x.tabs} role="tablist" aria-label="Etapas">
@@ -178,6 +202,8 @@ export function ProductTop({ product }: { product: Product }) {
           </button>
         </div>
 
+        {/* só esta parte rola; as abas ficam em cima e o preço com o botão, embaixo */}
+        <div className={x.panelScroll}>
         <div role="tabpanel" id="sim-custom" aria-labelledby="sim-tab-custom" hidden={tab !== "custom"}>
           <SimPanel
             product={product}
@@ -207,6 +233,7 @@ export function ProductTop({ product }: { product: Product }) {
               <QuoteBuyBox product={product} {...custom} step={1} />
             </div>
           )}
+        </div>
         </div>
 
         {online && <StockOrderFooter product={product} order={order} positions={positions} />}

@@ -1,4 +1,5 @@
 /* Simulador: nome/cores e vistas à esquerda, a peça grande no meio, abas e compra à direita.
+   No computador ocupa a altura da tela: a peça fica parada e só as duas laterais rolam.
    No celular: nome e cores, a peça, as vistas lado a lado e as abas embaixo. */
 .sim {
   --ink: #1b3356;
@@ -17,20 +18,47 @@
 :global(:root[data-theme="dark"]) .sim {
   --ink: var(--brand-500);
 }
-@media (min-width: 900px) {
-  .sim {
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
-    grid-template-rows: auto auto 1fr;
-    grid-template-areas: "info panel" "stage panel" "views panel";
-    gap: 20px 28px;
-    align-items: start;
-  }
+/* no celular, os blocos da coluna da esquerda entram na grade (nome e cores em cima, vistas embaixo da peça) */
+.side {
+  display: contents;
 }
-@media (min-width: 1200px) {
+.center {
+  grid-area: stage;
+  width: 100%;
+  max-width: 640px;
+  min-width: 0;
+  margin-inline: auto;
+}
+@media (min-width: 1024px) {
   .sim {
-    grid-template-columns: 200px minmax(0, 1fr) minmax(360px, 400px);
-    grid-template-rows: auto 1fr;
-    grid-template-areas: "info stage panel" "views stage panel";
+    grid-template-columns: minmax(230px, 260px) minmax(0, 1fr) minmax(340px, 400px);
+    grid-template-areas: "side stage panel";
+    /* a altura da tela menos o cabeçalho, o caminho (Início › …) e a margem do cartão */
+    height: clamp(480px, calc(100dvh - var(--header-h) - 96px), 900px);
+    gap: 28px;
+  }
+  .side {
+    grid-area: side;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    min-height: 0;
+    padding-right: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  /* a peça: o maior quadrado que cabe no meio, parado */
+  .center {
+    display: grid;
+    place-items: center;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    container-type: size;
+  }
+  .center > .stage {
+    width: min(100cqw, 100cqh);
   }
 }
 
@@ -38,7 +66,7 @@
 .info {
   grid-area: info;
   display: grid;
-  gap: 18px;
+  gap: 22px;
   align-content: start;
   min-width: 0;
 }
@@ -57,35 +85,29 @@
 }
 .head {
   display: grid;
-  gap: 6px;
+  gap: 10px;
 }
 .title {
   margin: 0;
-  font-size: clamp(21px, 2vw, 24px);
+  font-size: clamp(22px, 1.7vw, 25px);
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
 }
 .short {
   margin: 0;
-  font-size: 14.5px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.55;
   color: var(--text-2);
-}
-.price {
-  display: grid;
-  gap: 2px;
-  margin-top: 6px;
-}
-.price small {
-  font-size: 12.5px;
-  color: var(--muted);
 }
 .colors {
   display: grid;
-  gap: 10px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
+  gap: 12px;
+}
+.colorName {
+  margin-top: -4px;
+  font-size: 13px;
+  color: var(--muted);
 }
 .label {
   display: flex;
@@ -106,7 +128,7 @@
 .views {
   grid-area: views;
   display: grid;
-  gap: 10px;
+  gap: 12px;
   align-content: start;
   min-width: 0;
 }
@@ -170,7 +192,7 @@
   background: var(--link);
   color: #fff;
 }
-@media (min-width: 1200px) {
+@media (min-width: 1024px) {
   .viewList,
   .viewList[data-count] {
     grid-template-columns: 1fr;
@@ -179,8 +201,8 @@
     grid-template-columns: 56px minmax(0, 1fr);
     justify-items: start;
     align-items: center;
-    gap: 12px;
-    padding: 6px 10px 6px 6px;
+    gap: 14px;
+    padding: 6px 12px 6px 6px;
     font-size: 14.5px;
     font-weight: 500;
     text-align: left;
@@ -197,8 +219,8 @@
 
 /* ---------------------------------------------------------------- peça grande */
 .stage {
-  grid-area: stage;
   position: relative;
+  width: 100%;
   min-width: 0;
   overflow: hidden;
   border-radius: var(--radius-xl);
@@ -325,13 +347,6 @@
 .addBtn:hover {
   background: rgb(12 26 46 / 1);
 }
-/* a peça fica à vista enquanto a coluna da direita rola (ajustar o tamanho, escolher a técnica) */
-@media (min-width: 900px) {
-  .stage {
-    position: sticky;
-    top: calc(var(--header-h, 72px) + 16px);
-  }
-}
 @media (max-width: 520px) {
   .area {
     gap: 6px;
@@ -356,6 +371,21 @@
   border-radius: var(--radius-xl);
   background: var(--surface);
   box-shadow: var(--shadow-xs);
+}
+/* no computador, abas em cima, preço e botão embaixo, e só o meio rola */
+@media (min-width: 1024px) {
+  .panel {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .panelScroll {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
 }
 .tabs {
   display: grid;
@@ -655,22 +685,14 @@
   color: var(--muted);
 }
 
-/* rodapé: valor por peça, total e o botão de compra (fica à vista enquanto rola a coluna) */
+/* rodapé: valor por peça, total e o botão de compra (no computador, fixo no pé da coluna) */
 .footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
   display: grid;
   gap: 10px;
   padding: 12px;
   border-top: 1px solid var(--line);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   background: var(--surface);
-}
-@media (max-width: 899px) {
-  .footer {
-    position: static;
-  }
 }
 .sums {
   display: grid;

@@ -109,8 +109,12 @@
   border: 0;
   background: none;
   color: #1b2430;
-  filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.95)) drop-shadow(0 0 1px rgb(255 255 255 / 0.95));
+  /* só a seta: sem brilho atrás e sem o destaque azul/branco do toque no celular */
+  -webkit-tap-highlight-color: transparent;
   transition: transform var(--dur-fast) var(--ease);
+}
+.nav:focus:not(:focus-visible) {
+  outline: none;
 }
 .nav:hover {
   transform: scale(1.12);

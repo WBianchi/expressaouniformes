@@ -6,7 +6,9 @@
 export type SaleKind = "stock" | "custom";
 export type Size = "PP" | "P" | "M" | "G" | "GG" | "XG" | "XGG" | "G3" | "G4" | "G5" | "G6" | "G7" | "G8";
 export type Technique = "DTF" | "Silk" | "Bordado" | "Sublimação";
-export type Position = "frente" | "costas" | "manga";
+/** Lugares da logo na peça. "manga" é a manga esquerda (a da foto de lado); a direita usa a mesma foto espelhada. */
+export const POSITIONS = ["frente", "costas", "manga", "manga-direita"] as const;
+export type Position = (typeof POSITIONS)[number];
 
 export type Color = { id: string; name: string; hex: string; /** tecido mesclado (fios de dois tons): textura na bolinha e na foto */ pattern?: "mescla" };
 
@@ -633,8 +635,12 @@ export const getColor = (id: string) => colors.find((c) => c.id === id);
 export const positionFees: Record<Position, { label: string; fee: number }> = {
   frente: { label: "Frente (peito)", fee: 6.9 },
   costas: { label: "Costas", fee: 8.9 },
-  manga: { label: "Manga", fee: 4.9 },
+  manga: { label: "Manga esquerda", fee: 4.9 },
+  "manga-direita": { label: "Manga direita", fee: 4.9 },
 };
+
+/** De onde sai o preço da posição na tabela do simulador: as duas mangas usam o preço da manga. */
+export const feePosition = (p: Position): Exclude<Position, "manga-direita"> => (p === "manga-direita" ? "manga" : p);
 
 /** Técnica usada no preço quando o cliente ainda não escolheu: a primeira do anúncio. */
 export const defaultTechnique = (p: Pick<Product, "techniques">): Technique | undefined => p.techniques[0];
@@ -646,11 +652,11 @@ export const defaultTechnique = (p: Pick<Product, "techniques">): Technique | un
  */
 export function feeFor(p: Pick<Product, "techniques">, technique: Technique | null | undefined, position: Position): number {
   const t = technique ?? defaultTechnique(p);
-  return (t && customizationFees[t]?.[position]) ?? positionFees[position].fee;
+  return (t && customizationFees[t]?.[feePosition(position)]) ?? positionFees[position].fee;
 }
 
 /** Preço de uma técnica numa posição pela tabela do simulador (sem cair na primeira técnica do anúncio). */
-export const tableFee = (technique: Technique, position: Position) => customizationFees[technique]?.[position] ?? positionFees[position].fee;
+export const tableFee = (technique: Technique, position: Position) => customizationFees[technique]?.[feePosition(position)] ?? positionFees[position].fee;
 
 export const company = {
   name: "Expressão Uniformes",

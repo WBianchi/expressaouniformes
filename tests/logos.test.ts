@@ -111,6 +111,41 @@ test("manga aparece na vista lateral", () => {
   assert.equal(logoSpots({ category: "calcas" }).manga, undefined);
 });
 
+test("manga direita: a foto de lado espelhada, com a logo no mesmo lugar do outro lado", async () => {
+  const { availablePositions, flipFits } = await import("../lib/mockup.ts");
+  const spots = logoSpots(camiseta);
+  const left = spots.manga!;
+  const right = spots["manga-direita"]!;
+  assert.equal(right.view, "side-flip");
+  assert.equal(right.x, 100 - left.x);
+  assert.equal(right.y, left.y);
+  assert.deepEqual([right.area.x0, right.area.x1], [100 - left.area.x1, 100 - left.area.x0]);
+  assert.deepEqual(right.max, left.max);
+  assert.deepEqual(availablePositions(camiseta), ["frente", "costas", "manga", "manga-direita"]);
+  // peça sem manga (calça): nenhuma das duas
+  assert.deepEqual(availablePositions({ category: "calcas" }), ["frente", "costas"]);
+  // foto virada para a direita: ela é a manga direita; a esquerda é a espelhada
+  const fem = logoSpots({ category: "camisas", slug: "camisa-social-feminina-manga-longa" });
+  assert.equal(fem["manga-direita"]!.view, "side");
+  assert.equal(fem.manga!.view, "side-flip");
+  // contorno espelhado: o que cabe à esquerda na foto cabe à direita na foto virada
+  const fits = flipFits((a) => a.x0 >= 10 && a.x1 <= 40);
+  assert.equal(fits({ x0: 65, x1: 85, y0: 0, y1: 10 }), true);
+  assert.equal(fits({ x0: 15, x1: 35, y0: 0, y1: 10 }), false);
+});
+
+test("carrinho aceita logo nas duas mangas", () => {
+  const line = cartLineSchema.safeParse({
+    id: "a",
+    slug: "camiseta-malha-pv",
+    color: "branco",
+    sizes: { M: 5 },
+    positions: ["manga", "manga-direita"],
+    placements: { "manga-direita": { x: 46, y: 28, w: 6 } },
+  });
+  assert.equal(line.success, true, JSON.stringify(line.error?.issues));
+});
+
 test("checkout aceita posição ajustada e recusa valores fora do limite", () => {
   const base = { id: "x", slug: "camiseta-malha-pv", color: "marinho", sizes: { M: 10 }, positions: ["frente"] };
   assert.equal(cartLineSchema.safeParse({ ...base, placements: { frente: { x: 40, y: 30, w: 8.5 } } }).success, true);
@@ -144,7 +179,7 @@ test("costas: a logo nasce no alto da área (padrão da fábrica) e cresce para 
 test("manga: área no meio da manga de cada foto, não no meio da imagem", () => {
   assert.equal(logoSpots(camiseta).manga!.x, 54);
   // foto virada para o outro lado
-  assert.ok(logoSpots({ category: "camisas", slug: "camisa-social-feminina-manga-longa" }).manga!.x < 50);
+  assert.ok(logoSpots({ category: "camisas", slug: "camisa-social-feminina-manga-longa" })["manga-direita"]!.x < 50);
   // produto cadastrado no painel (sem medida própria) usa o padrão da categoria
   assert.equal(logoSpots({ category: "camisetas", slug: "produto-novo" }).manga!.x, 55);
 });
@@ -165,10 +200,10 @@ test("bordas vazias da logo são cortadas: fundo transparente ou branco", async 
   assert.equal(contentBox(img([200, 0, 0, 255]), 20, 20), null);
   // imagem sem sobra: nada a cortar
   assert.equal(contentBox(img([10, 40, 120, 255]), 20, 20), null);
-  // logo larga cortada: no bordado das costas (até 27 × 5 cm) ela chega bem mais larga que 5 cm
+  // logo larga: no bordado das costas (até 27 cm) a largura chega a 27 cm
   const bordado = logoSpots(camiseta, "Bordado").costas!;
-  assert.equal(maxLogoCm(bordado, 1), 5);
-  assert.equal(maxLogoCm(bordado, 4), 20);
+  assert.equal(maxLogoCm(bordado, 1), 27);
+  assert.equal(maxLogoCm(bordado, 4), 27);
 });
 
 // peça de mentira para os testes: um retângulo (x 20–80, y 10–90) é a peça, o resto é fundo

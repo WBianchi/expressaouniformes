@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, CheckCircle2, Copy, MessageCircle, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { categories, getColor, getProduct, inStock, positionFees, products, whatsappLink, type Position } from "@/lib/catalog";
+import { categories, getColor, getProduct, inStock, POSITIONS, positionFees, products, whatsappLink, type Position } from "@/lib/catalog";
 import { availablePositions } from "@/lib/mockup";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY, employeeOptions } from "@/lib/quote";
 import { emptyCompany, quoteRequestMessage, type QuoteCompany } from "@/lib/quote-message";
@@ -57,7 +57,7 @@ export function QuoteBuilder({ initial }: { initial?: string }) {
   }, [initial, add]);
 
   // posições usadas em algum item (sem itens, mostra a frente)
-  const usedPositions = (["frente", "costas", "manga"] as Position[]).filter((p) => items.some((i) => i.positions.includes(p)));
+  const usedPositions: Position[] = POSITIONS.filter((p) => items.some((i) => i.positions.includes(p)));
   if (!usedPositions.length) usedPositions.push("frente");
 
   const list = useMemo(() => (cat === "todos" ? products : products.filter((p) => p.category === cat)), [cat]);

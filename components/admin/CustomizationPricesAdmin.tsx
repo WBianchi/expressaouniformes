@@ -67,7 +67,7 @@ export function CustomizationPricesAdmin({ fees, enabled }: { fees: Customizatio
             <span role="columnheader">Técnica</span>
             {POSITION_OPTIONS.map((pos) => (
               <span key={pos} role="columnheader">
-                {positionFees[pos].label}
+                {pos === "manga" ? "Manga (cada uma)" : positionFees[pos].label}
               </span>
             ))}
           </div>

@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import { Fragment, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import type { Position, Product, Technique } from "@/lib/catalog";
 import {
   cmText,
@@ -23,17 +23,19 @@ import { useLogoAspects } from "./useLogoAspect";
 type MockProduct = Pick<Product, "name" | "image" | "back" | "side" | "category"> & { slug?: string; colorPhotos?: Record<string, string[]> };
 
 /** Posição de cada vista nas fotos por cor do painel: 0–1 vestindo, 2–4 peça (frente, costas, lado). */
-const VIEW_SLOT: Record<View, number> = { front: 2, back: 3, side: 4 };
+const VIEW_SLOT: Record<View, number> = { front: 2, back: 3, side: 4, "side-flip": 4 };
 
 /**
  * Foto da peça numa vista: a foto própria da cor (painel → Fotos por cor), quando houver, como
  * está; senão a foto da peça (com as trocas do painel), que a troca de cor pinta na cor `tint`.
+ * A manga direita ("side-flip") é a foto de lado espelhada (`flip`).
  */
 export function usePiecePhoto(product: MockProduct, view: View, color?: string | null, tint?: string | null) {
   const piece = useProductMedia()(product);
   const own = color ? product.colorPhotos?.[color]?.[VIEW_SLOT[view]] : undefined;
-  const base = own || (view === "back" ? piece.back : view === "side" ? piece.side : piece.image);
-  return { base, tint: own ? null : (tint ?? null) };
+  const side = view === "side" || view === "side-flip";
+  const base = own || (view === "back" ? piece.back : side ? piece.side : piece.image);
+  return { base, tint: own ? null : (tint ?? null), flip: view === "side-flip" };
 }
 
 const CORNERS: Corner[] = ["nw", "ne", "sw", "se"];
@@ -62,6 +64,7 @@ export function LogoMockup({
   tint,
   color,
   technique,
+  tools,
 }: {
   product: MockProduct;
   view: View;
@@ -84,6 +87,8 @@ export function LogoMockup({
   color?: string | null;
   /** técnica de aplicação: limita o tamanho da logo (ex.: bordado nas costas) */
   technique?: Technique | null;
+  /** barrinha de ações em cima da logo selecionada (simulador); no lugar da etiqueta de tamanho */
+  tools?: (position: Position) => ReactNode;
 }) {
   const square = useRef<HTMLDivElement>(null);
   const drag = useRef<Drag | null>(null);
@@ -150,7 +155,7 @@ export function LogoMockup({
 
   const photo = usePiecePhoto(product, view, color, tint);
   const src = useRecolored(photo.base, photo.tint);
-  const label = view === "back" ? "costas" : view === "side" ? "lado" : "frente";
+  const label = view === "back" ? "costas" : view === "front" ? "frente" : "lado";
 
   return (
     <div className={s.mock}>
@@ -163,7 +168,7 @@ export function LogoMockup({
         onPointerUp={onPlace ? end : undefined}
         onPointerCancel={onPlace ? end : undefined}
       >
-        <SafeImage src={src} alt={alt ?? `${product.name}, ${label}`} priority={priority} />
+        <SafeImage src={src} alt={alt ?? `${product.name}, ${label}`} priority={priority} className={photo.flip ? s.flip : undefined} />
         {visible.map(({ pos, spot, aspect, box }) => {
           const logo = logos[pos];
           const editable = !!onPlace && !!logo;
@@ -182,6 +187,7 @@ export function LogoMockup({
                 data-editable={editable || undefined}
                 data-active={(editable && !bare) || undefined}
                 data-low={box.y + box.hPct / 2 > 88 || undefined}
+                data-high={box.y - box.hPct / 2 < 16 || undefined}
                 role={editable ? "group" : undefined}
                 tabIndex={editable ? 0 : undefined}
                 aria-label={editable ? `Logo da ${label}: ${cmText(box.w)} por ${cmText(box.hCm)} cm. Arraste para mover, puxe os cantos para mudar o tamanho; no teclado, setas movem e + ou − mudam o tamanho.` : undefined}
@@ -205,9 +211,15 @@ export function LogoMockup({
                         onPointerDown={(e) => start(pos, c, box, aspect, e)}
                       />
                     ))}
-                    <span className={s.sizeTag} aria-hidden>
-                      {cmText(box.w)} × {cmText(box.hCm)} cm
-                    </span>
+                    {tools ? (
+                      <span className={s.tools} onPointerDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                        {tools(pos)}
+                      </span>
+                    ) : (
+                      <span className={s.sizeTag} aria-hidden>
+                        {cmText(box.w)} × {cmText(box.hCm)} cm
+                      </span>
+                    )}
                   </>
                 )}
               </span>

@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Check, ImagePlus, MessageSquareText, Sparkles, Trash2, TrendingDown, TriangleAlert } from "lucide-react";
-import { feeFor, getColor, getProduct, money, positionFees, type Position, type Size } from "@/lib/catalog";
+import { feeFor, getColor, getProduct, money, POSITIONS, positionFees, type Position, type Size } from "@/lib/catalog";
+import { availablePositions } from "@/lib/mockup";
 import { type CartLine, lineLogos, lineQuantity, lineTotal, unitPrice, volumeDiscount, volumeTiers, lineFees } from "@/lib/pricing";
 import { useStore } from "@/components/store/StoreProvider";
 import { SafeImage, Stepper } from "@/components/ui/primitives";
@@ -12,7 +13,7 @@ import { AnimatedMoney } from "./AnimatedMoney";
 import s from "./Cart.module.css";
 import { useProductMedia } from "@/components/store/MediaProvider";
 
-const allPositions = Object.keys(positionFees) as Position[];
+const allPositions: Position[] = [...POSITIONS];
 
 export function CartLineItem({ line, index }: { line: CartLine; index: number }) {
   const { updateLine, removeLine, restoreLine } = useStore();
@@ -131,7 +132,7 @@ export function CartLineItem({ line, index }: { line: CartLine; index: number })
         <fieldset className={s.block}>
           <legend className={s.blockTitle}>Posições da logo</legend>
           <div className={s.positions}>
-            {allPositions.map((p) => {
+            {availablePositions(product).map((p) => {
               const on = line.positions.includes(p);
               return (
                 <button key={p} type="button" className={s.position} aria-pressed={on} onClick={() => togglePosition(p)}>

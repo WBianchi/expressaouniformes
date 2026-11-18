@@ -62,7 +62,7 @@ export function ItemArt({ item }: { item: Item }) {
     Object.entries(item.logos ?? {}).map(([p, l]) => [p, l?.thumb]),
   );
   const views = product
-    ? (["front", "back", "side"] as View[]).filter((v) =>
+    ? (["front", "back", "side", "side-flip"] as View[]).filter((v) =>
         positions.some((p) => logoSpots(product)[p]?.view === v),
       )
     : [];

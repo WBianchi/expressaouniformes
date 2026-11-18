@@ -1,11 +1,11 @@
 "use client";
-// Logos da empresa compartilhadas pelo site, uma por posição (frente, costas, manga):
+// Logos da empresa compartilhadas pelo site, uma por posição (frente, costas e as duas mangas):
 // enviadas uma vez, aparecem na prévia de qualquer peça, no carrinho e no orçamento.
 // Guarda só as miniaturas no navegador, por até 3 dias: depois disso (ou sem data,
 // de versões antigas) a prévia volta limpa, para um arquivo de teste não ficar
 // aparecendo nas peças para sempre.
 import { useCallback, useMemo, useSyncExternalStore } from "react";
-import type { Position } from "@/lib/catalog";
+import { POSITIONS, type Position } from "@/lib/catalog";
 import type { LogoValue } from "./LogoUpload";
 
 export type LogoSet = Partial<Record<Position, NonNullable<LogoValue>>>;
@@ -17,7 +17,6 @@ const EVENT = "eu-logo-change";
 /** quando a logo foi enviada (ms) */
 const AT = "eu-logos-at";
 const TTL = 3 * 24 * 60 * 60 * 1000;
-const POSITIONS: Position[] = ["frente", "costas", "manga"];
 
 function read(): string | null {
   try {

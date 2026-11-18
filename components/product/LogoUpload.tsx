@@ -1,13 +1,34 @@
 "use client";
 import { upload } from "@vercel/blob/client";
-import { CheckCircle2, ImageUp, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { CheckCircle2, ImageUp, Loader2, RefreshCw, Trash2, Upload } from "lucide-react";
 import { useId, useRef, useState, type DragEvent } from "react";
 import { artContentType, artPath } from "@/lib/art";
 import { formatBytes, makeLogoThumb, validateLogo } from "./logoThumb";
 import s from "./Product.module.css";
 
-/** url: arquivo original guardado para a fábrica (só na compra pronta-entrega). */
-export type LogoValue = { name: string; thumb: string; size?: number; url?: string } | null;
+/** url: arquivo original guardado para a fábrica (só na compra pronta-entrega); w × h: tamanho do arquivo em pixels. */
+export type LogoValue = { name: string; thumb: string; size?: number; url?: string; w?: number; h?: number } | null;
+
+/** Largura e altura (px) da imagem enviada; nulo se o navegador não souber (alguns SVG). */
+const imageSize = (file: File) =>
+  new Promise<{ w: number; h: number } | null>((ok) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    const done = (v: { w: number; h: number } | null) => {
+      URL.revokeObjectURL(url);
+      ok(v);
+    };
+    img.onload = () => done(img.naturalWidth && img.naturalHeight ? { w: img.naturalWidth, h: img.naturalHeight } : null);
+    img.onerror = () => done(null);
+    img.src = url;
+  });
+
+/** "PNG · 420 × 280 px" (ou o peso do arquivo, sem as medidas) */
+const fileMeta = (v: NonNullable<LogoValue>) => {
+  const ext = v.name.match(/\.([a-z0-9]{2,4})$/i)?.[1]?.toUpperCase() ?? (v.thumb.match(/^data:image\/(\w+)/)?.[1]?.toUpperCase() || "Imagem");
+  const dims = v.w && v.h ? `${v.w} × ${v.h} px` : v.size ? formatBytes(v.size) : "";
+  return [ext, dims].filter(Boolean).join(" · ");
+};
 
 /** Guarda o arquivo original no Blob (a fábrica usa para imprimir ou bordar). */
 async function uploadOriginal(file: File) {
@@ -25,6 +46,7 @@ export function LogoUpload({
   label = "logo",
   compact,
   keepOriginal,
+  card,
 }: {
   value: LogoValue;
   onChange: (v: LogoValue) => void;
@@ -34,6 +56,8 @@ export function LogoUpload({
   compact?: boolean;
   /** também guarda o arquivo original (compra pronta-entrega: vai para o pedido e para a fila de artes) */
   keepOriginal?: boolean;
+  /** simulador: logo enviada num cartão (nome, tipo e medidas) com o botão "Trocar logo" embaixo */
+  card?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
@@ -55,8 +79,8 @@ export function LogoUpload({
     setError(null);
     setBusy(true);
     try {
-      const thumb = await makeLogoThumb(file);
-      const v = { name: file.name.slice(0, 200), thumb, size: file.size };
+      const [thumb, dims] = await Promise.all([makeLogoThumb(file), imageSize(file)]);
+      const v = { name: file.name.slice(0, 200), thumb, size: file.size, ...(dims ?? {}) };
       latest.current = v;
       onChange(v);
       if (keepOriginal) {
@@ -95,7 +119,27 @@ export function LogoUpload({
         aria-label={label}
         onChange={(e) => handle(e.target.files?.[0])}
       />
-      {value ? (
+      {value && card ? (
+        <>
+          <div className={s.fileCard}>
+            <span className={s.filePreview}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={value.thumb} alt="Prévia da logo enviada" />
+            </span>
+            <span className={s.fileInfo}>
+              <b title={value.name}>{value.name}</b>
+              <small>{fileMeta(value)}</small>
+              {keepOriginal && sending && !value.url ? <small>Guardando o arquivo original para a produção…</small> : null}
+            </span>
+            <button type="button" className="icon-btn" onClick={() => onChange(null)} aria-label={`Remover ${label.toLowerCase()}`}>
+              <Trash2 size={18} />
+            </button>
+          </div>
+          <button type="button" className={s.swapBtn} onClick={() => input.current?.click()} disabled={busy}>
+            {busy ? <Loader2 size={17} className={s.spin} /> : <Upload size={17} />} Trocar logo
+          </button>
+        </>
+      ) : value ? (
         <div className={s.uploadDone}>
           <span className={s.uploadPreview}>
             {/* eslint-disable-next-line @next/next/no-img-element */}

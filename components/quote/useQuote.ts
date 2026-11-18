@@ -4,7 +4,7 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { getProduct, type Position, type Technique } from "@/lib/catalog";
+import { getProduct, POSITIONS, type Position, type Technique } from "@/lib/catalog";
 import { isPlacement, type Placements } from "@/lib/mockup";
 
 export type QuoteItem = {
@@ -21,7 +21,6 @@ export type QuoteItem = {
 
 const KEY = "eu-quote";
 const EVENT = "eu-quote-change";
-const POSITIONS: Position[] = ["frente", "costas", "manga"];
 
 function read(): string {
   try {

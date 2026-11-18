@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, ChevronRight, Wand2 } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { getCategory, getProduct, inStock, products } from "@/lib/catalog";
 import { STOCK_MIN_QTY } from "@/lib/quote";
 import { syncCatalog } from "@/lib/listings-server";
@@ -53,14 +53,6 @@ export default async function SimulatorPage({ params }: Props) {
         </nav>
 
         <section className={s.card} aria-label={`Simulador: ${product.name}`}>
-          <div className={s.simBar}>
-            <Link href={`/produto/${product.slug}`}>
-              <ArrowLeft size={16} /> Voltar para o produto
-            </Link>
-            <span className={s.simTag}>
-              <Wand2 size={15} /> Simulador da sua logo · pronta-entrega a partir de {STOCK_MIN_QTY} peças
-            </span>
-          </div>
           <ProductTop product={product} />
         </section>
       </div>

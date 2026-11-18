@@ -1,0 +1,729 @@
+/* Simulador: nome/cores e vistas à esquerda, a peça grande no meio, abas e compra à direita.
+   No celular: nome e cores, a peça, as vistas lado a lado e as abas embaixo. */
+.sim {
+  --ink: #1b3356;
+  --buy: #15803d;
+  --buy-hover: #166534;
+  display: grid;
+  grid-template-areas: "info" "stage" "views" "panel";
+  gap: 18px;
+  min-width: 0;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .sim {
+    --ink: var(--brand-500);
+  }
+}
+:global(:root[data-theme="dark"]) .sim {
+  --ink: var(--brand-500);
+}
+@media (min-width: 900px) {
+  .sim {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: "info panel" "stage panel" "views panel";
+    gap: 20px 28px;
+    align-items: start;
+  }
+}
+@media (min-width: 1200px) {
+  .sim {
+    grid-template-columns: 200px minmax(0, 1fr) minmax(360px, 400px);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "info stage panel" "views stage panel";
+  }
+}
+
+/* ---------------------------------------------------------------- coluna da esquerda */
+.info {
+  grid-area: info;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-width: 0;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.back:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+.head {
+  display: grid;
+  gap: 6px;
+}
+.title {
+  margin: 0;
+  font-size: clamp(21px, 2vw, 24px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.short {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.price {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+}
+.price small {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.colors {
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.label span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* vistas da peça: lista na coluna da esquerda; no celular e no tablet, lado a lado embaixo da peça */
+.views {
+  grid-area: views;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-width: 0;
+}
+.viewList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.viewList[data-count="2"],
+.viewList[data-count="1"] {
+  grid-template-columns: repeat(2, minmax(0, 120px));
+}
+.viewList[data-count="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.viewBtn {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 6px 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+.viewBtn:hover {
+  border-color: var(--line-strong);
+}
+.viewBtn[aria-pressed="true"] {
+  border-color: var(--link);
+  background: var(--info-soft);
+  box-shadow: 0 0 0 1px var(--link);
+}
+.viewThumb {
+  position: relative;
+  width: 100%;
+  max-width: 72px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.viewName {
+  line-height: 1.2;
+}
+.viewOn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--link);
+  color: #fff;
+}
+@media (min-width: 1200px) {
+  .viewList,
+  .viewList[data-count] {
+    grid-template-columns: 1fr;
+  }
+  .viewBtn {
+    grid-template-columns: 56px minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px 6px 6px;
+    font-size: 14.5px;
+    font-weight: 500;
+    text-align: left;
+  }
+  .viewThumb {
+    width: 56px;
+  }
+  .viewOn {
+    top: 50%;
+    right: 10px;
+    translate: 0 -50%;
+  }
+}
+
+/* ---------------------------------------------------------------- peça grande */
+.stage {
+  grid-area: stage;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--surface-2);
+  isolation: isolate;
+}
+.viewport {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.viewport[data-zoom] {
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.canvas {
+  position: relative;
+  aspect-ratio: 1;
+  min-width: 100%;
+}
+.stageTag {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  pointer-events: none;
+}
+.toolbar {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.toolBtn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  color: var(--text);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.toolBtn:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.toolBtn:first-child:not(:disabled) {
+  color: var(--ink);
+}
+.toolBtn:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+.zoom {
+  position: absolute;
+  z-index: 3;
+  bottom: 12px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.zoom button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text);
+}
+.zoom button:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.zoom button:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+.zoom output {
+  min-width: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+/* área sem logo: botão no meio da peça para colocar uma */
+.addBtn {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  background: rgb(12 26 46 / 0.86);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.addBtn:hover {
+  background: rgb(12 26 46 / 1);
+}
+/* a peça fica à vista enquanto a coluna da direita rola (ajustar o tamanho, escolher a técnica) */
+@media (min-width: 900px) {
+  .stage {
+    position: sticky;
+    top: calc(var(--header-h, 72px) + 16px);
+  }
+}
+@media (max-width: 520px) {
+  .area {
+    gap: 6px;
+    padding-inline: 6px 8px;
+  }
+  .areaIcon {
+    width: 30px;
+    height: 30px;
+  }
+  .toolBtn {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* ---------------------------------------------------------------- abas e compra */
+.panel {
+  grid-area: panel;
+  display: grid;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 12px 12px 0;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+.tabs button:hover {
+  color: var(--text);
+}
+.tabs button[aria-selected="true"] {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: var(--shadow-xs);
+}
+.tabCount {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--link);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.tabs button[aria-selected="true"] .tabCount {
+  background: #fff;
+  color: var(--ink);
+}
+.tabBody {
+  display: grid;
+  gap: 20px;
+  padding: 18px 16px 20px;
+}
+.group {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.groupTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.groupTitle span {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--link);
+}
+.linkBtn:hover {
+  text-decoration: underline;
+}
+.copyRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+/* área de aplicação */
+.areas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  padding: 8px 10px 8px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+.area:hover {
+  border-color: var(--line-strong);
+}
+.area[aria-pressed="true"] {
+  border-color: var(--link);
+  background: var(--info-soft);
+  box-shadow: 0 0 0 1px var(--link);
+}
+.areaIcon {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  color: var(--text-2);
+}
+.areaMark {
+  fill: var(--link);
+  opacity: 0.85;
+}
+.areaText {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+.areaText b {
+  font-size: 14px;
+  font-weight: 600;
+}
+.areaText small {
+  font-size: 12px;
+  color: var(--text-2);
+}
+.areaText .areaFee {
+  margin-top: 2px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.areaCheck {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--link);
+  color: #fff;
+}
+
+/* tamanho da estampa: largura e altura (a altura acompanha a largura) */
+.sizeRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.cmField {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.cmBox {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding-left: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.cmBox:focus-within {
+  border-color: var(--link);
+  box-shadow: 0 0 0 3px var(--info-soft);
+}
+.cmBox input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.cmBox small {
+  margin-right: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.cmSteps {
+  display: grid;
+  align-self: stretch;
+  border-left: 1px solid var(--line);
+}
+.cmSteps button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  color: var(--text-2);
+}
+.cmSteps button:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.cmSteps button:disabled {
+  opacity: 0.3;
+}
+.lock {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  color: var(--link);
+}
+
+/* técnica */
+.techs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.tech {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+  flex-wrap: wrap;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+.tech:hover {
+  border-color: var(--line-strong);
+}
+.tech[aria-checked="true"] {
+  border-color: var(--link);
+  background: var(--info-soft);
+  box-shadow: 0 0 0 1px var(--link);
+}
+.radio {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.tech[aria-checked="true"] .radio {
+  border: 5px solid var(--link);
+}
+.techText {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+}
+.techText b {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.techText small {
+  font-size: 12px;
+  color: var(--text-2);
+}
+.techFee {
+  flex-basis: 100%;
+  padding-left: 28px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* rodapé: valor por peça, total e o botão de compra (fica à vista enquanto rola a coluna) */
+.footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: var(--surface);
+}
+@media (max-width: 899px) {
+  .footer {
+    position: static;
+  }
+}
+.sums {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+  padding: 10px 4px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.sums > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 0 12px;
+}
+.sums > div + div {
+  border-left: 1px solid var(--line-strong);
+}
+.sums dt {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.sums dd {
+  margin: 0;
+  font-size: clamp(18px, 1.6vw, 21px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sums del {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.buyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 52px;
+  border-radius: var(--radius);
+  background: var(--buy);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.buyBtn:hover {
+  background: var(--buy-hover);
+}
+.payBox {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+}

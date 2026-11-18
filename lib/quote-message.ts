@@ -1,5 +1,5 @@
 // Mensagem do pedido de orçamento ("Monte seu pedido") enviada ao consultor pelo WhatsApp.
-import { getColor, getProduct, positionFees, type Position } from "./catalog.ts";
+import { getColor, getProduct, POSITIONS, positionFees, type Position } from "./catalog.ts";
 import { employeeOptions } from "./quote.ts";
 
 export type QuoteCompany = {
@@ -22,7 +22,7 @@ const where = (positions: Position[], placements: Partial<Record<Position, unkno
     : "sem logo";
 
 function logoLines(items: { positions: Position[] }[], names: Partial<Record<Position, string>>) {
-  const used = (["frente", "costas", "manga"] as Position[]).filter((p) => items.some((i) => i.positions.includes(p)));
+  const used = POSITIONS.filter((p) => items.some((i) => i.positions.includes(p)));
   const sent = used.filter((p) => names[p]);
   if (!sent.length) return ["*Logo:* envio nesta conversa"];
   return [

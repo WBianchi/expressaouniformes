@@ -544,33 +544,6 @@
     display: none;
   }
 }
-/* simulador (página separada, só pronta-entrega): volta para o produto + simulador da logo */
-.simBar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-}
-.simBar a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-}
-.simBar a:hover {
-  text-decoration: underline;
-}
-.simTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-2);
-}
 .page :global(#descricao) {
   scroll-margin-top: calc(var(--header-h) + 80px);
 }

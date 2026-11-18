@@ -173,3 +173,57 @@
     animation: none;
   }
 }
+
+/* foto de lado espelhada: a outra manga */
+.flip {
+  transform: scaleX(-1);
+}
+
+/* barrinha de ações em cima da logo selecionada (tamanho, voltar ao padrão, remover) */
+.tools {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% + 18px);
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #fff;
+  color: #1b2430;
+  box-shadow: 0 4px 14px rgb(12 26 46 / 0.18), 0 0 0 1px rgb(12 26 46 / 0.06);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  cursor: default;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.spot[data-active] .tools,
+.spot[data-editable]:focus-within .tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* logo encostada no alto da foto: a barrinha vai para baixo dela */
+.spot[data-high] .tools {
+  bottom: auto;
+  top: calc(100% + 18px);
+}
+.tools > span {
+  padding: 0 8px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tools > button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  color: inherit;
+}
+.tools > button:hover {
+  background: #eef1f5;
+}

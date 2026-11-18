@@ -167,14 +167,27 @@ test("preço da personalização: tabela única do simulador, por técnica e pos
   assert.equal(feeFor(getProduct(SLUG)!, "Bordado", "frente"), positionFees.frente.fee);
 });
 
-test("bordado nas costas: logo até 27 × 5 cm", async () => {
+test("bordado nas costas: logo até 27 cm (não fica presa em 5 cm de altura)", async () => {
   const { logoSpots, maxLogoCm } = await import("../lib/mockup.ts");
   const silk = logoSpots(getProduct(SLUG)!, "Silk").costas!;
   const bordado = logoSpots(getProduct(SLUG)!, "Bordado").costas!;
   assert.equal(maxLogoCm(silk, 1), 28);
-  assert.equal(maxLogoCm(bordado, 1), 5); // logo quadrada: a altura de 5 cm limita
+  assert.equal(maxLogoCm(bordado, 1), 27); // logo quadrada: 27 × 27 cm
   assert.equal(maxLogoCm(bordado, 10), 27); // logo bem larga: até 27 cm
+  assert.equal(maxLogoCm(bordado, 0.5), 13.5); // logo alta: 27 cm de altura
   assert.equal(logoSpots(getProduct(SLUG)!, "Bordado").frente!.cap, undefined);
+});
+
+test("as duas mangas usam o preço da manga da tabela do simulador", async () => {
+  const { feeFor, positionFees } = await import("../lib/catalog.ts");
+  try {
+    applyCatalogEdits({ ...NO_EDITS, fees: { Bordado: { manga: 9.5 } } });
+    assert.equal(feeFor(getProduct(SLUG)!, "Bordado", "manga"), 9.5);
+    assert.equal(feeFor(getProduct(SLUG)!, "Bordado", "manga-direita"), 9.5);
+  } finally {
+    applyCatalogEdits(NO_EDITS);
+  }
+  assert.equal(feeFor(getProduct(SLUG)!, "Bordado", "manga-direita"), positionFees["manga-direita"].fee);
 });
 
 test("ficha técnica: texto editado, linha escondida e linhas extras", async () => {

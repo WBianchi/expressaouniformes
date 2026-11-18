@@ -3,10 +3,10 @@
 // nasce (nas costas, no alto dela). Daí o cliente leva a logo para qualquer lugar da peça naquela
 // vista (o simulador não deixa sair do contorno da peça, medido na foto) e aumenta até o máximo
 // da posição. Coordenadas em % da foto quadrada.
-import { getProduct, type Position, type Product, type Technique } from "./catalog.ts";
+import { getProduct, POSITIONS, type Position, type Product, type Technique } from "./catalog.ts";
 
-/** "side" é a vista lateral (onde fica a manga) */
-export type View = "front" | "back" | "side";
+/** "side" é a vista lateral (a foto de lado, com a manga esquerda); "side-flip" é a mesma foto espelhada (manga direita). */
+export type View = "front" | "back" | "side" | "side-flip";
 /** Retângulo (em % da foto). */
 export type Area = { x0: number; x1: number; y0: number; y1: number };
 /**
@@ -30,9 +30,9 @@ export type Spot = {
   top?: boolean;
 };
 
-/** Limites de tamanho por técnica e posição: a fábrica não faz bordado grande nas costas. */
+/** Limites de tamanho por técnica e posição: o bordado nas costas vai até 27 cm (de largura e de altura). */
 export const TECHNIQUE_CAPS: Partial<Record<Technique, Partial<Record<Position, { w: number; h: number }>>>> = {
-  Bordado: { costas: { w: 27, h: 5 } },
+  Bordado: { costas: { w: 27, h: 27 } },
 };
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
@@ -82,6 +82,7 @@ export const POSITION_MAX: Record<Position, { w: number; h: number }> = {
   frente: { w: 28, h: 35 },
   costas: { w: 28, h: 35 },
   manga: { w: 10, h: 10 },
+  "manga-direita": { w: 10, h: 10 },
 };
 /** Até onde a logo da manga anda a partir do centro da manga (cm): ela não vai para o corpo da peça. */
 const SLEEVE_REACH = 8;
@@ -132,6 +133,9 @@ const SLEEVE: Record<string, readonly [number, number]> = {
   "moletom-canguru": [53.5, 31],
 };
 
+// Fotos de lado viradas para a direita: mostram a manga direita (a esquerda é a foto espelhada).
+const SIDE_SHOWS_RIGHT = new Set(["camisa-social-feminina-manga-longa"]);
+
 // Ajuste fino por produto.
 const bySlug: Record<string, Layout> = {
   // o peitilho é estreito: a logo fica centralizada nele
@@ -141,7 +145,8 @@ const bySlug: Record<string, Layout> = {
 
 /**
  * Onde cada posição aparece na foto da peça (sem as posições que a peça não tem).
- * Com a técnica, aplica o limite de tamanho dela (ex.: bordado nas costas até 27 × 5 cm).
+ * Com a técnica, aplica o limite de tamanho dela (ex.: bordado nas costas até 27 cm).
+ * As duas mangas usam a foto de lado: a manga que não aparece nela é a mesma foto espelhada.
  */
 export function logoSpots(p: Pick<Product, "category"> & { slug?: string }, technique?: Technique | null): Partial<Record<Position, Spot>> {
   const cm = (p.slug && SCALE_BY_SLUG[p.slug]) || SCALE[p.category] || SCALE.camisetas;
@@ -157,11 +162,27 @@ export function logoSpots(p: Pick<Product, "category"> & { slug?: string }, tech
     out[pos] = { view: l.view, x: l.x, y: l.y, cm, area: rect(l.x, l.y, l.size[0], l.size[1], cm), bounds, max, ...(cap ? { cap } : {}), ...(l.top ? { top: true } : {}) };
   }
   for (const pos of (p.slug && getProduct(p.slug)?.noPositions) || []) delete out[pos];
+  if (out.manga) {
+    // a outra manga: a mesma foto espelhada (a logo não espelha, só a peça)
+    const photo = out.manga;
+    const flip = { ...photo, view: "side-flip" as View, x: 100 - photo.x, area: mirror(photo.area), bounds: mirror(photo.bounds) };
+    const right = p.slug && SIDE_SHOWS_RIGHT.has(p.slug);
+    out.manga = right ? flip : photo;
+    out["manga-direita"] = right ? photo : flip;
+  } else delete out["manga-direita"];
   return out;
 }
 
-export const availablePositions = (p: Pick<Product, "category"> & { slug?: string }) =>
-  (["frente", "costas", "manga"] as Position[]).filter((pos) => !!logoSpots(p)[pos]);
+/** Retângulo espelhado na horizontal (foto virada). */
+const mirror = (a: Area): Area => ({ x0: 100 - a.x1, x1: 100 - a.x0, y0: a.y0, y1: a.y1 });
+
+/** Contorno da peça na foto espelhada: o mesmo teste, com o retângulo virado. */
+export const flipFits = (fits: Fits): Fits => (a) => fits(mirror(a));
+
+export const availablePositions = (p: Pick<Product, "category"> & { slug?: string }) => {
+  const spots = logoSpots(p);
+  return POSITIONS.filter((pos) => !!spots[pos]);
+};
 
 // ---------------------------------------------------------------- posição e tamanho da logo
 

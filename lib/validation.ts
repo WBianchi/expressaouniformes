@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { colors, getProduct, inStock, type Size } from "./catalog.ts";
+import { colors, getProduct, inStock, POSITIONS, type Size } from "./catalog.ts";
 import { isArtUrl } from "./art.ts";
 
 const sizeKeys = ["PP", "P", "M", "G", "GG", "XG", "XGG", "G3", "G4", "G5", "G6", "G7", "G8"] as const satisfies readonly Size[];
@@ -18,13 +18,13 @@ export const cartLineSchema = z
     slug: z.string(),
     color: z.string().refine((c) => colors.some((x) => x.id === c)),
     sizes: z.partialRecord(z.enum(sizeKeys), count),
-    positions: z.array(z.enum(["frente", "costas", "manga"])).max(3),
-    logos: z.partialRecord(z.enum(["frente", "costas", "manga"]), logoSchema).optional(),
+    positions: z.array(z.enum(POSITIONS)).max(POSITIONS.length),
+    logos: z.partialRecord(z.enum(POSITIONS), logoSchema).optional(),
     logo: logoSchema.optional(),
     technique: z.enum(["DTF", "Silk", "Bordado", "Sublimação"]).optional(),
     placements: z
       .partialRecord(
-        z.enum(["frente", "costas", "manga"]),
+        z.enum(POSITIONS),
         // w = largura da logo em cm; s = escala do formato antigo (carrinhos salvos antes)
         z
           .object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100), w: z.number().min(0.5).max(100).optional(), s: z.number().min(0.5).max(2).optional() })

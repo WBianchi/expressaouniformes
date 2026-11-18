@@ -1,19 +1,29 @@
 "use client";
+// Simulador da logo (página /produto/[slug]/simulador), no formato "estúdio":
+// - à esquerda: nome, preço, cores e as vistas da peça (frente, costas, manga esquerda e direita);
+// - no meio: a peça grande na vista escolhida, com a logo livre (arrasta, puxa os cantos, zoom);
+// - à direita: abas "Personalizar" (área, logo, tamanho e técnica) e "Pedido" (tamanhos, frete)
+//   e o rodapé com o valor por peça, o total e o botão de compra.
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { inStock, money, type Position, type Product, type Technique } from "@/lib/catalog";
+import { ArrowLeft, Check } from "lucide-react";
+import { getColor, inStock, money, tintFor, type Position, type Product, type Technique } from "@/lib/catalog";
 import { PIX_DISCOUNT } from "@/lib/pricing";
 import { toCatalogTechnique, type ArtTechnique } from "@/lib/qualify";
-import { availablePositions, type Placement, type Placements } from "@/lib/mockup";
-import { Price } from "@/components/ui/primitives";
-import { ProductHead } from "./ProductHead";
+import { availablePositions, logoSpots, type Placement, type Placements } from "@/lib/mockup";
+import { Price, Swatches } from "@/components/ui/primitives";
+import { LogoMockup, usePiecePhoto } from "./LogoMockup";
+import type { LogoValue } from "./LogoUpload";
 import { QuoteBuyBox } from "./QuoteBuyBox";
-import { StockBuyBox } from "./StockBuyBox";
-import { Studio } from "./Studio";
+import { SimPanel } from "./SimPanel";
+import { SimStage, VIEW_NAME } from "./SimStage";
+import { StockOrderFooter, StockOrderTab, useStockOrder } from "./StockBuyBox";
 import { useBrandLogos } from "./useBrandLogo";
-import s from "./Product.module.css";
-import st from "./Studio.module.css";
+import { useLogoAspects } from "./useLogoAspect";
+import { usePieceFit } from "./usePieceFit";
+import x from "./Simulator.module.css";
 
-/** O que o estúdio do simulador escolhe e a compra usa. */
+/** O que o simulador escolhe e a compra usa. */
 export type CustomProps = {
   color: string;
   positions: Position[];
@@ -22,19 +32,22 @@ export type CustomProps = {
   technique: Technique | null;
 };
 
-/**
- * Simulador: título e preço, o estúdio (cor, vistas da peça com a logo e técnica) e, embaixo,
- * tamanhos e compra. O estúdio e a compra compartilham cor, logos, posições e técnica.
- */
+type Tab = "custom" | "order";
+
 export function ProductTop({ product }: { product: Product }) {
+  const available = availablePositions(product);
   const [logos, setLogo] = useBrandLogos();
-  const [positions, setPositions] = useState<Position[]>(() => availablePositions(product).slice(0, 1));
-  // posição/tamanho que o cliente ajustou em cada lugar (sem ajuste = posição padrão)
+  // áreas com logo no pedido (começa com a frente, como antes)
+  const [positions, setPositions] = useState<Position[]>(() => available.slice(0, 1));
+  // área na tela (a peça grande mostra a vista dela)
+  const [active, setActive] = useState<Position>(available[0] ?? "frente");
+  // posição/tamanho que o cliente ajustou em cada área (sem ajuste = lugar padrão)
   const [placements, setPlacements] = useState<Placements>({});
   // a técnica define o preço da personalização: começa na primeira do anúncio
   const [technique, setTechnique] = useState<Technique | null>(product.techniques[0] ?? null);
   const [color, setColor] = useState(product.colors[0]);
-  const available = inStock(product);
+  const [tab, setTab] = useState<Tab>("custom");
+  const online = inStock(product);
 
   // vindo da página do produto (?cor=mescla) ou do questionário (?tecnica=bordado),
   // já abre na cor escolhida e com a técnica marcada
@@ -46,54 +59,158 @@ export function ProductTop({ product }: { product: Product }) {
     if (t && product.techniques.includes(t)) setTechnique(t);
   }, [product.colors, product.techniques]);
 
-  const onLogo: typeof setLogo = (position, next) => {
-    // logo nova (ou trocada) começa na posição padrão (centro; nas costas, no alto), num tamanho que cabe
-    if (next?.thumb !== logos[position]?.thumb)
-      setPlacements((cur) => {
-        const rest = { ...cur };
-        delete rest[position];
-        return rest;
-      });
-    setLogo(position, next);
-  };
+  const include = (pos: Position) => setPositions((cur) => (cur.includes(pos) ? cur : available.filter((p) => p === pos || cur.includes(p))));
+  const exclude = (pos: Position) => setPositions((cur) => cur.filter((p) => p !== pos));
 
-  const onPlace = (position: Position, placement: Placement | null) =>
+  const onPlace = (pos: Position, placement: Placement | null) =>
     setPlacements((cur) => {
       const next = { ...cur };
-      if (placement) next[position] = placement;
-      else delete next[position];
+      if (placement) next[pos] = placement;
+      else delete next[pos];
       return next;
     });
 
+  const onLogo = (pos: Position, next: LogoValue) => {
+    // logo nova (ou trocada) começa no lugar padrão (no peito; nas costas, no alto), num tamanho que cabe
+    if (next?.thumb !== logos[pos]?.thumb) onPlace(pos, null);
+    setLogo(pos, next);
+    if (next) include(pos);
+  };
+
+  // a vista da área na tela: foto, contorno da peça (a logo não sai dela) e proporção da logo
+  const spots = logoSpots(product, technique);
+  const spot = spots[active] ?? spots[available[0]]!;
+  const tint = tintFor(product, color);
+  const photo = usePiecePhoto(product, spot.view, color, tint);
+  const fits = usePieceFit(photo.base, photo.flip);
+  const aspectOf = useLogoAspects([logos[active]?.thumb]);
+  const aspect = aspectOf(logos[active]?.thumb);
+
   const custom: CustomProps = { color, positions, logos, placements, technique };
+  const order = useStockOrder(product, custom, () => setTab("order"));
+  const colorName = getColor(color)?.name ?? "";
+
   return (
-    <div className={st.sim}>
-      <div className={st.simHead}>
-        <ProductHead product={product} />
-        {available && (
-          <div className={s.priceBlock}>
-            <Price value={product.price} compareAt={product.compareAt} prefix="Peça lisa a partir de" size="lg" />
-            <span className={s.muted}>
-              ou {money(product.price * (1 - PIX_DISCOUNT))} no Pix · pedido mínimo de {product.minQty} peças
-            </span>
-          </div>
-        )}
+    <div className={x.sim}>
+      <div className={x.info}>
+        <Link href={`/produto/${product.slug}`} className={x.back}>
+          <ArrowLeft size={16} /> Voltar
+        </Link>
+        <div className={x.head}>
+          <h1 className={x.title}>{product.name}</h1>
+          {product.short && <p className={x.short}>{product.short}</p>}
+          {online && (
+            <div className={x.price}>
+              <Price value={product.price} compareAt={product.compareAt} prefix="Peça lisa a partir de" />
+              <small>
+                ou {money(product.price * (1 - PIX_DISCOUNT))} no Pix · mínimo de {product.minQty} peças
+              </small>
+            </div>
+          )}
+        </div>
+        <div className={x.colors}>
+          <h2 className={x.label}>
+            Cores disponíveis <span>{colorName}</span>
+          </h2>
+          <Swatches ids={product.colors} value={color} onChange={setColor} size="lg" />
+        </div>
       </div>
-      <Studio
+
+      <nav className={x.views} aria-label="Visualização">
+        <h2 className={x.label}>Visualização</h2>
+        <div className={x.viewList} data-count={available.length}>
+          {available.map((pos) => {
+            const s = spots[pos]!;
+            const on = positions.includes(pos);
+            return (
+              <button key={pos} type="button" className={x.viewBtn} aria-pressed={active === pos} onClick={() => setActive(pos)}>
+                <span className={x.viewThumb}>
+                  <LogoMockup
+                    product={product}
+                    view={s.view}
+                    positions={on ? [pos] : []}
+                    logos={{ [pos]: logos[pos]?.thumb }}
+                    placements={placements}
+                    markers={false}
+                    color={color}
+                    tint={tint}
+                    technique={technique}
+                    alt=""
+                  />
+                </span>
+                <span className={x.viewName}>{VIEW_NAME[pos]}</span>
+                {on && (
+                  <span className={x.viewOn} aria-label="com logo">
+                    <Check size={11} strokeWidth={3} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <SimStage
+        key={active}
         product={product}
-        fees={available}
-        color={color}
-        onColor={setColor}
-        positions={positions}
-        onPositions={setPositions}
-        logos={logos}
-        onLogo={onLogo}
+        pos={active}
+        spot={spot}
+        included={positions.includes(active)}
+        logo={logos[active]}
         placements={placements}
-        onPlace={onPlace}
+        aspect={aspect}
+        fits={fits}
+        color={color}
+        tint={tint}
         technique={technique}
-        onTechnique={setTechnique}
+        onPlace={onPlace}
+        onInclude={() => include(active)}
+        onRemoveLogo={() => onLogo(active, null)}
       />
-      {available ? <StockBuyBox product={product} {...custom} step={positions.length ? 4 : 3} /> : <QuoteBuyBox product={product} {...custom} step={positions.length ? 4 : 3} />}
+
+      <section className={x.panel} aria-label="Personalização e pedido">
+        <div className={x.tabs} role="tablist" aria-label="Etapas">
+          <button type="button" role="tab" id="sim-tab-custom" aria-controls="sim-custom" aria-selected={tab === "custom"} onClick={() => setTab("custom")}>
+            Personalizar
+          </button>
+          <button type="button" role="tab" id="sim-tab-order" aria-controls="sim-order" aria-selected={tab === "order"} onClick={() => setTab("order")}>
+            Pedido {online && order.qty > 0 && <span className={x.tabCount}>{order.qty}</span>}
+          </button>
+        </div>
+
+        <div role="tabpanel" id="sim-custom" aria-labelledby="sim-tab-custom" hidden={tab !== "custom"}>
+          <SimPanel
+            product={product}
+            fees={online}
+            available={available}
+            active={active}
+            onActive={setActive}
+            positions={positions}
+            onInclude={include}
+            onExclude={exclude}
+            logos={logos}
+            onLogo={onLogo}
+            placements={placements}
+            onPlace={onPlace}
+            spot={spot}
+            aspect={aspect}
+            fits={fits}
+            technique={technique}
+            onTechnique={setTechnique}
+          />
+        </div>
+        <div role="tabpanel" id="sim-order" aria-labelledby="sim-tab-order" hidden={tab !== "order"}>
+          {online ? (
+            <StockOrderTab product={product} order={order} color={color} positions={positions} />
+          ) : (
+            <div className={x.tabBody}>
+              <QuoteBuyBox product={product} {...custom} step={1} />
+            </div>
+          )}
+        </div>
+
+        {online && <StockOrderFooter product={product} order={order} positions={positions} />}
+      </section>
     </div>
   );
 }

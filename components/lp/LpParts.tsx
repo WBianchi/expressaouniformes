@@ -9,8 +9,9 @@ type LpColor = { color: string; setColor: (id: string) => void; tint: string | n
 const ColorCtx = createContext<LpColor | null>(null);
 
 /** Cor escolhida na página: o seletor troca e a galeria pinta a foto da peça. */
-export function LpColorProvider({ colors, children }: { colors: string[]; children: ReactNode }) {
-  const [color, setColor] = useState(colors[0]);
+/** `initial`: cor marcada ao abrir a página (a da foto de capa, quando ela tem cor no painel). */
+export function LpColorProvider({ colors, initial, children }: { colors: string[]; initial?: string; children: ReactNode }) {
+  const [color, setColor] = useState(initial && colors.includes(initial) ? initial : colors[0]);
   const tint = tintFor({ colors }, color);
   return <ColorCtx.Provider value={{ color, setColor, tint }}>{children}</ColorCtx.Provider>;
 }

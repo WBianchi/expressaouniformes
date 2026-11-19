@@ -410,16 +410,21 @@
   filter: none;
   opacity: 1;
 }
-/* tema escuro: a logo em cinza claro (as escuras sumiriam no fundo escuro) */
+/* tema escuro: parada, a logo fica em cinza claro (as escuras sumiriam no fundo escuro);
+   com o mouse em cima, fica colorida como no tema claro */
 @media (prefers-color-scheme: dark) {
-  :global(:root:not([data-theme="light"])) .clientsTrack img,
-  :global(:root:not([data-theme="light"])) .clientsTrack li:hover img {
+  :global(:root:not([data-theme="light"])) .clientsTrack img {
     filter: grayscale(1) invert(1);
   }
+  :global(:root:not([data-theme="light"])) .clientsTrack li:hover img {
+    filter: none;
+  }
 }
-:global(:root[data-theme="dark"]) .clientsTrack img,
-:global(:root[data-theme="dark"]) .clientsTrack li:hover img {
+:global(:root[data-theme="dark"]) .clientsTrack img {
   filter: grayscale(1) invert(1);
+}
+:global(:root[data-theme="dark"]) .clientsTrack li:hover img {
+  filter: none;
 }
 @keyframes clients-marquee {
   to {

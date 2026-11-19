@@ -20,8 +20,11 @@ const ZOOM = 2.5;
 
 /**
  * Galeria da landing page (estilo marketplace): foto principal grande e miniaturas
- * embaixo. Fotos do anúncio, na ordem do painel; a foto vestindo da cor escolhida vem primeiro.
- * Clique (ou toque) na foto abre a foto ampliada, com zoom para ver os detalhes.
+ * embaixo. Fotos do anúncio, na ordem do painel. Clique (ou toque) na foto abre a foto ampliada,
+ * com zoom para ver os detalhes.
+ * Cor escolhida com fotos próprias (vestindo, enviadas por cor, ou fotos da galeria marcadas com a
+ * cor no painel): aparecem só as fotos dela e as fotos sem cor (ex.: tabela de medidas); as fotos
+ * marcadas com outras cores somem. Cor sem nenhuma foto: a galeria inteira.
  */
 export function LpGallery({
   images: base,
@@ -32,38 +35,32 @@ export function LpGallery({
   images: LpImage[];
   name: string;
   colorPhotos?: Record<string, string[]>;
-  /** cor marcada em cada foto da galeria (painel): escolher a cor leva para a foto dela */
+  /** cor marcada em cada foto da galeria (painel): escolher a cor mostra só as fotos dela */
   photoColors?: Record<string, string>;
 }) {
   const [i, setI] = useState(0);
   const [open, setOpen] = useState(false);
   const lp = useLpColor();
   const tint = lp?.tint ?? null;
-  // cor com fotos vestindo próprias (enviadas no painel): elas vão para a frente da galeria e
-  // as outras fotos do anúncio continuam depois delas (só a foto principal muda)
-  const own = lp ? colorModelPhotos(colorPhotos?.[lp.color]) : [];
-  const images = useMemo<LpImage[]>(
-    () =>
-      own.length
-        ? [...own.map((src, k) => ({ src, label: k ? "vestindo, costas" : "vestindo, frente" })), ...base.filter((im) => !own.includes(im.src))]
-        : base,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [own.join("|"), base],
-  );
-  const hasOwn = own.length > 0;
   const color = lp?.color;
-  // ao escolher outra cor (não ao abrir a página): a foto vestindo da cor, se houver; senão a foto da
-  // galeria marcada com essa cor no painel; senão a peça sozinha (quando houver; é ela que muda de cor)
+  const own = color ? colorModelPhotos(colorPhotos?.[color]) : [];
+  const images = useMemo<LpImage[]>(() => {
+    const tag = (im: LpImage) => photoColors?.[im.src];
+    const mine = color ? base.filter((im) => tag(im) === color && !own.includes(im.src)) : [];
+    if (!own.length && !mine.length) return base;
+    return [
+      ...own.map((src, k) => ({ src, label: k ? "vestindo, costas" : "vestindo, frente" })),
+      ...mine,
+      ...base.filter((im) => !tag(im) && !own.includes(im.src)),
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color, own.join("|"), base, photoColors]);
+  // outra cor escolhida: volta para a primeira foto (a da cor, quando ela tem fotos)
   const lastColor = useRef(color);
   useEffect(() => {
     if (lastColor.current === color) return;
     lastColor.current = color;
-    if (hasOwn) return setI(0);
-    const tagged = color ? images.findIndex((im) => photoColors?.[im.src] === color) : -1;
-    if (tagged >= 0) return setI(tagged);
-    if (!tint) return;
-    setI((cur) => (images[cur]?.piece || !images.some((im) => im.piece) ? cur : images.findIndex((im) => im.piece)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setI(0);
   }, [color]);
   const touch = useRef<number | null>(null);
   const thumbs = useRef<HTMLUListElement>(null);

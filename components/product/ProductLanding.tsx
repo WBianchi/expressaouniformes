@@ -93,7 +93,8 @@ export async function ProductLanding({ product, source }: { product: Product; so
   return (
     <div className={s.page}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <LpColorProvider colors={product.colors}>
+      {/* abre na cor da foto de capa (marcada no painel): a galeria mostra as fotos dessa cor */}
+      <LpColorProvider colors={product.colors} initial={images[0] && product.photoColors?.[images[0].src]}>
         <LpStickyBar
           name={product.name}
           price={available ? `a partir de ${money(product.price * (1 - PIX_DISCOUNT))} no Pix` : `Sob cotação · a partir de ${CUSTOM_MIN_QTY} peças`}

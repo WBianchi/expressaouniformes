@@ -1,5 +1,6 @@
-/* faixa azul-marinho logo abaixo do banner: ícone de linha + texto curto, centralizados */
+/* faixa azul-marinho logo abaixo do banner: ícone de linha + texto curto */
 .bar {
+  position: relative;
   background: var(--brand-800);
   color: #fff;
 }
@@ -10,7 +11,7 @@
   justify-content: center;
   gap: 12px clamp(24px, 3.4vw, 48px);
   margin: 0 auto;
-  padding-block: 16px;
+  padding: 16px 0;
   list-style: none;
 }
 .list li {
@@ -25,25 +26,68 @@
   flex: none;
   color: rgb(255 255 255 / 0.92);
 }
-/* celular: duas colunas, alinhadas à esquerda */
+/* setas: só no celular */
+.nav {
+  display: none;
+}
+
+/* celular: uma condição por vez, numa linha só, deslizando; setas nos cantos da barra */
 @media (max-width: 767px) {
-  .list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    justify-content: stretch;
-    gap: 12px 14px;
-    padding-block: 14px;
+  .viewport {
+    width: auto;
+    /* as setas ficam nas margens; o corte é na borda do texto (a próxima condição não aparece) */
+    margin-inline: 40px;
+    padding-inline: 0;
+    overflow: hidden;
   }
-  .list[data-count="1"] {
-    grid-template-columns: 1fr;
-    justify-items: center;
+  .list {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0;
+    padding-block: 13px;
+    transform: translateX(calc(var(--i, 0) * -100%));
+    transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
   }
   .list li {
+    flex: 0 0 100%;
+    justify-content: center;
     gap: 8px;
-    font-size: 12.5px;
+    min-width: 0;
+    font-size: 14px;
+  }
+  .list li span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .list svg {
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
+  }
+  .nav {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    border: 0;
+    background: none;
+    color: #fff;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav:focus:not(:focus-visible) {
+    outline: none;
+  }
+  .nav[data-dir="prev"] {
+    left: 0;
+  }
+  .nav[data-dir="next"] {
+    right: 0;
+  }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .list {
+    transition: none;
   }
 }

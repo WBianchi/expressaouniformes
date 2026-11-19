@@ -127,40 +127,53 @@ export function FactoryStrip() {
   );
 }
 
-/** Logos repetidas até encher a faixa (com poucas logos, a volta não deixa buraco). */
-const MARQUEE_MIN = 10;
+/** Logos repetidas até encher a fileira (com poucas logos, a volta não deixa buraco). */
+const LAP_MIN = 10;
+/** A partir de quantas logos a galeria passa a ter duas fileiras. */
+const TWO_ROWS_FROM = 8;
 
 /**
- * "Empresas que vestem Expressão": faixa com as logos dos clientes passando sozinha (para com o
- * mouse em cima). Só logos autorizadas, cadastradas no painel (Logos de clientes). Some quando vazia;
- * com até 3 logos, ficam paradas e centralizadas.
+ * "Nossos clientes": as logos passando sozinhas, sem fundo, em cinza, esmaecendo nas pontas (como a
+ * galeria do site da fábrica), e paradas com o mouse em cima. Com muitas logos, duas fileiras, a de
+ * baixo no sentido contrário. Só logos autorizadas, cadastradas no painel (Logos de clientes).
+ * Some quando não há nenhuma.
  */
 export function ClientLogos({ logos }: { logos: ClientLogo[] }) {
   if (!logos.length) return null;
-  const moving = logos.length > 3;
-  // uma "volta" com pelo menos MARQUEE_MIN logos, duas vezes seguidas: a faixa anda meia largura e recomeça igual
-  const lap = moving ? Array.from({ length: Math.ceil(MARQUEE_MIN / logos.length) }, () => logos).flat() : logos;
+  const half = Math.ceil(logos.length / 2);
+  const rows = logos.length >= TWO_ROWS_FROM ? [logos.slice(0, half), logos.slice(half)] : [logos];
   return (
     <section className={s.section} aria-labelledby="clientes">
-      <div className="container">
-        <h2 id="clientes" className={`${s.title} ${s.clientsTitle}`}>
-          Empresas que vestem Expressão
+      <div className={`container ${s.clientsHead}`}>
+        <h2 id="clientes" className={s.title}>
+          Nossos clientes
         </h2>
+        <p className={s.sub}>Confira algumas das empresas que já vestem Expressão. Em breve, a sua também pode estar nesta galeria.</p>
       </div>
-      <div className={s.clientsBand} data-moving={moving || undefined}>
-        <ul className={s.clientsTrack} style={{ ["--lap" as string]: `${lap.length * 3.2}s` }}>
-          {(moving ? [...lap, ...lap] : lap).map((l, i) => {
-            // a primeira passada de cada logo é a que o leitor de tela lê; as repetições ficam ocultas
-            const repeat = i >= logos.length;
-            return (
-              <li key={`${l.id}-${i}`} title={l.name} aria-hidden={repeat || undefined}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={l.image} alt={repeat ? "" : l.name} loading="lazy" />
-              </li>
-            );
-          })}
-        </ul>
+      <div className={s.clientsBand}>
+        {rows.map((row, r) => (
+          <LogoRow key={r} logos={row} reverse={r === 1} />
+        ))}
       </div>
     </section>
+  );
+}
+
+function LogoRow({ logos, reverse }: { logos: ClientLogo[]; reverse: boolean }) {
+  // uma "volta" com pelo menos LAP_MIN logos, duas vezes seguidas: a fileira anda meia largura e recomeça igual
+  const lap = Array.from({ length: Math.ceil(LAP_MIN / logos.length) }, () => logos).flat();
+  return (
+    <ul className={s.clientsTrack} data-reverse={reverse || undefined} style={{ ["--lap" as string]: `${lap.length * 3.5}s` }}>
+      {[...lap, ...lap].map((l, i) => {
+        // a primeira passada de cada logo é a que o leitor de tela lê; as repetições ficam ocultas
+        const repeat = i >= logos.length;
+        return (
+          <li key={`${l.id}-${i}`} title={l.name} aria-hidden={repeat || undefined}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={l.image} alt={repeat ? "" : l.name} loading="lazy" />
+          </li>
+        );
+      })}
+    </ul>
   );
 }

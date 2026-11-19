@@ -127,7 +127,7 @@ export async function resetCategoryPhoto(slug: string) {
   });
 }
 
-/* ---------------- Logos de clientes (vitrine "Empresas que vestem Expressão") ---------------- */
+/* ---------------- Logos de clientes (galeria "Nossos clientes") ---------------- */
 
 const clientLogoSchema = z.object({
   name: z.string().trim().min(2, "Informe o nome da empresa.").max(80),

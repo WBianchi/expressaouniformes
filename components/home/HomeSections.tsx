@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useCategoryMedia } from "@/components/store/MediaProvider";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { categories, inStock, products } from "@/lib/catalog";
+import { categories, inStock, products, type Category } from "@/lib/catalog";
 import type { CategoryRows } from "@/lib/site-content";
 import { CUSTOM_MIN_QTY, STOCK_MIN_QTY } from "@/lib/quote";
 import { ProductCard } from "@/components/ui/ProductCard";
@@ -12,9 +12,31 @@ import s from "./Home.module.css";
 
 /**
  * Categorias da home: quadros grandes, quase da largura da tela (5 por linha no computador), em 1 ou
- * 2 linhas (escolha do painel). Setas pretas nas laterais, só quando há mais quadros para aquele lado.
+ * 2 linhas (escolha do painel). Cada linha rola sozinha, com as suas setas pretas nas laterais, que só
+ * aparecem quando há mais quadros para aquele lado.
  */
 export function CategoryGrid({ rows = 1 }: { rows?: CategoryRows }) {
+  // em 2 linhas: metade das categorias em cima e o resto embaixo
+  const half = Math.ceil(categories.length / 2);
+  const lines = rows === 2 ? [categories.slice(0, half), categories.slice(half)] : [categories];
+  return (
+    <section className={`${s.section} ${s.catsSection}`} aria-label="Categorias">
+      <div className={s.catsWrap}>
+        {lines.map((list, i) => (
+          <CategoryRail key={i} list={list} name={lines.length > 1 ? (i ? "segunda linha de categorias" : "primeira linha de categorias") : "categorias"} />
+        ))}
+      </div>
+      <div className={`container ${s.catsMore}`}>
+        <Link href="/loja" className={s.more}>
+          Ver todos os produtos <ArrowRight size={15} />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/** Uma linha de categorias que rola para o lado, com a seta de cada lado. */
+function CategoryRail({ list, name }: { list: Category[]; name: string }) {
   const rail = useRef<HTMLUListElement>(null);
   const catMedia = useCategoryMedia();
   // dá para rolar para trás / para frente
@@ -31,47 +53,38 @@ export function CategoryGrid({ rows = 1 }: { rows?: CategoryRows }) {
       el.removeEventListener("scroll", update);
       ro.disconnect();
     };
-  }, [rows]);
+  }, [list.length]);
   const scroll = (d: number) => {
     const el = rail.current;
     if (el) el.scrollBy({ left: d * el.clientWidth * 0.8, behavior: "smooth" });
   };
-  // em 2 linhas, metade das categorias em cima e o resto embaixo (a faixa rola as duas juntas)
-  const cols = rows === 2 ? Math.ceil(categories.length / 2) : categories.length;
   return (
-    <section className={`${s.section} ${s.catsSection}`} aria-label="Categorias">
-      <div className={s.catsWrap}>
-        <ul className={s.cats} ref={rail} data-rows={rows} style={{ ["--cols" as string]: cols }}>
-          {categories.map((c) => {
-            const m = catMedia(c);
-            return (
-              <li key={c.slug}>
-                {/* a imagem padrão já traz o nome escrito; foto trocada no painel pode pedir o nome por cima */}
-                <Link href={`/loja?categoria=${c.slug}`} className={s.cat} aria-label={c.name}>
-                  <SafeImage src={m.image} alt={c.name} />
-                  {m.showName && <span className={s.catName}>{c.name}</span>}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-        {edge.prev && (
-          <button type="button" className={s.catNav} data-dir="prev" onClick={() => scroll(-1)} aria-label="Categorias anteriores">
-            <ChevronLeft size={34} strokeWidth={2.4} />
-          </button>
-        )}
-        {edge.next && (
-          <button type="button" className={s.catNav} data-dir="next" onClick={() => scroll(1)} aria-label="Próximas categorias">
-            <ChevronRight size={34} strokeWidth={2.4} />
-          </button>
-        )}
-      </div>
-      <div className={`container ${s.catsMore}`}>
-        <Link href="/loja" className={s.more}>
-          Ver todos os produtos <ArrowRight size={15} />
-        </Link>
-      </div>
-    </section>
+    <div className={s.catsRow}>
+      <ul className={s.cats} ref={rail}>
+        {list.map((c) => {
+          const m = catMedia(c);
+          return (
+            <li key={c.slug}>
+              {/* a imagem padrão já traz o nome escrito; foto trocada no painel pode pedir o nome por cima */}
+              <Link href={`/loja?categoria=${c.slug}`} className={s.cat} aria-label={c.name}>
+                <SafeImage src={m.image} alt={c.name} />
+                {m.showName && <span className={s.catName}>{c.name}</span>}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+      {edge.prev && (
+        <button type="button" className={s.catNav} data-dir="prev" onClick={() => scroll(-1)} aria-label={`Voltar na ${name}`}>
+          <ChevronLeft strokeWidth={2.4} />
+        </button>
+      )}
+      {edge.next && (
+        <button type="button" className={s.catNav} data-dir="next" onClick={() => scroll(1)} aria-label={`Avançar na ${name}`}>
+          <ChevronRight strokeWidth={2.4} />
+        </button>
+      )}
+    </div>
   );
 }
 

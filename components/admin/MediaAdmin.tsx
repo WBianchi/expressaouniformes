@@ -770,13 +770,13 @@ export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
     <div className="admin-panel">
       <div className="panel-heading">
         <div>
-          <h3>Empresas que vestem Expressão</h3>
+          <h3>Nossos clientes</h3>
           <p>
-            Logos de clientes numa faixa que passa sozinha na home (logo depois
-            das categorias) e nas páginas de produto, para dar confiança a quem
-            visita. Use somente logos de empresas que autorizaram. Prefira PNG
-            com fundo transparente. Sem logos ativas, a faixa não aparece no
-            site; com até 3, as logos ficam paradas.
+            Logos de clientes passando sozinhas na home (logo depois das
+            categorias) e nas páginas de produto, em cinza, para dar confiança a
+            quem visita. A partir de 8 logos, viram duas fileiras. Use somente
+            logos de empresas que autorizaram. Prefira PNG com fundo
+            transparente. Sem logos ativas, a galeria não aparece no site.
           </p>
         </div>
       </div>

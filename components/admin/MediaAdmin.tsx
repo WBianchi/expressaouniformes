@@ -772,10 +772,11 @@ export function ClientLogosAdmin({ logos }: { logos: ClientLogo[] | null }) {
         <div>
           <h3>Empresas que vestem Expressão</h3>
           <p>
-            Logos de clientes exibidas na home e nas landing pages, para dar
-            confiança a quem visita. Use somente logos de empresas que
-            autorizaram. Prefira PNG com fundo transparente. Sem logos ativas, a
-            seção não aparece no site.
+            Logos de clientes numa faixa que passa sozinha na home (logo depois
+            das categorias) e nas páginas de produto, para dar confiança a quem
+            visita. Use somente logos de empresas que autorizaram. Prefira PNG
+            com fundo transparente. Sem logos ativas, a faixa não aparece no
+            site; com até 3, as logos ficam paradas.
           </p>
         </div>
       </div>

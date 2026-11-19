@@ -4,7 +4,8 @@
 // - no meio: a peça grande na vista escolhida, com a logo livre (arrasta, puxa os cantos, zoom);
 // - à direita: abas "Personalizar" (área, logo, tamanho e técnica) e "Pedido" (tamanhos, frete)
 //   e o rodapé com o valor por peça, o total e o botão de compra.
-// No computador ocupa a altura da tela: a peça fica parada e só as duas laterais rolam.
+// No computador ocupa a altura da tela: a peça fica parada, a coluna da esquerda aparece inteira
+// e só o painel da direita rola.
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
@@ -54,8 +55,8 @@ export function ProductTop({ product }: { product: Product }) {
   const root = useRef<HTMLDivElement>(null);
 
   // no computador a página não rola em cima do simulador: a peça fica parada e a roda do mouse
-  // só rola a lateral (ou a foto com zoom) que tiver o que rolar. Ctrl + roda segue sendo o zoom do navegador.
-  // Tela baixa (o simulador não cabe inteiro): a página rola até ele caber.
+  // só rola o painel da direita (ou a foto com zoom). Ctrl + roda segue sendo o zoom do navegador.
+  // Tela baixa (o simulador não cabe inteiro): a página rola normalmente.
   useEffect(() => {
     const el = root.current;
     if (!el) return;

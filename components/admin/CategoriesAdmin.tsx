@@ -28,7 +28,7 @@ export function CategoriesAdmin({ photos, edits, enabled }: { photos: CategoryPh
         <div>
           <h3>Categorias</h3>
           <p>
-            Renomeie, crie categorias e troque a foto de cada uma. Elas aparecem na home (&quot;Compre por categoria&quot;), no menu Produtos, nos filtros
+            Renomeie, crie categorias e troque a foto de cada uma. Elas aparecem na home, no menu Produtos, nos filtros
             da loja e no rodapé. Para mudar a categoria de um produto, abra o anúncio em Anúncios.
           </p>
         </div>

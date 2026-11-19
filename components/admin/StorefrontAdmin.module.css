@@ -1,0 +1,157 @@
+/* Painel: barra de condições, banner da "Minha conta" e linhas das categorias */
+.pad {
+  margin: 20px 24px;
+}
+.body {
+  display: grid;
+  gap: 14px;
+  padding: 0 24px 24px;
+}
+.items {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.items[aria-busy="true"] {
+  opacity: 0.7;
+}
+.item {
+  display: grid;
+  grid-template-columns: 40px minmax(150px, 220px) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--admin-line, #e3e7ee);
+  border-radius: 12px;
+}
+.iconPreview {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #0b2545;
+  color: #fff;
+}
+.itemActions {
+  display: flex;
+  gap: 4px;
+}
+@media (max-width: 720px) {
+  .item {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+  .text,
+  .itemActions {
+    grid-column: 1 / -1;
+  }
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+.preview {
+  display: grid;
+  gap: 6px;
+  overflow: hidden;
+}
+.previewLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted, #5b6573);
+}
+.preview > section {
+  border-radius: 10px;
+}
+
+/* banner da conta: prévia como aparece no site */
+.account {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  min-height: 150px;
+  padding: 22px 24px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+  background: #0b2545;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.accountImg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+}
+.account::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgb(7 26 51 / 0.9), rgb(7 26 51 / 0.55) 60%, rgb(7 26 51 / 0.3));
+}
+.accountText {
+  display: grid;
+  gap: 2px;
+}
+.accountText small {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  color: #e9c46a;
+}
+.accountText b {
+  font-size: 26px;
+}
+
+/* 1 ou 2 linhas */
+.rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 280px));
+  align-items: start;
+  gap: 12px;
+}
+.rows[aria-busy="true"] {
+  opacity: 0.7;
+}
+.rowOption {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--admin-line, #e3e7ee);
+  border-radius: 12px;
+  background: var(--admin-panel, #fff);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.rowOption[aria-checked="true"] {
+  border-color: #2b70df;
+  box-shadow: 0 0 0 1px #2b70df;
+  background: #eef4ff;
+}
+.rowOption small {
+  color: var(--muted, #5b6573);
+  font-size: 12.5px;
+}
+.rowSketch {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.rowSketch i {
+  aspect-ratio: 4 / 5;
+  border-radius: 3px;
+  background: #c9d3e1;
+}

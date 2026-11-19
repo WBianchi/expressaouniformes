@@ -6,7 +6,7 @@ import { asaasMode } from "@/lib/asaas";
 import { frenetConfigured } from "@/lib/frenet";
 import { listOrders } from "@/lib/order-lookup";
 import { hasDatabase } from "@/lib/orders";
-import { listBanners, listCategoryPhotos, listClientLogos, listPhotoOverrides } from "@/lib/site-media";
+import { listBanners, listCategoryPhotos, listClientLogos, listPhotoOverrides, listSiteContent } from "@/lib/site-media";
 import { listLeads } from "@/lib/leads";
 import { listCatalogEdits } from "@/lib/listings-server";
 import { NO_EDITS } from "@/lib/catalog";
@@ -18,7 +18,7 @@ export const metadata = {
 
 export default async function Page() {
   if (!(await isAdmin())) return <AdminLogin configured={adminConfigured()} />;
-  const [result, banners, photos, leads, clientLogos, categoryPhotos, edits] = await Promise.all([
+  const [result, banners, photos, leads, clientLogos, categoryPhotos, edits, siteContent] = await Promise.all([
     listOrders(),
     listBanners().catch(() => null),
     listPhotoOverrides().catch(() => ({})),
@@ -26,6 +26,7 @@ export default async function Page() {
     listClientLogos().catch(() => null),
     listCategoryPhotos().catch(() => ({})),
     listCatalogEdits().catch(() => NO_EDITS),
+    listSiteContent().catch(() => null),
   ]);
   return (
     <AdminDashboard
@@ -38,6 +39,7 @@ export default async function Page() {
       edits={edits}
       leads={leads}
       clientLogos={clientLogos}
+      siteContent={siteContent}
       integrations={{
         asaas: asaasMode(),
         frenet: frenetConfigured(),

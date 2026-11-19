@@ -3,7 +3,8 @@ import { company } from "@/lib/catalog";
 import { CategoryGrid, ProductSection } from "@/components/home/HomeSections";
 import { ClientLogos, FactoryStrip, TwoPaths } from "@/components/home/FactorySections";
 import { HeroSlider } from "@/components/home/HeroSlider";
-import { getBanners, getClientLogos } from "@/lib/site-media";
+import { BenefitsBar } from "@/components/home/BenefitsBar";
+import { getBanners, getClientLogos, getSiteContent } from "@/lib/site-media";
 import { Faq } from "@/components/home/Faq";
 import { faqs } from "@/components/home/faqData";
 
@@ -45,17 +46,19 @@ const jsonLd = {
 };
 
 export default async function HomePage() {
-  const [banners, clientLogos] = await Promise.all([getBanners(), getClientLogos()]);
+  const [banners, clientLogos, content] = await Promise.all([getBanners(), getClientLogos(), getSiteContent()]);
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <HeroSlider banners={banners} />
+      <BenefitsBar benefits={content.benefits} />
       <TwoPaths />
-      <CategoryGrid />
+      <CategoryGrid rows={content.categoryRows} />
+      {/* logos de clientes logo depois das categorias: dá confiança antes dos produtos */}
+      <ClientLogos logos={clientLogos} />
       <ProductSection mode="stock" />
       <FactoryStrip />
       <ProductSection mode="quote" />
-      <ClientLogos logos={clientLogos} />
       <Faq />
     </>
   );

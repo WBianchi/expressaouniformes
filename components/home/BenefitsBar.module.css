@@ -1,0 +1,49 @@
+/* faixa azul-marinho logo abaixo do banner: ícone de linha + texto curto, centralizados */
+.bar {
+  background: var(--brand-800);
+  color: #fff;
+}
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px clamp(24px, 3.4vw, 48px);
+  margin: 0 auto;
+  padding-block: 16px;
+  list-style: none;
+}
+.list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.list svg {
+  flex: none;
+  color: rgb(255 255 255 / 0.92);
+}
+/* celular: duas colunas, alinhadas à esquerda */
+@media (max-width: 767px) {
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+    gap: 12px 14px;
+    padding-block: 14px;
+  }
+  .list[data-count="1"] {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .list li {
+    gap: 8px;
+    font-size: 12.5px;
+  }
+  .list svg {
+    width: 20px;
+    height: 20px;
+  }
+}

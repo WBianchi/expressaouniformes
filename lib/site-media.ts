@@ -3,6 +3,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { defaultBanners, type Banner, type PhotoOverrides } from "./banners";
+import { defaultSiteContent, parseSiteContent, SITE_CONTENT_KEYS, type SiteContent } from "./site-content";
 
 export const MEDIA_TAG = "site-media";
 
@@ -128,5 +129,29 @@ export const getClientLogos = unstable_cache(
     }
   },
   ["client-logos"],
+  { tags: [MEDIA_TAG], revalidate: 3600 },
+);
+
+/** Barra de condições, banner da "Minha conta" e linhas das categorias, como gravados (painel). */
+export async function listSiteContent(): Promise<SiteContent | null> {
+  if (!process.env.DATABASE_URL) return null;
+  const sql = await db();
+  const rows = (await sql.query("select key, data from expressao.site_settings where key = any($1)", [[...SITE_CONTENT_KEYS]])) as {
+    key: string;
+    data: unknown;
+  }[];
+  return parseSiteContent(rows);
+}
+
+/** Conteúdo editável da loja (sem banco ou com erro: o padrão). */
+export const getSiteContent = unstable_cache(
+  async (): Promise<SiteContent> => {
+    try {
+      return (await listSiteContent()) ?? defaultSiteContent;
+    } catch {
+      return defaultSiteContent;
+    }
+  },
+  ["site-content"],
   { tags: [MEDIA_TAG], revalidate: 3600 },
 );

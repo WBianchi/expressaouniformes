@@ -127,22 +127,38 @@ export function FactoryStrip() {
   );
 }
 
-/** "Empresas que confiam": só logos autorizadas, cadastradas no painel. Some quando vazia. */
+/** Logos repetidas até encher a faixa (com poucas logos, a volta não deixa buraco). */
+const MARQUEE_MIN = 10;
+
+/**
+ * "Empresas que vestem Expressão": faixa com as logos dos clientes passando sozinha (para com o
+ * mouse em cima). Só logos autorizadas, cadastradas no painel (Logos de clientes). Some quando vazia;
+ * com até 3 logos, ficam paradas e centralizadas.
+ */
 export function ClientLogos({ logos }: { logos: ClientLogo[] }) {
   if (!logos.length) return null;
+  const moving = logos.length > 3;
+  // uma "volta" com pelo menos MARQUEE_MIN logos, duas vezes seguidas: a faixa anda meia largura e recomeça igual
+  const lap = moving ? Array.from({ length: Math.ceil(MARQUEE_MIN / logos.length) }, () => logos).flat() : logos;
   return (
     <section className={s.section} aria-labelledby="clientes">
       <div className="container">
-        <h2 id="clientes" className={s.title}>
+        <h2 id="clientes" className={`${s.title} ${s.clientsTitle}`}>
           Empresas que vestem Expressão
         </h2>
-        <ul className={s.clients}>
-          {logos.map((l) => (
-            <li key={l.id} title={l.name}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={l.image} alt={l.name} loading="lazy" />
-            </li>
-          ))}
+      </div>
+      <div className={s.clientsBand} data-moving={moving || undefined}>
+        <ul className={s.clientsTrack} style={{ ["--lap" as string]: `${lap.length * 3.2}s` }}>
+          {(moving ? [...lap, ...lap] : lap).map((l, i) => {
+            // a primeira passada de cada logo é a que o leitor de tela lê; as repetições ficam ocultas
+            const repeat = i >= logos.length;
+            return (
+              <li key={`${l.id}-${i}`} title={l.name} aria-hidden={repeat || undefined}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={l.image} alt={repeat ? "" : l.name} loading="lazy" />
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>

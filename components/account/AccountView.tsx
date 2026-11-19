@@ -81,7 +81,9 @@ const errorsOf = (e: z.ZodError) => {
   return out;
 };
 
-export default function AccountView() {
+/** `banner`: foto do topo da conta (a padrão ou a enviada no painel). */
+export default function AccountView({ banner = "/images/sections/account-bg.webp" }: { banner?: string }) {
+  const bannerBg = { backgroundImage: `url(${JSON.stringify(banner)})` };
   const router = useRouter();
   const { favorites } = useStore();
   const [loaded, setLoaded] = useState(false);
@@ -160,7 +162,7 @@ export default function AccountView() {
     return (
       <div className={`container ${s.wrap}`}>
         <div className={s.invite}>
-          <span className={s.inviteImg} style={{ backgroundImage: "url(/images/sections/account-bg.webp)" }} aria-hidden />
+          <span className={s.inviteImg} style={bannerBg} aria-hidden />
           <span className={s.inviteIcon}>
             <UserRound size={30} strokeWidth={1.6} />
           </span>
@@ -186,7 +188,7 @@ export default function AccountView() {
   return (
     <div className={`container ${s.wrap}`}>
       <div className={s.top}>
-        <span className={s.topImg} style={{ backgroundImage: "url(/images/sections/account-bg.webp)" }} aria-hidden />
+        <span className={s.topImg} style={bannerBg} aria-hidden />
         <div>
           <span className={s.eyebrow}>Minha conta</span>
           <h1>Olá, {first}</h1>

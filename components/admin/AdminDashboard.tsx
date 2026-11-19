@@ -44,6 +44,7 @@ import type { AdminOrder, OrdersResult } from "@/lib/order-lookup";
 import { logout } from "@/app/admin/actions";
 import type { Banner, PhotoOverrides } from "@/lib/banners";
 import { BannersAdmin, ClientLogosAdmin } from "./MediaAdmin";
+import { AccountBannerAdmin, BenefitsAdmin, CategoryRowsAdmin } from "./StorefrontAdmin";
 import { CategoriesAdmin } from "./CategoriesAdmin";
 import { CustomizationPricesAdmin } from "./CustomizationPricesAdmin";
 import { ListingsAdmin } from "./ListingsAdmin";
@@ -51,6 +52,7 @@ import { ArtQueue, ItemArt, artApproved, needsArt } from "./ArtQueue";
 import { LeadsAdmin } from "./LeadsAdmin";
 import type { AdminLead } from "@/lib/lead-admin-types";
 import type { CategoryPhotos, ClientLogo } from "@/lib/site-media";
+import type { SiteContent } from "@/lib/site-content";
 const navigation = [
   ["Visão geral", LayoutDashboard],
   ["Pedidos", ShoppingBag],
@@ -217,6 +219,7 @@ export default function AdminDashboard({
   edits,
   leads,
   clientLogos,
+  siteContent,
 }: {
   orders: AdminOrder[];
   source: OrdersResult["source"];
@@ -228,6 +231,8 @@ export default function AdminDashboard({
   edits: CatalogEdits;
   leads: AdminLead[] | null;
   clientLogos: ClientLogo[] | null;
+  /** barra de condições, banner da conta e linhas das categorias (null = sem banco) */
+  siteContent: SiteContent | null;
 }) {
   const rows = allOrders.map(toRow);
   const paid = allOrders.filter((o) => o.status === "pago");
@@ -677,9 +682,16 @@ export default function AdminDashboard({
           ) : active === "Logos de clientes" ? (
             <ClientLogosAdmin logos={clientLogos} />
           ) : active === "Banners" ? (
-            <BannersAdmin banners={banners} />
+            <div className="admin-stack">
+              <BannersAdmin banners={banners} />
+              <BenefitsAdmin content={siteContent} />
+              <AccountBannerAdmin content={siteContent} />
+            </div>
           ) : active === "Categorias" ? (
-            <CategoriesAdmin photos={categoryPhotos} edits={edits} enabled={integrations.database} />
+            <div className="admin-stack">
+              <CategoryRowsAdmin content={siteContent} />
+              <CategoriesAdmin photos={categoryPhotos} edits={edits} enabled={integrations.database} />
+            </div>
           ) : active === "Anúncios" ? (
             <ListingsAdmin edits={edits} photos={photos} enabled={integrations.database} />
           ) : active === "Preços do simulador" ? (

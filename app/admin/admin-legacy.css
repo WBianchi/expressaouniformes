@@ -2493,6 +2493,11 @@ footer {
   gap: 22px;
   margin: 24px 0;
 }
+/* vários quadros na mesma aba (ex.: Banners: carrossel, barra de condições e banner da conta) */
+.admin-stack {
+  display: grid;
+  gap: 20px;
+}
 .admin-panel {
   background: var(--admin-panel);
   border: 1px solid var(--admin-line);

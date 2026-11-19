@@ -462,6 +462,48 @@
   display: grid;
   gap: 12px;
 }
+/* escolha da cor: as fotos de cada cor ficam separadas */
+.galleryTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.galleryTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line, #d7dde6);
+  border-radius: 999px;
+  background: var(--surface, #fff);
+  color: var(--text, #111827);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.galleryTab[aria-selected="true"] {
+  border-color: var(--blue, #215fcc);
+  box-shadow: 0 0 0 1px var(--blue, #215fcc);
+  background: #eef4ff;
+}
+:global(.admin-app.dark) .galleryTab[aria-selected="true"] {
+  background: #17284a;
+}
+.galleryTab small {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted, #6b7280);
+}
+.galleryTab small[data-full] {
+  color: #b42318;
+}
+.galleryDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.18);
+}
 .photoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

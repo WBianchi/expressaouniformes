@@ -759,7 +759,10 @@ function ListingEditor({ slug, edits, photos, enabled, onBack }: { slug: string;
 
       <section className="admin-panel">
         <h3 className={s.sectionTitle}>Galeria do anúncio</h3>
-        <p className={s.hint}>Fotos comerciais (pessoa vestindo, detalhes, ambiente). Elas não mudam de cor; quem muda de cor é a peça sozinha, logo abaixo.</p>
+        <p className={s.hint}>
+          Fotos comerciais (pessoa vestindo, detalhes, ambiente), separadas por cor: escolha a cor e envie as fotos dela. Na página do produto, o cliente vê
+          só as fotos da cor escolhida (mais as de &quot;Todas as cores&quot;). Essas fotos não são pintadas; quem muda de cor sozinha é a peça, logo abaixo.
+        </p>
         <GalleryEditor slug={slug} saved={gallery} savedColors={current.photoColors ?? {}} colors={current.colors} enabled={enabled} />
       </section>
 

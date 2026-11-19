@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyCatalogEdits, categories, getCategory, getProduct, NO_EDITS, products, stockProducts, withListing } from "../lib/catalog.ts";
-import { cleanColorPhotos, galleryPhotosSchema, listingDiff, listingFieldsOf, listingFormOf, listingFormSchema, listingOverrideSchema } from "../lib/listing.ts";
+import { cleanColorPhotos, galleryPhotosSchema, listingDiff, listingFieldsOf, listingFormOf, listingFormSchema, listingOverrideSchema, MAX_PHOTOS, photosOverLimit } from "../lib/listing.ts";
 import { unitPrice } from "../lib/pricing.ts";
 import { cartLineSchema } from "../lib/validation.ts";
 import { adjustmentMessage, artPath, customerWhatsapp, isArtUrl } from "../lib/art.ts";
@@ -143,6 +143,22 @@ test("galeria: ao menos a capa, sem repetir e só imagens do site ou do Blob", (
   assert.equal(galleryPhotosSchema.safeParse([]).success, false);
   assert.equal(galleryPhotosSchema.safeParse(["/images/a.webp", "/images/a.webp"]).success, false);
   assert.equal(galleryPhotosSchema.safeParse(["https://evil.example.com/x.webp"]).success, false);
+});
+
+test("galeria: até 15 fotos em cada cor (e 15 sem cor), não 15 no anúncio inteiro", () => {
+  const urls = (cor: string, n: number) => Array.from({ length: n }, (_, i) => `/images/${cor}-${i}.webp`);
+  const laranja = urls("laranja", MAX_PHOTOS);
+  const branco = urls("branco", MAX_PHOTOS);
+  const semCor = urls("medidas", MAX_PHOTOS);
+  const tags = Object.fromEntries([...laranja.map((u) => [u, "laranja"]), ...branco.map((u) => [u, "branco"])]);
+  const all = [...laranja, ...branco, ...semCor];
+  assert.ok(galleryPhotosSchema.safeParse(all).success);
+  assert.equal(photosOverLimit(all, tags), null);
+  // as 45 fotos continuam válidas quando o anúncio é lido do banco
+  assert.ok(listingOverrideSchema.safeParse({ photos: all, photoColors: tags }).success);
+  const extra = "/images/laranja-extra.webp";
+  assert.match(photosOverLimit([...all, extra], { ...tags, [extra]: "laranja" }, () => "Laranja") ?? "", /na cor Laranja \(tem 16\)/);
+  assert.match(photosOverLimit([...all, extra], tags) ?? "", /Todas as cores \(tem 16\)/);
 });
 
 test("preço da personalização: tabela única do simulador, por técnica e posição", async () => {

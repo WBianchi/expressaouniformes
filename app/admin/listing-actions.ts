@@ -4,8 +4,8 @@
 // Só o que difere do catálogo do código vai para o banco.
 import { z } from "zod";
 import { safeImage } from "@/lib/banners";
-import { catalogHas, colors, getCategory, NO_PHOTO, withListing, type ListingFields, type SaleKind } from "@/lib/catalog";
-import { cleanColorPhotos, COLOR_PHOTO_SLOTS, galleryPhotosSchema, photoColorsSchema, listingDiff, listingFieldsOf, listingFormSchema, listingOverrideSchema, type ListingForm } from "@/lib/listing";
+import { catalogHas, colors, getCategory, getColor, NO_PHOTO, withListing, type ListingFields, type SaleKind } from "@/lib/catalog";
+import { cleanColorPhotos, COLOR_PHOTO_SLOTS, galleryPhotosSchema, photoColorsSchema, photosOverLimit, listingDiff, listingFieldsOf, listingFormSchema, listingOverrideSchema, type ListingForm } from "@/lib/listing";
 import { adminCatalog, dropBlob, runAction, type MediaResult } from "./action-utils";
 
 type Sql = Awaited<ReturnType<typeof adminCatalog>>;
@@ -86,6 +86,8 @@ export async function saveGallery(slug: string, photos: string[], photoColors: R
     else next.photos = list;
     // cor de cada foto: só das fotos que ficaram na galeria
     const tags = photoColorsSchema.parse(Object.fromEntries(Object.entries(photoColors).filter(([url, c]) => list.includes(url) && !!c)));
+    const over = photosOverLimit(list, tags, (id) => getColor(id)?.name ?? id);
+    if (over) throw new Error(over);
     if (Object.keys(tags).length) next.photoColors = tags;
     else delete next.photoColors;
     await writeOverride(sql, k, next);

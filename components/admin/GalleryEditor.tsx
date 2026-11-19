@@ -1,7 +1,9 @@
 "use client";
-// Galeria do anúncio no painel: enviar várias fotos de uma vez, escolher a capa, mudar a ordem
-// (arrastando ou pelas setas), trocar ou tirar cada foto, marcar a cor da peça em cada foto
-// (na página do produto, escolher a cor mostra a foto dela) e ver tudo antes de salvar.
+// Galeria do anúncio no painel, separada por cor: escolhe a cor em cima e envia as fotos dela
+// (até MAX_PHOTOS por cor; elas já entram marcadas com a cor). "Todas as cores" guarda as fotos que
+// valem para qualquer cor (tabela de medidas, detalhes). Em cada cor dá para mudar a ordem
+// (arrastando ou pelas setas), trocar, tirar, passar para outra cor e escolher a capa da vitrine.
+// Na página do produto, escolher a cor mostra só as fotos dela e as de todas as cores.
 import { useRef, useState, type DragEvent } from "react";
 import { ArrowLeft, ArrowRight, ImagePlus, RefreshCw, Star, Trash2, Upload } from "lucide-react";
 import { getColor } from "@/lib/catalog";
@@ -11,7 +13,11 @@ import { ACCEPT, uploadImage, useAction } from "./MediaAdmin";
 import m from "./MediaAdmin.module.css";
 import s from "./ListingsAdmin.module.css";
 
-type Item = { src: string; uploading?: boolean; name?: string; /** cor da peça nesta foto (id) */ color?: string };
+type Item = { src: string; uploading?: boolean; name?: string; /** cor da peça nesta foto (id); sem cor = todas as cores */ color?: string };
+
+/** "" = todas as cores (fotos sem cor marcada) */
+const ALL = "";
+const colorName = (id: string) => (id === ALL ? "Todas as cores" : (getColor(id)?.name ?? id));
 
 export function GalleryEditor({
   slug,
@@ -24,13 +30,15 @@ export function GalleryEditor({
   saved: string[];
   /** cor marcada em cada foto salva (endereço → id da cor) */
   savedColors?: Record<string, string>;
-  /** cores à venda do anúncio (opções da marcação) */
+  /** cores à venda do anúncio */
   colors?: string[];
   enabled: boolean;
 }) {
   const { pending, error, setError, run } = useAction();
   const fromSaved = () => saved.map((src) => ({ src, color: savedColors[src] }));
   const [items, setItems] = useState<Item[]>(fromSaved);
+  // começa na cor da capa (ou na primeira cor do anúncio)
+  const [group, setGroup] = useState<string>(() => savedColors[saved[0]] ?? (saved.length || colors.length < 2 ? ALL : colors[0]));
   const [over, setOver] = useState(false);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [done, setDone] = useState(false);
@@ -53,6 +61,16 @@ export function GalleryEditor({
     if (now === prevKey || now === savedKey) setItems(fromSaved());
   }
 
+  // separa por cor só quando o anúncio tem mais de uma cor (ou já tem foto marcada)
+  const byColor = colors.length > 1 || items.some((i) => i.color);
+  const orphan = [...new Set(items.flatMap((i) => (i.color && !colors.includes(i.color) ? [i.color] : [])))];
+  const groups = byColor ? [...colors, ...orphan, ALL] : [ALL];
+  const current = byColor ? group : ALL;
+  const inGroup = (it: Item, g: string) => (it.color ?? ALL) === g;
+  const count = (g: string) => items.filter((it) => inGroup(it, g)).length;
+  // fotos da cor na tela, com a posição de cada uma na galeria inteira
+  const shown = items.flatMap((it, gi) => (!byColor || inGroup(it, current) ? [{ it, gi }] : []));
+
   const change = (fn: (cur: Item[]) => Item[]) => {
     setDone(false);
     setItems(fn);
@@ -61,14 +79,16 @@ export function GalleryEditor({
   /** Envia as fotos para o Blob na hora (prévia já aparece); a galeria só muda no site ao salvar. */
   const upload = (files: File[], at?: number) => {
     setError(null);
-    const room = MAX_PHOTOS - items.length + (at !== undefined ? 1 : 0);
-    if (files.length > room) setError(`No máximo ${MAX_PHOTOS} fotos por anúncio: ${files.length - room} ficaram de fora.`);
+    const room = MAX_PHOTOS - shown.length + (at !== undefined ? 1 : 0);
+    if (files.length > room)
+      setError(`No máximo ${MAX_PHOTOS} fotos ${byColor ? `em ${colorName(current)}` : "por anúncio"}: ${files.length - room} ficaram de fora.`);
+    const color = current || undefined;
     for (const file of files.slice(0, Math.max(0, room))) {
       const temp = URL.createObjectURL(file);
       change((cur) => {
         const next = [...cur];
-        if (at !== undefined) next[at] = { src: temp, uploading: true, name: file.name };
-        else next.push({ src: temp, uploading: true, name: file.name });
+        if (at !== undefined) next[at] = { src: temp, uploading: true, name: file.name, color: cur[at]?.color };
+        else next.push({ src: temp, uploading: true, name: file.name, color });
         return next;
       });
       uploadImage(file, "produtos")
@@ -81,6 +101,7 @@ export function GalleryEditor({
     }
   };
 
+  /** Leva a foto da posição `from` para a posição `to` (posições da galeria inteira). */
   const move = (from: number, to: number) =>
     change((cur) => {
       if (to < 0 || to >= cur.length || from === to) return cur;
@@ -89,6 +110,17 @@ export function GalleryEditor({
       next.splice(to, 0, it);
       return next;
     });
+  /** Troca de lugar com a vizinha da mesma cor. */
+  const swap = (k: number, d: number) => {
+    const a = shown[k]?.gi;
+    const b = shown[k + d]?.gi;
+    if (a === undefined || b === undefined) return;
+    change((cur) => {
+      const next = [...cur];
+      [next[a], next[b]] = [next[b], next[a]];
+      return next;
+    });
+  };
 
   const onDropFiles = (e: DragEvent) => {
     e.preventDefault();
@@ -100,54 +132,88 @@ export function GalleryEditor({
 
   return (
     <div className={s.galleryEditor}>
+      {byColor && (
+        <div className={s.galleryTabs} role="tablist" aria-label="Fotos de qual cor">
+          {groups.map((g) => {
+            const hex = g ? getColor(g)?.hex : undefined;
+            const n = count(g);
+            return (
+              <button
+                key={g || "all"}
+                type="button"
+                role="tab"
+                aria-selected={current === g}
+                className={s.galleryTab}
+                onClick={() => {
+                  setGroup(g);
+                  setError(null);
+                }}
+              >
+                {g ? <span className={s.galleryDot} style={{ background: hex }} aria-hidden /> : <ImagePlus size={14} aria-hidden />}
+                {colorName(g)}
+                <small data-full={n >= MAX_PHOTOS || undefined}>
+                  {n}/{MAX_PHOTOS}
+                </small>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {byColor && (
+        <p className={s.hint}>
+          {current
+            ? `Fotos da cor ${colorName(current)}: aparecem quando o cliente escolhe ${colorName(current)} na página do produto.`
+            : "Fotos que aparecem em qualquer cor escolhida (ex.: tabela de medidas, detalhe do tecido)."}
+        </p>
+      )}
       {error && <p className={m.error}>{error}</p>}
       <ul className={s.photoGrid} aria-busy={pending}>
-        {items.map((it, i) => (
+        {shown.map(({ it, gi }, k) => (
           <li
             key={it.src}
             className={s.photo}
-            data-cover={i === 0 || undefined}
-            data-dragging={dragFrom === i || undefined}
+            data-cover={gi === 0 || undefined}
+            data-dragging={dragFrom === gi || undefined}
             draggable={!it.uploading}
             onDragStart={(e) => {
-              setDragFrom(i);
+              setDragFrom(gi);
               e.dataTransfer.effectAllowed = "move";
             }}
             onDragOver={(e) => dragFrom !== null && e.preventDefault()}
             onDrop={(e) => {
               e.preventDefault();
-              if (dragFrom !== null) move(dragFrom, i);
+              if (dragFrom !== null) move(dragFrom, gi);
               setDragFrom(null);
             }}
             onDragEnd={() => setDragFrom(null)}
           >
             <span className={s.photoImg}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={it.src} alt={`Foto ${i + 1}`} draggable={false} />
+              <img src={it.src} alt={`Foto ${k + 1}`} draggable={false} />
               {it.uploading && <span className={m.uploading}>Enviando…</span>}
-              {i === 0 && (
+              {gi === 0 && (
                 <em>
                   <Star size={11} /> Capa
                 </em>
               )}
-              <b className={s.photoNum}>{i + 1}</b>
+              <b className={s.photoNum}>{k + 1}</b>
             </span>
             <div className={s.photoActions}>
-              <button type="button" className="icon-button" disabled={i === 0} onClick={() => move(i, i - 1)} aria-label={`Mover foto ${i + 1} para a esquerda`} title="Mover para a esquerda">
+              <button type="button" className="icon-button" disabled={k === 0} onClick={() => swap(k, -1)} aria-label={`Mover foto ${k + 1} para a esquerda`} title="Mover para a esquerda">
                 <ArrowLeft size={14} />
               </button>
               <button
                 type="button"
                 className="icon-button"
-                disabled={i === items.length - 1}
-                onClick={() => move(i, i + 1)}
-                aria-label={`Mover foto ${i + 1} para a direita`}
+                disabled={k === shown.length - 1}
+                onClick={() => swap(k, 1)}
+                aria-label={`Mover foto ${k + 1} para a direita`}
                 title="Mover para a direita"
               >
                 <ArrowRight size={14} />
               </button>
-              {i > 0 && (
-                <button type="button" className="icon-button" onClick={() => move(i, 0)} aria-label={`Usar a foto ${i + 1} como capa`} title="Usar como capa">
+              {gi > 0 && (
+                <button type="button" className="icon-button" onClick={() => move(gi, 0)} aria-label={`Usar a foto ${k + 1} como capa`} title="Usar como capa da vitrine">
                   <Star size={14} />
                 </button>
               )}
@@ -156,10 +222,10 @@ export function GalleryEditor({
                 className="icon-button"
                 disabled={it.uploading}
                 onClick={() => {
-                  replacing.current = i;
+                  replacing.current = gi;
                   replace.current?.click();
                 }}
-                aria-label={`Trocar a foto ${i + 1}`}
+                aria-label={`Trocar a foto ${k + 1}`}
                 title="Trocar esta foto"
               >
                 <RefreshCw size={14} />
@@ -168,28 +234,28 @@ export function GalleryEditor({
                 type="button"
                 className="icon-button"
                 disabled={it.uploading}
-                onClick={() => change((cur) => cur.filter((_, k) => k !== i))}
-                aria-label={`Tirar a foto ${i + 1}`}
+                onClick={() => change((cur) => cur.filter((x) => x.src !== it.src))}
+                aria-label={`Tirar a foto ${k + 1}`}
                 title="Tirar da galeria"
               >
                 <Trash2 size={14} />
               </button>
             </div>
-            {colors.length > 1 && (
+            {byColor && (
               <label className={s.photoColor}>
-                <span>Cor da peça</span>
+                <span>Passar para</span>
                 <select
-                  value={it.color ?? ""}
+                  value={it.color ?? ALL}
                   onChange={(e) => {
                     const color = e.target.value || undefined;
-                    change((cur) => cur.map((x, k) => (k === i ? { ...x, color } : x)));
+                    if (count(e.target.value) >= MAX_PHOTOS) return setError(`${colorName(e.target.value)} já tem ${MAX_PHOTOS} fotos.`);
+                    change((cur) => cur.map((x) => (x.src === it.src ? { ...x, color } : x)));
                   }}
-                  aria-label={`Cor da peça na foto ${i + 1}`}
+                  aria-label={`Cor da foto ${k + 1}`}
                 >
-                  <option value="">Todas / não marcar</option>
-                  {[...colors, ...(it.color && !colors.includes(it.color) ? [it.color] : [])].map((id) => (
-                    <option key={id} value={id}>
-                      {getColor(id)?.name ?? id}
+                  {groups.map((g) => (
+                    <option key={g || "all"} value={g}>
+                      {colorName(g)}
                     </option>
                   ))}
                 </select>
@@ -197,7 +263,7 @@ export function GalleryEditor({
             )}
           </li>
         ))}
-        {items.length < MAX_PHOTOS && (
+        {shown.length < MAX_PHOTOS && (
           <li>
             <button
               type="button"
@@ -213,7 +279,7 @@ export function GalleryEditor({
               onDrop={onDropFiles}
             >
               <ImagePlus size={24} />
-              <b>Adicionar fotos</b>
+              <b>{byColor ? `Adicionar fotos: ${colorName(current)}` : "Adicionar fotos"}</b>
               <small>Selecione ou arraste várias de uma vez</small>
             </button>
           </li>
@@ -242,13 +308,14 @@ export function GalleryEditor({
         }}
       />
       <p className={s.hint}>
-        A primeira foto é a capa (vitrine e topo da página do produto); a segunda aparece ao passar o mouse na vitrine. Use fotos verticais (4:5), de até 8
-        MB, em JPG, PNG, WebP ou AVIF. Arraste as fotos para mudar a ordem ou use as setas. Em &quot;Cor da peça&quot;, marque a cor de cada foto: na página
-        do produto, quando o cliente escolhe uma cor (ex.: laranja), a galeria vai para a foto dessa cor.
+        {byColor
+          ? `Escolha a cor em cima e envie as fotos dela (até ${MAX_PHOTOS} por cor). A capa (estrela) é a foto da vitrine, e a página do produto abre na cor dela. `
+          : "A primeira foto é a capa (vitrine e topo da página do produto); a segunda aparece ao passar o mouse na vitrine. "}
+        Use fotos verticais (4:5), de até 8 MB, em JPG, PNG, WebP ou AVIF. Arraste as fotos para mudar a ordem ou use as setas.
       </p>
       <div className={s.saveBar} data-dirty={dirty || undefined}>
         <span>
-          {busy ? "Enviando fotos…" : done && !dirty ? "Galeria salva. A loja já mostra as fotos novas." : dirty ? "Galeria com alterações não salvas" : `${items.length} foto${items.length === 1 ? "" : "s"}`}
+          {busy ? "Enviando fotos…" : done && !dirty ? "Galeria salva. A loja já mostra as fotos novas." : dirty ? "Galeria com alterações não salvas" : `${items.length} foto${items.length === 1 ? "" : "s"} no anúncio`}
         </span>
         <div className="button-row">
           {dirty && (

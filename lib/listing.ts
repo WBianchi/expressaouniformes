@@ -23,8 +23,10 @@ const extraSpecsSchema = z
   )
   .max(12, "No máximo 12 linhas extras na ficha técnica.");
 
-/** Fotos por anúncio (galeria). */
+/** Fotos da galeria por cor (e também as "de todas as cores", sem cor marcada). */
 export const MAX_PHOTOS = 15;
+/** Teto da galeria inteira (todas as cores juntas): só uma trava contra abuso. */
+export const MAX_GALLERY = 300;
 
 const line = (label: string, max: number) => z.string().trim().max(max, `${label}: máximo de ${max} caracteres.`);
 const unique = <T,>(list: T[]) => new Set(list).size === list.length;
@@ -100,18 +102,33 @@ export const listingOverrideSchema = z
     photoColors: photoColorsSchema,
     // categoria que deixou de existir é ignorada ao aplicar (o anúncio volta para a do código)
     category: z.string().max(60),
-    photos: z.array(z.string().refine(safeImage)).max(MAX_PHOTOS),
+    photos: z.array(z.string().refine(safeImage)).max(MAX_GALLERY),
     specs: specsSchema,
     extraSpecs: extraSpecsSchema,
   })
   .partial();
 
-/** Galeria do anúncio: fotos do site ou do Blob, de 1 a MAX_PHOTOS, sem repetir. */
+/** Galeria do anúncio: fotos do site ou do Blob, ao menos a capa, sem repetir (o limite é por cor: ver photosOverLimit). */
 export const galleryPhotosSchema = z
   .array(z.string().refine(safeImage, "Foto inválida."))
   .min(1, "O anúncio precisa de pelo menos uma foto (a capa).")
-  .max(MAX_PHOTOS, `No máximo ${MAX_PHOTOS} fotos por anúncio.`)
+  .max(MAX_GALLERY, `No máximo ${MAX_GALLERY} fotos no anúncio.`)
   .refine(unique, "Foto repetida na galeria.");
+
+/**
+ * Até MAX_PHOTOS fotos em cada cor e MAX_PHOTOS sem cor ("todas as cores"). Devolve a mensagem do
+ * primeiro grupo que passou do limite, ou null.
+ */
+export function photosOverLimit(photos: string[], photoColors: Record<string, string>, colorName: (id: string) => string = (id) => id): string | null {
+  const count = new Map<string, number>();
+  for (const url of photos) {
+    const c = photoColors[url] ?? "";
+    count.set(c, (count.get(c) ?? 0) + 1);
+  }
+  for (const [c, n] of count)
+    if (n > MAX_PHOTOS) return `No máximo ${MAX_PHOTOS} fotos ${c ? `na cor ${colorName(c)}` : "em Todas as cores"} (tem ${n}).`;
+  return null;
+}
 
 /** Os campos editáveis de um produto, no formato do formulário. */
 export function listingFieldsOf(p: Product): ListingFields {
